@@ -1,33 +1,14 @@
-import { NostrEvent, NostrFetcher } from "nostr-fetch";
-import { useEffect, useState } from "react";
 import { VList } from "virtua";
 import { css } from "../styled-system/css";
 import { vstack } from "../styled-system/patterns";
-import { UserStatus } from "./components/UserStatus";
+import { UserStatusCard } from "./components/UserStatus";
+import { useFollowingsStatuses } from "./nostr";
 
-const relays = ["wss://relay.nostr.band", "wss://relayable.org"];
-
-const fetcher = NostrFetcher.init();
-
-const fetchUserStatusEvents = () =>
-  fetcher.fetchLatestEvents(relays, { kinds: [30315] }, 50);
+const pubkey =
+  "d1d1747115d16751a97c239f46ec1703292c3b7e9988b9ebdd4ec4705b15ed44";
 
 function App() {
-  const [events, setEvents] = useState<NostrEvent[]>([]);
-
-  useEffect(() => {
-    fetchUserStatusEvents()
-      .then((evs) => {
-        const filtered = evs.filter((ev) => ev.content.trim() !== "");
-        setEvents(filtered);
-        console.log(
-          filtered.map((ev) => {
-            return { status: ev.content, at: ev.created_at };
-          })
-        );
-      })
-      .catch((err) => console.error(err));
-  }, []);
+  const { profileMap, userStatues } = useFollowingsStatuses(pubkey);
 
   return (
     <div
@@ -47,15 +28,20 @@ function App() {
       </header>
       <main style={{ height: "100%", width: "100vw" }}>
         <VList>
-          {events.length !== 0 ? (
-            events.map((ev) => (
-              <div
-                key={ev.id}
-                className={css({ w: "600px", mx: "auto", mb: "2" })}
-              >
-                <UserStatus event={ev} />
-              </div>
-            ))
+          {userStatues.length !== 0 ? (
+            userStatues.map((status) => {
+              const profile = profileMap.get(status.pubkey) ?? {
+                pubkey: status.pubkey,
+              };
+              return (
+                <div
+                  key={status.pubkey}
+                  className={css({ w: "600px", mx: "auto", mb: "3" })}
+                >
+                  <UserStatusCard profile={profile} status={status} />
+                </div>
+              );
+            })
           ) : (
             <p className={css({ textAlign: "center" })}>Now Loading...</p>
           )}
