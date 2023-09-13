@@ -15,7 +15,7 @@ function App() {
       className={vstack({
         h: "100vh",
         pt: "4",
-        gap: "6",
+        gap: "4",
       })}
     >
       <header className={css({ lineHeight: "tight", textAlign: "center" })}>
@@ -24,7 +24,7 @@ function App() {
           Have an eye on your friends' status.
         </p>
       </header>
-      <main style={{ height: "100%", width: "100vw" }}>
+      <main className={css({ h: "100%", w: "100vw", pt: "2", pb: "4" })}>
         <VList>
           {userStatues.length !== 0 ? (
             userStatues.map((status) => {
@@ -34,7 +34,11 @@ function App() {
               return (
                 <div
                   key={status.pubkey}
-                  className={css({ w: "600px", mx: "auto", mb: "3" })}
+                  className={css({
+                    w: "600px",
+                    mx: "auto",
+                    mb: "2",
+                  })}
                 >
                   <UserStatusCard profile={profile} status={status} />
                 </div>

@@ -11,6 +11,12 @@ export default defineConfig({
   // Files to exclude
   exclude: [],
 
+  globalCss: {
+    body: {
+      backgroundColor: "slate.100",
+    },
+  },
+
   // Useful for theme customization
   theme: {
     extend: {

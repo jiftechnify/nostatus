@@ -17,22 +17,17 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({
         px: "4",
         pt: "4",
         pb: "3",
-        alignItems: "start",
-        gap: "2.5",
-        lineHeight: "snug",
-        border: "1px solid gray",
+        shadow: "md",
         rounded: "md",
+        alignItems: "start",
+        bg: "slate.50",
+        lineHeight: "snug",
+        gap: "2.5",
       })}
     >
       <div>
         {/* status */}
-        <p
-          className={css({
-            textStyle: "main-status",
-          })}
-        >
-          {status.general?.content || "no status"}
-        </p>
+        <GeneralStatus content={status.general?.content} />
 
         {/* now playing  */}
         {status.music && status.music.content && (
@@ -79,5 +74,28 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({
         </div>
       </div>
     </div>
+  );
+};
+
+const GeneralStatus = ({ content }: { content: string | undefined }) => {
+  const text = content ?? "";
+
+  return text !== "" ? (
+    <p
+      className={css({
+        textStyle: "main-status",
+      })}
+    >
+      {text}
+    </p>
+  ) : (
+    <p
+      className={css({
+        textStyle: "main-status",
+        color: "slate.300",
+      })}
+    >
+      No status
+    </p>
   );
 };
