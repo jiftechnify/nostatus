@@ -3,6 +3,12 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "author": "jiftechnify",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jiftechnify/nostatus.git"
+  },
+  "license": "MIT",
   "scripts": {
     "prepare": "panda codegen",
     "dev": "vite",
@@ -16,7 +22,6 @@
     "nostr-tools": "^1.15.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-virtuoso": "^4.5.1",
     "rx-nostr": "^1.8.0",
     "virtua": "^0.8.2"
   },

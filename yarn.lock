@@ -4455,11 +4455,6 @@ react-refresh@^0.14.0:
   resolved "https://registry.yarnpkg.com/react-refresh/-/react-refresh-0.14.0.tgz#4e02825378a5f227079554d4284889354e5f553e"
   integrity sha512-wViHqhAd8OHeLS/IRMJjTSDHF3U9eWi62F/MledQGPdJGDhodXJ9PBLNGr6WWL7qlH12Mt3TyTpbS+hGXMjCzQ==
 
-react-virtuoso@^4.5.1:
-  version "4.5.1"
-  resolved "https://registry.yarnpkg.com/react-virtuoso/-/react-virtuoso-4.5.1.tgz#74555974d159df0636c6918989150f71aedc53e8"
-  integrity sha512-Jdo9M/T5PcDAczvmXAKwvb/BW0MCMr/cb+3j2m9192zlQgQ+syMdJR42i+Sk80ln5aSNaL1fnxleJzdKsCc4lw==
-
 react@18.2.0, react@^18.2.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react/-/react-18.2.0.tgz#555bd98592883255fa00de14f1151a917b5d77d5"
