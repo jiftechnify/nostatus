@@ -15,10 +15,10 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({
     <div
       className={vstack({
         px: "4",
-        pt: "3",
-        pb: "2",
+        pt: "4",
+        pb: "3",
         alignItems: "start",
-        gap: "3",
+        gap: "2.5",
         lineHeight: "snug",
         border: "1px solid gray",
         rounded: "md",
@@ -50,7 +50,7 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({
       </div>
 
       {/* profile */}
-      <div className={hstack({ alignItems: "baseline", gap: "1" })}>
+      <div className={hstack({  gap: "1" })}>
         <img
           className={circle({
             size: "5",
@@ -62,12 +62,11 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({
         />
         <div
           className={hstack({
-            gap: "1.5",
-            position: "relative",
-            top: "-1",
+            gap: "1",
+            alignItems: 'baseline'
           })}
         >
-          <p>{profile.displayName ?? "No Name"}</p>
+          {profile.displayName && <p>{profile.displayName}</p>}
           <p className={css({ fontSize: "xs", color: "gray.400" })}>
             @{profile.name ?? "???"}
           </p>

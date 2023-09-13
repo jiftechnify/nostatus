@@ -159,6 +159,7 @@ type StatusData = {
 };
 
 export const statusDataFromEvent = (ev: NostrEvent): StatusData => {
+  const content = ev.content.trim();
   const createdAt = ev.created_at;
   const linkUrl = getTagValue(ev, "r");
   const expiration = (() => {
@@ -170,7 +171,7 @@ export const statusDataFromEvent = (ev: NostrEvent): StatusData => {
     return !isNaN(exp) ? exp : undefined;
   })();
 
-  return { content: ev.content, linkUrl, createdAt, expiration };
+  return { content, linkUrl, createdAt, expiration };
 };
 
 export type UserProfile = {
@@ -262,13 +263,34 @@ export const useFollowingsStatuses = (pubkey: string) => {
 
       const prevStatus = userStatusMap.current.get(pubkey);
       const prevSameCatStatus = prevStatus?.[category];
-      if (prevStatus === undefined) {
-        userStatusMap.current.set(ev.pubkey, { pubkey, [category]: newStatus });
-      } else if (
-        prevSameCatStatus === undefined ||
-        newStatus.createdAt > prevSameCatStatus.createdAt
-      ) {
-        userStatusMap.current.set(ev.pubkey, { ...prevStatus, [category]: ev });
+
+      if (newStatus.content !== "") {
+        if (prevStatus === undefined) {
+          userStatusMap.current.set(ev.pubkey, {
+            pubkey,
+            [category]: newStatus,
+          });
+        } else if (
+          prevSameCatStatus === undefined ||
+          newStatus.createdAt > prevSameCatStatus.createdAt
+        ) {
+          userStatusMap.current.set(ev.pubkey, {
+            ...prevStatus,
+            [category]: newStatus,
+          });
+        }
+      } else {
+        // status update with emtpy content -> invalidate
+        if (
+          prevStatus !== undefined &&
+          prevSameCatStatus !== undefined &&
+          newStatus.createdAt > prevSameCatStatus.createdAt
+        ) {
+          userStatusMap.current.set(ev.pubkey, {
+            ...prevStatus,
+            [category]: undefined,
+          });
+        }
       }
 
       // sort by last updated time, newest to oldest
@@ -293,19 +315,16 @@ export const useFollowingsStatuses = (pubkey: string) => {
       const abortFetchProfile = ns.fetchUserProfiles(
         userData.followings,
         (ev) => {
-          console.log("profile ev", ev);
           updateUserProfileMap(ev);
         }
       );
       const abortFetchStatus = ns.fetchAllPastUserStatus(
         userData.followings,
         (ev) => {
-          console.log("past status ev:", ev);
           updateUserStatusList(ev);
         }
       );
       const subStatus = ns.subscribeUserStatus(userData.followings, (ev) => {
-        console.log("realtime status ev:", ev);
         updateUserStatusList(ev);
       });
 

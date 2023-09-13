@@ -1,7 +1,7 @@
 import { VList } from "virtua";
 import { css } from "../styled-system/css";
 import { vstack } from "../styled-system/patterns";
-import { UserStatusCard } from "./components/UserStatus";
+import { UserStatusCard } from "./components/UserStatusCard";
 import { useFollowingsStatuses } from "./nostr";
 
 const pubkey =
