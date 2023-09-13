@@ -9,6 +9,7 @@ import {
   uniq,
   verify,
 } from "rx-nostr";
+import { currUnixtime } from "./utils";
 
 const bootstrapRelays = [
   "wss://relay.nostr.band",
@@ -260,9 +261,19 @@ export const useFollowingsStatuses = (pubkey: string | undefined) => {
 
     const updateUserStatusList = (ev: NostrEvent) => {
       const pubkey = ev.pubkey;
+
       const newStatus = statusDataFromEvent(ev);
+      if (
+        newStatus.expiration !== undefined &&
+        currUnixtime() >= newStatus.expiration
+      ) {
+        // ignore already expired statuses
+        return;
+      }
+
       const category = getTagValue(ev, "d");
       if (!isSupportedCategory(category)) {
+        // ignore statuses other than "general" and "music"
         return;
       }
 
