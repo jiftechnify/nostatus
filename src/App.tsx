@@ -4,7 +4,7 @@ import { LoginForm } from "./components/LoginForm";
 import { UserStatusList } from "./components/UserStatusList";
 import { useCachedPubkey } from "./nostr";
 
-function App() {
+export const App = () => {
   const { pubkey, savePubkey } = useCachedPubkey();
 
   const onLogin = (pubkey: string) => {
@@ -21,19 +21,11 @@ function App() {
     >
       <header className={css({ lineHeight: "tight", textAlign: "center" })}>
         <h1 className={css({ textStyle: "title" })}>nostatus</h1>
-        <p className={css({ textStyle: "tagline", color: "gray.500" })}>
-          Have an eye on your friends' status.
-        </p>
+        <p className={css({ textStyle: "tagline", color: "gray.500" })}>Have an eye on your friends' status.</p>
       </header>
       <main className={css({ h: "100%", w: "100vw", pt: "2", pb: "4" })}>
-        {pubkey !== undefined ? (
-          <UserStatusList userPubkey={pubkey} />
-        ) : (
-          <LoginForm onLogin={onLogin} />
-        )}
+        {pubkey !== undefined ? <UserStatusList userPubkey={pubkey} /> : <LoginForm onLogin={onLogin} />}
       </main>
     </div>
   );
-}
-
-export default App;
+};

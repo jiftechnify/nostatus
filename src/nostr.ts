@@ -2,20 +2,10 @@ import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
 import { NostrEvent, NostrFetcher } from "nostr-fetch";
 import { nip19 } from "nostr-tools";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  RxNostr,
-  createRxForwardReq,
-  createRxNostr,
-  uniq,
-  verify,
-} from "rx-nostr";
+import { RxNostr, createRxForwardReq, createRxNostr, uniq, verify } from "rx-nostr";
 import { currUnixtime } from "./utils";
 
-const bootstrapRelays = [
-  "wss://relay.nostr.band",
-  "wss://relayable.org",
-  "wss://yabu.me",
-];
+const bootstrapRelays = ["wss://relay.nostr.band", "wss://relayable.org", "wss://yabu.me"];
 
 export class NostrSystem {
   #rxNostr: RxNostr;
@@ -64,9 +54,7 @@ export class NostrSystem {
     if (k3 === undefined) {
       return undefined;
     }
-    const followings = k3.tags
-      .filter((t) => t[0] === "p" && t[1] !== undefined)
-      .map((t) => t[1]);
+    const followings = k3.tags.filter((t) => t[0] === "p" && t[1] !== undefined).map((t) => t[1]);
 
     const relayListEvs = [k3];
     if (k10002 !== undefined) {
@@ -77,10 +65,7 @@ export class NostrSystem {
     return { followings, readRelays };
   }
 
-  public fetchUserProfiles(
-    pubkeys: string[],
-    onProfileEv: (ev: NostrEvent) => void
-  ) {
+  public fetchUserProfiles(pubkeys: string[], onProfileEv: (ev: NostrEvent) => void) {
     const ac = new AbortController();
 
     try {
@@ -109,10 +94,7 @@ export class NostrSystem {
     return () => ac.abort();
   }
 
-  public fetchAllPastUserStatus(
-    pubkeys: string[],
-    onStatusEv: (ev: NostrEvent) => void
-  ): () => void {
+  public fetchAllPastUserStatus(pubkeys: string[], onStatusEv: (ev: NostrEvent) => void): () => void {
     const ac = new AbortController();
 
     try {
@@ -137,10 +119,7 @@ export class NostrSystem {
     return () => ac.abort;
   }
 
-  public subscribeUserStatus(
-    pubkeys: string[],
-    onStatusEv: (ev: NostrEvent) => void
-  ) {
+  public subscribeUserStatus(pubkeys: string[], onStatusEv: (ev: NostrEvent) => void) {
     const req = createRxForwardReq();
     const subscription = this.#rxNostr
       .use(req)
@@ -221,20 +200,13 @@ const isSupportedCategory = (s: string): s is UserStatusCategory => {
   return ["general", "music"].includes(s);
 };
 
-type FollowingsStatusesLoadState =
-  | "init"
-  | "fetching-user-data"
-  | "failed-user-data"
-  | "subscribing";
+type FollowingsStatusesLoadState = "init" | "fetching-user-data" | "failed-user-data" | "subscribing";
 
 export const useFollowingsStatuses = (pubkey: string | undefined) => {
-  const [nostrSystem, setNostrStytem] = useState<NostrSystem | undefined>(
-    undefined
-  );
+  const [nostrSystem, setNostrStytem] = useState<NostrSystem | undefined>(undefined);
   const userStatusMap = useRef(new Map<string, UserStatus>());
 
-  const [loadState, setLoadState] =
-    useState<FollowingsStatusesLoadState>("init");
+  const [loadState, setLoadState] = useState<FollowingsStatusesLoadState>("init");
   const [profileMap, setProfileMap] = useState(new Map<string, UserProfile>());
   const [userStatues, setUserStatuses] = useState<UserStatus[]>([]);
 
@@ -263,10 +235,7 @@ export const useFollowingsStatuses = (pubkey: string | undefined) => {
       const pubkey = ev.pubkey;
 
       const newStatus = statusDataFromEvent(ev);
-      if (
-        newStatus.expiration !== undefined &&
-        currUnixtime() >= newStatus.expiration
-      ) {
+      if (newStatus.expiration !== undefined && currUnixtime() >= newStatus.expiration) {
         // ignore already expired statuses
         return;
       }
@@ -286,10 +255,7 @@ export const useFollowingsStatuses = (pubkey: string | undefined) => {
             pubkey,
             [category]: newStatus,
           });
-        } else if (
-          prevSameCatStatus === undefined ||
-          newStatus.createdAt > prevSameCatStatus.createdAt
-        ) {
+        } else if (prevSameCatStatus === undefined || newStatus.createdAt > prevSameCatStatus.createdAt) {
           userStatusMap.current.set(ev.pubkey, {
             ...prevStatus,
             [category]: newStatus,
@@ -328,18 +294,12 @@ export const useFollowingsStatuses = (pubkey: string | undefined) => {
 
       setLoadState("subscribing");
 
-      const abortFetchProfile = ns.fetchUserProfiles(
-        userData.followings,
-        (ev) => {
-          updateUserProfileMap(ev);
-        }
-      );
-      const abortFetchStatus = ns.fetchAllPastUserStatus(
-        userData.followings,
-        (ev) => {
-          updateUserStatusList(ev);
-        }
-      );
+      const abortFetchProfile = ns.fetchUserProfiles(userData.followings, (ev) => {
+        updateUserProfileMap(ev);
+      });
+      const abortFetchStatus = ns.fetchAllPastUserStatus(userData.followings, (ev) => {
+        updateUserStatusList(ev);
+      });
       const subStatus = ns.subscribeUserStatus(userData.followings, (ev) => {
         updateUserStatusList(ev);
       });
@@ -373,9 +333,7 @@ const parseReadRelayList = (evs: NostrEvent[]): string[] => {
   if (relayListEvs.length === 0) {
     return [];
   }
-  const latest = relayListEvs.sort(
-    (a, b) => b.created_at - a.created_at
-  )[0] as NostrEvent;
+  const latest = relayListEvs.sort((a, b) => b.created_at - a.created_at)[0] as NostrEvent;
 
   switch (latest.kind) {
     case 3:
@@ -388,15 +346,9 @@ const parseReadRelayList = (evs: NostrEvent[]): string[] => {
   }
 };
 
-const selectRelaysByUsage = (
-  relayList: RelayList,
-  usage: "read" | "write"
-): string[] =>
+const selectRelaysByUsage = (relayList: RelayList, usage: "read" | "write"): string[] =>
   Object.entries(relayList)
-    .filter(
-      ([, { read, write }]) =>
-        (usage === "read" && read) || (usage === "write" && write)
-    )
+    .filter(([, { read, write }]) => (usage === "read" && read) || (usage === "write" && write))
     .map(([rurl]) => rurl);
 
 const parseRelayListInKind3 = (ev: NostrEvent): RelayList => {
@@ -436,8 +388,7 @@ const parseRelayListInKind10002 = (ev: NostrEvent): RelayList => {
   return res;
 };
 
-const getTagValue = (ev: NostrEvent, name: string): string =>
-  ev.tags.find((t) => t[0] === name)?.[1] ?? "";
+const getTagValue = (ev: NostrEvent, name: string): string => ev.tags.find((t) => t[0] === name)?.[1] ?? "";
 
 const regexp32BytesHexStr = /^[a-f0-9]{64}$/;
 
@@ -478,9 +429,7 @@ export const isNip07ExtAvailable = async () => {
 };
 
 export const useCachedPubkey = () => {
-  const [pubkey, setPubkey] = useState<string | undefined>(
-    localStorage.getItem("nostr_pubkey") ?? undefined
-  );
+  const [pubkey, setPubkey] = useState<string | undefined>(localStorage.getItem("nostr_pubkey") ?? undefined);
 
   const savePubkey = useCallback((pubkey: string) => {
     localStorage.setItem("nostr_pubkey", pubkey);

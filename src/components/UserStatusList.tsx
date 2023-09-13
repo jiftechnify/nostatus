@@ -7,11 +7,8 @@ type UserStatusListProps = {
   userPubkey: string;
 };
 
-export const UserStatusList: React.FC<UserStatusListProps> = ({
-  userPubkey,
-}) => {
-  const { loadState, profileMap, userStatues } =
-    useFollowingsStatuses(userPubkey);
+export const UserStatusList: React.FC<UserStatusListProps> = ({ userPubkey }) => {
+  const { loadState, profileMap, userStatues } = useFollowingsStatuses(userPubkey);
 
   return (
     <VList>
@@ -37,8 +34,7 @@ export const UserStatusList: React.FC<UserStatusListProps> = ({
         <p className={css({ textAlign: "center" })}>
           {loadState === "fetching-user-data" && "Fetching your follow list..."}
           {loadState === "subscribing" && "Fetching your friends' status... "}
-          {loadState === "failed-user-data" &&
-            "Failed to fetch your follow list 😵"}
+          {loadState === "failed-user-data" && "Failed to fetch your follow list 😵"}
         </p>
       )}
     </VList>

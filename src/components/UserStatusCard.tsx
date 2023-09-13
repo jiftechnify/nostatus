@@ -7,10 +7,7 @@ type UserStatusCardProps = {
   status: UserStatus;
 };
 
-export const UserStatusCard: React.FC<UserStatusCardProps> = ({
-  profile,
-  status,
-}) => {
+export const UserStatusCard: React.FC<UserStatusCardProps> = ({ profile, status }) => {
   return (
     <div
       className={vstack({
@@ -63,14 +60,8 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({
             alignItems: "baseline",
           })}
         >
-          {profile.displayName && (
-            <p className={css({ textStyle: "display-name" })}>
-              {profile.displayName}
-            </p>
-          )}
-          <p className={css({ textStyle: "name", color: "gray.400" })}>
-            @{profile.name ?? "???"}
-          </p>
+          {profile.displayName && <p className={css({ textStyle: "display-name" })}>{profile.displayName}</p>}
+          <p className={css({ textStyle: "name", color: "gray.400" })}>@{profile.name ?? "???"}</p>
         </div>
       </div>
     </div>
