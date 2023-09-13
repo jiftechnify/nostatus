@@ -48,10 +48,14 @@ export class NostrSystem {
   public async fetchUserData(pubkey: string) {
     const [k3, k10002] = await Promise.all(
       [3, 10002].map((kind) =>
-        this.#fetcher.fetchLastEvent(bootstrapRelays, {
-          authors: [pubkey],
-          kinds: [kind],
-        })
+        this.#fetcher.fetchLastEvent(
+          bootstrapRelays,
+          {
+            authors: [pubkey],
+            kinds: [kind],
+          },
+          { connectTimeoutMs: 5000 }
+        )
       )
     );
 
@@ -84,7 +88,7 @@ export class NostrSystem {
           relayUrls: this.getCurrReadRelays(),
         },
         { kinds: [0] },
-        { connectTimeoutMs: 2000 }
+        { connectTimeoutMs: 3000 }
       );
 
       (async () => {
@@ -100,7 +104,7 @@ export class NostrSystem {
       console.error(err);
     }
 
-    return ac.abort;
+    return () => ac.abort();
   }
 
   public fetchAllPastUserStatus(
@@ -114,7 +118,7 @@ export class NostrSystem {
         this.getCurrReadRelays(),
         { kinds: [30315], authors: pubkeys, "#d": ["general", "music"] },
         {},
-        { abortSignal: ac.signal, connectTimeoutMs: 2000 }
+        { abortSignal: ac.signal, connectTimeoutMs: 3000 }
       );
 
       (async () => {
@@ -128,7 +132,7 @@ export class NostrSystem {
       console.error(err);
     }
 
-    return ac.abort;
+    return () => ac.abort;
   }
 
   public subscribeUserStatus(
@@ -144,7 +148,7 @@ export class NostrSystem {
       kinds: [30315],
       authors: pubkeys,
       "#d": ["general", "music"],
-      since: Date.now() / 1000,
+      since: Math.floor(Date.now() / 1000),
     });
 
     return subscription;
