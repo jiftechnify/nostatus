@@ -1,6 +1,7 @@
 import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
 import { NostrEvent, NostrFetcher } from "nostr-fetch";
-import { useEffect, useRef, useState } from "react";
+import { nip19 } from "nostr-tools";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   RxNostr,
   createRxForwardReq,
@@ -225,7 +226,7 @@ type FollowingsStatusesLoadState =
   | "failed-user-data"
   | "subscribing";
 
-export const useFollowingsStatuses = (pubkey: string) => {
+export const useFollowingsStatuses = (pubkey: string | undefined) => {
   const [nostrSystem, setNostrStytem] = useState<NostrSystem | undefined>(
     undefined
   );
@@ -244,7 +245,7 @@ export const useFollowingsStatuses = (pubkey: string) => {
 
   useEffect(() => {
     setLoadState("init");
-    if (nostrSystem === undefined) {
+    if (nostrSystem === undefined || pubkey === undefined) {
       return;
     }
 
@@ -426,3 +427,59 @@ const parseRelayListInKind10002 = (ev: NostrEvent): RelayList => {
 
 const getTagValue = (ev: NostrEvent, name: string): string =>
   ev.tags.find((t) => t[0] === name)?.[1] ?? "";
+
+const regexp32BytesHexStr = /^[a-f0-9]{64}$/;
+
+export const parsePubkey = (pubkey: string): string | undefined => {
+  if (pubkey.startsWith("npub1")) {
+    try {
+      const res = nip19.decode(pubkey);
+      if (res.type === "npub") {
+        return res.data;
+      }
+      console.log("toHexPrivateKey: unexpected decode result");
+      return undefined;
+    } catch (err) {
+      console.error(err);
+      return undefined;
+    }
+  }
+  return regexp32BytesHexStr.test(pubkey) ? pubkey : undefined;
+};
+
+const MAX_NIP07_CHECKS = 5;
+export const isNip07ExtAvailable = async () => {
+  let numChecks = 0;
+
+  return new Promise<boolean>((resolve) => {
+    const nip07CheckInterval = setInterval(() => {
+      if (window.nostr) {
+        clearInterval(nip07CheckInterval);
+        resolve(true);
+      } else if (numChecks > MAX_NIP07_CHECKS) {
+        clearInterval(nip07CheckInterval);
+        resolve(false);
+      } else {
+        numChecks++;
+      }
+    }, 300);
+  });
+};
+
+export const useCachedPubkey = () => {
+  const [pubkey, setPubkey] = useState<string | undefined>(
+    localStorage.getItem("nostr_pubkey") ?? undefined
+  );
+
+  const savePubkey = useCallback((pubkey: string) => {
+    localStorage.setItem("nostr_pubkey", pubkey);
+    setPubkey(pubkey);
+  }, []);
+
+  const clearPubkey = useCallback(() => {
+    localStorage.removeItem("nostr_pubkey");
+    setPubkey(undefined);
+  }, []);
+
+  return { pubkey, savePubkey, clearPubkey };
+};

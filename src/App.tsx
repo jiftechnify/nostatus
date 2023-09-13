@@ -1,14 +1,15 @@
-import { VList } from "virtua";
 import { css } from "../styled-system/css";
 import { vstack } from "../styled-system/patterns";
-import { UserStatusCard } from "./components/UserStatusCard";
-import { useFollowingsStatuses } from "./nostr";
-
-const pubkey =
-  "d1d1747115d16751a97c239f46ec1703292c3b7e9988b9ebdd4ec4705b15ed44";
+import { LoginForm } from "./components/LoginForm";
+import { UserStatusList } from "./components/UserStatusList";
+import { useCachedPubkey } from "./nostr";
 
 function App() {
-  const { profileMap, userStatues } = useFollowingsStatuses(pubkey);
+  const { pubkey, savePubkey } = useCachedPubkey();
+
+  const onLogin = (pubkey: string) => {
+    savePubkey(pubkey);
+  };
 
   return (
     <div
@@ -25,29 +26,11 @@ function App() {
         </p>
       </header>
       <main className={css({ h: "100%", w: "100vw", pt: "2", pb: "4" })}>
-        <VList>
-          {userStatues.length !== 0 ? (
-            userStatues.map((status) => {
-              const profile = profileMap.get(status.pubkey) ?? {
-                pubkey: status.pubkey,
-              };
-              return (
-                <div
-                  key={status.pubkey}
-                  className={css({
-                    w: "600px",
-                    mx: "auto",
-                    mb: "2",
-                  })}
-                >
-                  <UserStatusCard profile={profile} status={status} />
-                </div>
-              );
-            })
-          ) : (
-            <p className={css({ textAlign: "center" })}>Now Loading...</p>
-          )}
-        </VList>
+        {pubkey !== undefined ? (
+          <UserStatusList userPubkey={pubkey} />
+        ) : (
+          <LoginForm onLogin={onLogin} />
+        )}
       </main>
     </div>
   );
