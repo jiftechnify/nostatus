@@ -19,10 +19,8 @@ function App() {
       })}
     >
       <header className={css({ lineHeight: "tight", textAlign: "center" })}>
-        <h1 className={css({ fontSize: "4xl", fontWeight: "bold" })}>
-          nostatus
-        </h1>
-        <p className={css({ fontSize: "sm", color: "gray.500" })}>
+        <h1 className={css({ textStyle: "title" })}>nostatus</h1>
+        <p className={css({ textStyle: "tagline", color: "gray.500" })}>
           Have an eye on your friends' status.
         </p>
       </header>

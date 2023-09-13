@@ -28,8 +28,7 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({
         {/* status */}
         <p
           className={css({
-            fontSize: "2xl",
-            fontWeight: "bold",
+            textStyle: "main-status",
           })}
         >
           {status.general?.content || "no status"}
@@ -37,20 +36,23 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({
 
         {/* now playing  */}
         {status.music && status.music.content && (
-          <p
+          <div
             className={css({
-              fontSize: "xs",
-              fontStyle: "italic",
+              textStyle: "now-playing",
               color: "slate.600",
+              _before: {
+                content: "'♫'",
+                mr: "1",
+              },
             })}
           >
-            ♫ {status.music.content}
-          </p>
+            {status.music.content}
+          </div>
         )}
       </div>
 
       {/* profile */}
-      <div className={hstack({  gap: "1" })}>
+      <div className={hstack({ gap: "1" })}>
         <img
           className={circle({
             size: "5",
@@ -63,11 +65,15 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({
         <div
           className={hstack({
             gap: "1",
-            alignItems: 'baseline'
+            alignItems: "baseline",
           })}
         >
-          {profile.displayName && <p>{profile.displayName}</p>}
-          <p className={css({ fontSize: "xs", color: "gray.400" })}>
+          {profile.displayName && (
+            <p className={css({ textStyle: "display-name" })}>
+              {profile.displayName}
+            </p>
+          )}
+          <p className={css({ textStyle: "name", color: "gray.400" })}>
             @{profile.name ?? "???"}
           </p>
         </div>
