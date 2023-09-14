@@ -14,7 +14,7 @@ export const App = () => {
   return (
     <div
       className={vstack({
-        h: "100vh",
+        h: "100dvh",
         pt: "4",
         gap: "4",
       })}
