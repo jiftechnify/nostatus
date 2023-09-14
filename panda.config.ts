@@ -12,6 +12,12 @@ export default defineConfig({
   exclude: [],
 
   globalCss: {
+    ":root": {
+      fontSize: {
+        base: "14px", // width < 640px
+        sm: "16px",
+      },
+    },
     body: {
       backgroundColor: "slate.100",
     },

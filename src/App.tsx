@@ -23,7 +23,7 @@ export const App = () => {
         <h1 className={css({ textStyle: "title" })}>nostatus</h1>
         <p className={css({ textStyle: "tagline", color: "gray.500" })}>Have an eye on your friends' status.</p>
       </header>
-      <main className={css({ h: "100%", w: "100vw", pt: "2", pb: "4" })}>
+      <main className={css({ h: "100%", w: "100vw", pt: "2" })}>
         {pubkey !== undefined ? <UserStatusList userPubkey={pubkey} /> : <LoginForm onLogin={onLogin} />}
       </main>
     </div>
