@@ -21,7 +21,10 @@ export const UserStatusList: React.FC<UserStatusListProps> = ({ userPubkey }) =>
             <div
               key={status.pubkey}
               className={css({
-                w: "600px",
+                w: {
+                  base: "94%", // width < 640px
+                  sm: "600px",
+                },
                 mx: "auto",
                 mb: "2",
               })}
