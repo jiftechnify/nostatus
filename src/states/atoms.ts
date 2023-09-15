@@ -1,12 +1,13 @@
+import { getFirstTagValue, getTagValues, parseReadRelayList } from "../nostr";
+import { currUnixtime } from "../utils";
+import { AccountMetadata, StatusData, UserProfile, UserStatus } from "./models";
+
 import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
 import { atom, getDefaultStore } from "jotai";
 import { atomFamily, atomWithStorage, loadable, selectAtom } from "jotai/utils";
 import { NostrEvent, NostrFetcher } from "nostr-fetch";
 import { createRxForwardReq, createRxNostr, uniq, verify } from "rx-nostr";
 import { Subscription } from "rxjs";
-import { currUnixtime } from "../utils";
-import { AccountMetadata, StatusData, UserProfile, UserStatus } from "./models";
-import { getFirstTagValue, getTagValues, parseReadRelayList } from "./nostr";
 
 export const myPubkeyAtom = atomWithStorage<string | undefined>("nostr_pubkey", undefined);
 
@@ -86,16 +87,17 @@ export const isNip07AvailableAtom = atom(async () => {
 
 const jotaiStore = getDefaultStore();
 
-const rxNostr = createRxNostr();
-const nostrFetcher = NostrFetcher.withCustomPool(rxNostrAdapter(rxNostr));
-
 const bootstrapRelays = ["wss://relay.nostr.band", "wss://relayable.org", "wss://yabu.me"];
+const bootstrapFetcher = NostrFetcher.init();
+
+const rxNostr = createRxNostr();
+const fetcherOnRxNostr = NostrFetcher.withCustomPool(rxNostrAdapter(rxNostr));
 
 /* fetch account data */
 export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata> => {
   const [k0, k3, k10002] = await Promise.all(
     [0, 3, 10002].map((kind) =>
-      nostrFetcher.fetchLastEvent(
+      bootstrapFetcher.fetchLastEvent(
         bootstrapRelays,
         {
           authors: [pubkey],
@@ -116,7 +118,7 @@ export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata>
   return { profile, followings, readRelays };
 };
 
-const relaysFullyConfiguredAtom = atom(false);
+const relaysSwitchedAtom = atom(false);
 
 /* processes after fetched my account data */
 jotaiStore.sub(myAcctDataAvailableAtom, async () => {
@@ -129,20 +131,18 @@ jotaiStore.sub(myAcctDataAvailableAtom, async () => {
       return;
     }
 
+    console.log("switching relays", data.readRelays);
     await rxNostr.switchRelays(
-      [...bootstrapRelays, ...data.readRelays].map((r) => {
+      data.readRelays.map((r) => {
         return { url: r, read: true, write: false };
       })
     );
 
-    jotaiStore.set(relaysFullyConfiguredAtom, true);
+    jotaiStore.set(relaysSwitchedAtom, true);
   } else {
-    await rxNostr.switchRelays(
-      [...bootstrapRelays].map((r) => {
-        return { url: r, read: true, write: false };
-      })
-    );
-    jotaiStore.set(relaysFullyConfiguredAtom, false);
+    console.log("disconnect from all relays");
+    await rxNostr.switchRelays([]);
+    jotaiStore.set(relaysSwitchedAtom, false);
   }
 });
 
@@ -157,22 +157,21 @@ const cancelFetchProfiles = () => {
   }
 };
 
-jotaiStore.sub(relaysFullyConfiguredAtom, async () => {
+jotaiStore.sub(relaysSwitchedAtom, async () => {
   cancelFetchProfiles();
 
   const myData = await jotaiStore.get(myAccountDataAtom);
   if (myData === undefined) {
-    console.log("fetchProfiles: reset");
+    console.log("fetch profiles: clear");
     profilesMap.clear();
     jotaiStore.set(followingsProfilesAtom, new Map<string, UserProfile>());
     return;
   }
 
   const { followings, readRelays } = myData;
-  console.log(readRelays);
 
   fetchProfilesAbortCtrl = new AbortController();
-  const iter = nostrFetcher.fetchLastEventPerAuthor(
+  const iter = fetcherOnRxNostr.fetchLastEventPerAuthor(
     { authors: followings, relayUrls: readRelays },
     { kinds: [0] },
     { abortSignal: fetchProfilesAbortCtrl.signal, connectTimeoutMs: 3000 }
@@ -259,24 +258,24 @@ const cancelFetchStatuses = () => {
   }
 };
 
-jotaiStore.sub(relaysFullyConfiguredAtom, async () => {
+jotaiStore.sub(relaysSwitchedAtom, async () => {
   console.log("fetch statues: myAccountDataAtom updated");
 
   cancelFetchStatuses();
 
   const myData = await jotaiStore.get(myAccountDataAtom);
   if (myData === undefined) {
+    console.log("fetch statues: clear");
     statusesMap.clear();
     jotaiStore.set(followingsStatusesAtom, new Map<string, UserStatus>());
     return;
   }
 
   const { followings, readRelays } = myData;
-  console.log(readRelays);
 
   // fetch past events
   fetchPastStatusesAbortCtrl = new AbortController();
-  const pastStatusEvIter = nostrFetcher.allEventsIterator(
+  const pastStatusEvIter = fetcherOnRxNostr.allEventsIterator(
     readRelays,
     { kinds: [30315], authors: followings, "#d": ["general", "music"] },
     {},

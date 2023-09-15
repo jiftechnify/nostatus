@@ -28,7 +28,14 @@ export const App = () => {
       })}
     >
       <header
-        className={css({ w: "94vw", maxW: "600px", px: "2", display: "grid", gridTemplateColumns: "6rem 1fr 6rem" })}
+        className={css({
+          w: "94vw",
+          maxW: "600px",
+          px: "2",
+          display: "grid",
+          gridTemplateColumns: "6rem 1fr 6rem",
+          alignItems: "center",
+        })}
       >
         <div className={css({ mr: "auto" })}></div>
         <div className={css({ lineHeight: "tight", textAlign: "center" })}>
@@ -36,16 +43,14 @@ export const App = () => {
           <p className={css({ textStyle: "tagline", color: "gray.500" })}>Have an eye on your friends' status.</p>
         </div>
         <div className={css({ ml: "auto" })}>
-          <Suspense fallback={<div>...</div>}>
+          <Suspense>
             <HeaderMenu onLogout={onLogout} />
           </Suspense>
         </div>
       </header>
 
       <main className={css({ h: "100%", w: "100vw", pt: "2" })}>
-        <Suspense fallback={<div>...</div>}>
-          {pubkey !== undefined ? <UserStatusList /> : <LoginForm onLogin={onLogin} />}
-        </Suspense>
+        <Suspense>{pubkey !== undefined ? <UserStatusList /> : <LoginForm onLogin={onLogin} />}</Suspense>
       </main>
     </div>
   );

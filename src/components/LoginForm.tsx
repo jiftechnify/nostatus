@@ -73,7 +73,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
             w: "100%",
             px: "1",
             py: "0.5",
-            rounded: "md",
+            rounded: "sm",
             fontSize: "sm",
           })}
           type="text"

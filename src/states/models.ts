@@ -1,5 +1,5 @@
 import { NostrEvent } from "nostr-fetch";
-import { getFirstTagValue } from "./nostr";
+import { getFirstTagValue } from "../nostr";
 
 export type UserProfile = {
   srcEventId: string;
