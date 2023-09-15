@@ -18,15 +18,22 @@
   },
   "dependencies": {
     "@nostr-fetch/adapter-rx-nostr": "^0.13.0",
+    "@radix-ui/react-avatar": "^1.0.3",
+    "@radix-ui/react-dropdown-menu": "^2.0.5",
+    "@shadow-panda/style-context": "^0.6.0",
+    "jotai": "^2.4.2",
+    "lucide-react": "^0.277.0",
     "nostr-fetch": "^0.13.0",
     "nostr-tools": "^1.15.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rx-nostr": "^1.8.0",
+    "rxjs": "^7.8.1",
     "virtua": "^0.8.2"
   },
   "devDependencies": {
     "@pandacss/dev": "^0.14.0",
+    "@shadow-panda/preset": "^0.6.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",

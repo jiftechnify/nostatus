@@ -1,25 +1,19 @@
+import { css } from "@shadow-panda/styled-system/css";
+import { useAtomValue } from "jotai";
 import { VList } from "virtua";
-import { css } from "../../styled-system/css";
-import { useFollowingsStatuses } from "../nostr";
+import { pubkeysOrderByLastStatusUpdateTimeAtom } from "../states/atoms";
 import { UserStatusCard } from "./UserStatusCard";
 
-type UserStatusListProps = {
-  userPubkey: string;
-};
-
-export const UserStatusList: React.FC<UserStatusListProps> = ({ userPubkey }) => {
-  const { loadState, profileMap, userStatues } = useFollowingsStatuses(userPubkey);
+export const UserStatusList: React.FC = () => {
+  const orderedPubkeys = useAtomValue(pubkeysOrderByLastStatusUpdateTimeAtom);
 
   return (
     <VList>
-      {userStatues.length !== 0 ? (
-        userStatues.map((status) => {
-          const profile = profileMap.get(status.pubkey) ?? {
-            pubkey: status.pubkey,
-          };
+      {orderedPubkeys.length !== 0 ? (
+        orderedPubkeys.map((pubkey) => {
           return (
             <div
-              key={status.pubkey}
+              key={pubkey}
               className={css({
                 w: {
                   base: "94%", // width < 640px
@@ -29,16 +23,12 @@ export const UserStatusList: React.FC<UserStatusListProps> = ({ userPubkey }) =>
                 mb: "2",
               })}
             >
-              <UserStatusCard profile={profile} status={status} />
+              <UserStatusCard pubkey={pubkey} />
             </div>
           );
         })
       ) : (
-        <p className={css({ textAlign: "center" })}>
-          {loadState === "fetching-user-data" && "Fetching your follow list..."}
-          {loadState === "subscribing" && "Fetching your friends' status... "}
-          {loadState === "failed-user-data" && "Failed to fetch your follow list 😵"}
-        </p>
+        <p className={css({ textAlign: "center" })}>Fetching...</p>
       )}
     </VList>
   );
