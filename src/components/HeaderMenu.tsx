@@ -1,8 +1,8 @@
 import { css } from "@shadow-panda/styled-system/css";
-import { circle } from "@shadow-panda/styled-system/patterns";
 import { useAtomValue } from "jotai";
 import { LogOut } from "lucide-react";
 import { myAccountDataAtom } from "../states/atoms";
+import { AppAvatar } from "./AppAvatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,15 +22,7 @@ export const HeaderMenu: React.FC<HeaderMenuProps> = ({ onLogout }) => {
   return myData !== undefined ? (
     <DropdownMenu>
       <DropdownMenuTrigger className={css({ cursor: "pointer" })}>
-        <img
-          className={circle({
-            size: "10",
-            maxWidth: "none",
-            objectFit: "cover",
-          })}
-          src={myData.profile.picture}
-          alt="my avatar"
-        />
+        <AppAvatar imgSrc={myData.profile.picture} size="md" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>

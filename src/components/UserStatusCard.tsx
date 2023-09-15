@@ -1,7 +1,8 @@
 import { css } from "@shadow-panda/styled-system/css";
-import { circle, hstack, vstack } from "@shadow-panda/styled-system/patterns";
+import { hstack, vstack } from "@shadow-panda/styled-system/patterns";
 import { useAtomValue } from "jotai";
 import { userProfileAtomFamily, userStatusAtomFamily } from "../states/atoms";
+import { AppAvatar } from "./AppAvatar";
 
 type UserStatusCardProps = {
   pubkey: string;
@@ -53,15 +54,7 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
 
       {/* profile */}
       <div className={hstack({ gap: "1" })}>
-        <img
-          className={circle({
-            size: "5",
-            maxWidth: "none",
-            objectFit: "cover",
-          })}
-          src={profile.picture}
-          alt="avatar"
-        />
+        <AppAvatar imgSrc={profile.picture} size="sm" />
         <div
           className={hstack({
             gap: "1",
