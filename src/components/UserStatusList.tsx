@@ -28,12 +28,7 @@ export const UserStatusList: React.FC = () => {
           );
         })
       ) : (
-        <p className={css({ textAlign: "center" })}>
-          Fetching data...
-          {/* {loadState === "fetching-user-data" && "Fetching your follow list..."} */}
-          {/* {loadState === "subscribing" && "Fetching your friends' status... "} */}
-          {/* {loadState === "failed-user-data" && "Failed to fetch your follow list 😵"} */}
-        </p>
+        <p className={css({ textAlign: "center" })}>Fetching...</p>
       )}
     </VList>
   );

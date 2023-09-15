@@ -33,7 +33,7 @@ export const App = () => {
           maxW: "600px",
           px: "2",
           display: "grid",
-          gridTemplateColumns: "6rem 1fr 6rem",
+          gridTemplateColumns: "4rem 1fr 4rem",
           alignItems: "center",
         })}
       >
