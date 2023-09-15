@@ -1,14 +1,22 @@
-import { css } from "../styled-system/css";
-import { vstack } from "../styled-system/patterns";
+import { css } from "@shadow-panda/styled-system/css";
+import { vstack } from "@shadow-panda/styled-system/patterns";
+import { useAtom } from "jotai";
+import { RESET } from "jotai/utils";
+import { Suspense } from "react";
+import { HeaderMenu } from "./components/HeaderMenu";
 import { LoginForm } from "./components/LoginForm";
 import { UserStatusList } from "./components/UserStatusList";
-import { useCachedPubkey } from "./nostr";
+import { myPubkeyAtom } from "./states/atoms";
 
 export const App = () => {
-  const { pubkey, savePubkey } = useCachedPubkey();
+  const [pubkey, setPubkey] = useAtom(myPubkeyAtom);
 
   const onLogin = (pubkey: string) => {
-    savePubkey(pubkey);
+    setPubkey(pubkey);
+  };
+  const onLogout = () => {
+    console.log("logout");
+    setPubkey(RESET);
   };
 
   return (
@@ -19,12 +27,25 @@ export const App = () => {
         gap: "4",
       })}
     >
-      <header className={css({ lineHeight: "tight", textAlign: "center" })}>
-        <h1 className={css({ textStyle: "title" })}>nostatus</h1>
-        <p className={css({ textStyle: "tagline", color: "gray.500" })}>Have an eye on your friends' status.</p>
+      <header
+        className={css({ w: "94vw", maxW: "600px", px: "2", display: "grid", gridTemplateColumns: "6rem 1fr 6rem" })}
+      >
+        <div className={css({ mr: "auto" })}></div>
+        <div className={css({ lineHeight: "tight", textAlign: "center" })}>
+          <h1 className={css({ textStyle: "title" })}>nostatus</h1>
+          <p className={css({ textStyle: "tagline", color: "gray.500" })}>Have an eye on your friends' status.</p>
+        </div>
+        <div className={css({ ml: "auto" })}>
+          <Suspense fallback={<div>...</div>}>
+            <HeaderMenu onLogout={onLogout} />
+          </Suspense>
+        </div>
       </header>
+
       <main className={css({ h: "100%", w: "100vw", pt: "2" })}>
-        {pubkey !== undefined ? <UserStatusList userPubkey={pubkey} /> : <LoginForm onLogin={onLogin} />}
+        <Suspense fallback={<div>...</div>}>
+          {pubkey !== undefined ? <UserStatusList /> : <LoginForm onLogin={onLogin} />}
+        </Suspense>
       </main>
     </div>
   );

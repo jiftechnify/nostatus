@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
-import { css } from "../../styled-system/css";
-import { vstack } from "../../styled-system/patterns";
-import { SystemStyleObject } from "../../styled-system/types";
-import { isNip07ExtAvailable, parsePubkey } from "../nostr";
+import { css } from "@shadow-panda/styled-system/css";
+import { vstack } from "@shadow-panda/styled-system/patterns";
+import { SystemStyleObject } from "@shadow-panda/styled-system/types";
+import { useAtomValue } from "jotai";
+import { useState } from "react";
+import { parsePubkey } from "../nostr";
+import { isNip07AvailableAtom } from "../states/atoms";
 
 const loginButtonStyles: SystemStyleObject = {
   px: "3",
@@ -31,14 +33,8 @@ type LoginFormProps = {
 };
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
-  const [nip07Available, setNip07Available] = useState(false);
+  const isNip07Available = useAtomValue(isNip07AvailableAtom);
   const [pubkeyInput, setPubkeyInput] = useState("");
-
-  useEffect(() => {
-    isNip07ExtAvailable()
-      .then((avail) => setNip07Available(avail))
-      .catch(console.error);
-  }, []);
 
   const onClickNip07Login = async () => {
     const pubkey = await window.nostr.getPublicKey();
@@ -67,7 +63,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
           ...loginButtonStyles,
         })}
         onClick={onClickNip07Login}
-        disabled={!nip07Available}
+        disabled={!isNip07Available}
       >
         Login with NIP-07 Extension
       </button>

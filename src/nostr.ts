@@ -1,4 +1,6 @@
 import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
+import { atom } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 import { NostrEvent, NostrFetcher } from "nostr-fetch";
 import { nip19 } from "nostr-tools";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -11,23 +13,15 @@ export class NostrSystem {
   #rxNostr: RxNostr;
   #fetcher: NostrFetcher;
 
-  private constructor() {
+  constructor() {
     this.#rxNostr = createRxNostr();
     this.#fetcher = NostrFetcher.withCustomPool(rxNostrAdapter(this.#rxNostr));
   }
 
-  static async init() {
-    const nostrSys = new NostrSystem();
-    await nostrSys.setReadRelays(bootstrapRelays);
-    return nostrSys;
-  }
-
-  public async setReadRelays(relays: string[]) {
-    await this.#rxNostr.switchRelays(
-      relays.map((r) => {
-        return { url: r, read: true, write: false };
-      })
-    );
+  public async addReadRelays(relays: string[]) {
+    for (const r of relays) {
+      await this.#rxNostr.addRelay({ url: r, read: true, write: false });
+    }
   }
 
   private getCurrReadRelays() {
@@ -37,9 +31,9 @@ export class NostrSystem {
       .map((r) => r.url);
   }
 
-  public async fetchUserData(pubkey: string) {
-    const [k3, k10002] = await Promise.all(
-      [3, 10002].map((kind) =>
+  public async fetchMyData(pubkey: string): Promise<MyData | undefined> {
+    const [k0, k3, k10002] = await Promise.all(
+      [0, 3, 10002].map((kind) =>
         this.#fetcher.fetchLastEvent(
           bootstrapRelays,
           {
@@ -50,19 +44,21 @@ export class NostrSystem {
         )
       )
     );
+    console.log(k0, k3, k10002);
 
     if (k3 === undefined) {
       return undefined;
     }
-    const followings = k3.tags.filter((t) => t[0] === "p" && t[1] !== undefined).map((t) => t[1]);
 
+    const profile = k0 !== undefined ? userProfileFromEvent(k0) : { pubkey };
+    const followings = k3.tags.filter((t) => t[0] === "p" && t[1] !== undefined).map((t) => t[1]);
     const relayListEvs = [k3];
     if (k10002 !== undefined) {
       relayListEvs.push(k10002);
     }
     const readRelays = parseReadRelayList(relayListEvs);
 
-    return { followings, readRelays };
+    return { profile, followings, readRelays };
   }
 
   public fetchUserProfiles(pubkeys: string[], onProfileEv: (ev: NostrEvent) => void) {
@@ -75,7 +71,7 @@ export class NostrSystem {
           relayUrls: this.getCurrReadRelays(),
         },
         { kinds: [0] },
-        { connectTimeoutMs: 3000 }
+        { abortSignal: ac.signal, connectTimeoutMs: 3000 }
       );
 
       (async () => {
@@ -135,6 +131,14 @@ export class NostrSystem {
     return subscription;
   }
 }
+
+const nostrSystem = new NostrSystem();
+
+export type MyData = {
+  profile: UserProfile;
+  followings: string[];
+  readRelays: string[];
+};
 
 type StatusData = {
   content: string;
@@ -198,132 +202,6 @@ const statusLastUpdatedTime = (us: UserStatus): number => {
 type UserStatusCategory = "general" | "music";
 const isSupportedCategory = (s: string): s is UserStatusCategory => {
   return ["general", "music"].includes(s);
-};
-
-type FollowingsStatusesLoadState = "init" | "fetching-user-data" | "failed-user-data" | "subscribing";
-
-export const useFollowingsStatuses = (pubkey: string | undefined) => {
-  const [nostrSystem, setNostrStytem] = useState<NostrSystem | undefined>(undefined);
-  const userStatusMap = useRef(new Map<string, UserStatus>());
-
-  const [loadState, setLoadState] = useState<FollowingsStatusesLoadState>("init");
-  const [profileMap, setProfileMap] = useState(new Map<string, UserProfile>());
-  const [userStatues, setUserStatuses] = useState<UserStatus[]>([]);
-
-  useEffect(() => {
-    NostrSystem.init().then((sys) => {
-      setNostrStytem(sys);
-    });
-  }, []);
-
-  useEffect(() => {
-    setLoadState("init");
-    if (nostrSystem === undefined || pubkey === undefined) {
-      return;
-    }
-
-    const updateUserProfileMap = (ev: NostrEvent) => {
-      const profile = userProfileFromEvent(ev);
-
-      setProfileMap((prev) => {
-        prev.set(ev.pubkey, profile);
-        return new Map(prev);
-      });
-    };
-
-    const updateUserStatusList = (ev: NostrEvent) => {
-      const pubkey = ev.pubkey;
-
-      const newStatus = statusDataFromEvent(ev);
-      if (newStatus.expiration !== undefined && currUnixtime() >= newStatus.expiration) {
-        // ignore already expired statuses
-        return;
-      }
-
-      const category = getTagValue(ev, "d");
-      if (!isSupportedCategory(category)) {
-        // ignore statuses other than "general" and "music"
-        return;
-      }
-
-      const prevStatus = userStatusMap.current.get(pubkey);
-      const prevSameCatStatus = prevStatus?.[category];
-
-      if (newStatus.content !== "") {
-        if (prevStatus === undefined) {
-          userStatusMap.current.set(ev.pubkey, {
-            pubkey,
-            [category]: newStatus,
-          });
-        } else if (prevSameCatStatus === undefined || newStatus.createdAt > prevSameCatStatus.createdAt) {
-          userStatusMap.current.set(ev.pubkey, {
-            ...prevStatus,
-            [category]: newStatus,
-          });
-        }
-      } else {
-        // status update with emtpy content -> invalidate
-        if (
-          prevStatus !== undefined &&
-          prevSameCatStatus !== undefined &&
-          newStatus.createdAt > prevSameCatStatus.createdAt
-        ) {
-          userStatusMap.current.set(ev.pubkey, {
-            ...prevStatus,
-            [category]: undefined,
-          });
-        }
-      }
-
-      // sort by last updated time, newest to oldest
-      const sorted = [...userStatusMap.current.values()].sort(
-        (s1, s2) => statusLastUpdatedTime(s2) - statusLastUpdatedTime(s1)
-      );
-      setUserStatuses(sorted);
-    };
-
-    const main = async (ns: NostrSystem) => {
-      setLoadState("fetching-user-data");
-      const userData = await ns.fetchUserData(pubkey);
-      if (userData === undefined) {
-        setLoadState("failed-user-data");
-        return;
-      }
-
-      await ns.setReadRelays(userData.readRelays);
-
-      setLoadState("subscribing");
-
-      const abortFetchProfile = ns.fetchUserProfiles(userData.followings, (ev) => {
-        updateUserProfileMap(ev);
-      });
-      const abortFetchStatus = ns.fetchAllPastUserStatus(userData.followings, (ev) => {
-        updateUserStatusList(ev);
-      });
-      const subStatus = ns.subscribeUserStatus(userData.followings, (ev) => {
-        updateUserStatusList(ev);
-      });
-
-      return () => {
-        abortFetchProfile();
-        abortFetchStatus();
-        subStatus.unsubscribe();
-      };
-    };
-
-    let cancel: (() => void) | undefined;
-    main(nostrSystem)
-      .then((c) => {
-        cancel = c;
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-
-    return () => cancel?.();
-  }, [nostrSystem, pubkey]);
-
-  return { loadState, profileMap, userStatues };
 };
 
 type RelayList = Record<string, { read: boolean; write: boolean }>;
@@ -428,6 +306,150 @@ export const isNip07ExtAvailable = async () => {
   });
 };
 
+/** global states **/
+
+export const cachedPubkeyAtom = atomWithStorage<string | undefined>("nostr_pubkey", undefined);
+
+export const myDataAtom = atom((get) => {
+  const pubkey = get(cachedPubkeyAtom);
+  if (pubkey === undefined) {
+    return Promise.resolve(undefined);
+  }
+  return nostrSystem.fetchMyData(pubkey);
+});
+
+export const followingsProfilesAtom = atom(async (get) => {
+  const updateValueAtom = atom(async (get) => {
+    const profileMap = new Map<string, UserProfile>();
+    let updateValue: (m: Map<string, UserProfile>) => void;
+    let cancel: () => void = () => {
+      console.warn("cancel() called before fetch started");
+    };
+
+    const myData = await get(myDataAtom);
+    console.log("followingsProfilesAtom: myData=", myData);
+    if (myData === undefined) {
+      cancel();
+      profileMap.clear();
+      return atom(new Map<string, UserProfile>());
+    }
+
+    const abortFetch = nostrSystem.fetchUserProfiles(myData.followings, (ev) => {
+      const profile = userProfileFromEvent(ev);
+      profileMap.set(ev.pubkey, profile);
+      updateValue?.(new Map(profileMap));
+    });
+    cancel = () => {
+      console.log("followingsProfilesAtom: canceled");
+      abortFetch();
+    };
+
+    const latestValueAtom = atom(profileMap);
+    latestValueAtom.onMount = (update) => {
+      updateValue = update;
+
+      return () => {
+        cancel();
+      };
+    };
+
+    return latestValueAtom;
+  });
+
+  const valueAtom = await get(updateValueAtom);
+  return get(valueAtom);
+});
+
+export const followingsStatusListAtom = atom(async (get) => {
+  const updateValueAtom = atom(async (get) => {
+    const statusMap = new Map<string, UserStatus>();
+
+    let updateValue: (l: UserStatus[]) => void;
+    let cancel: () => void = () => {
+      console.warn("cancel() called before fetch started");
+    };
+
+    const myData = await get(myDataAtom);
+    if (myData === undefined) {
+      statusMap.clear();
+      cancel();
+      return atom<UserStatus[]>([]);
+    }
+
+    const updateStatusMap = (ev: NostrEvent) => {
+      const pubkey = ev.pubkey;
+
+      const newStatus = statusDataFromEvent(ev);
+      if (newStatus.expiration !== undefined && currUnixtime() >= newStatus.expiration) {
+        // ignore already expired statuses
+        return;
+      }
+
+      const category = getTagValue(ev, "d");
+      if (!isSupportedCategory(category)) {
+        // ignore statuses other than "general" and "music"
+        return;
+      }
+
+      const prevStatus = statusMap.get(pubkey);
+      const prevSameCatStatus = prevStatus?.[category];
+
+      if (newStatus.content !== "") {
+        if (prevStatus === undefined) {
+          statusMap.set(ev.pubkey, {
+            pubkey,
+            [category]: newStatus,
+          });
+        } else if (prevSameCatStatus === undefined || newStatus.createdAt > prevSameCatStatus.createdAt) {
+          statusMap.set(ev.pubkey, {
+            ...prevStatus,
+            [category]: newStatus,
+          });
+        }
+      } else {
+        // status update with emtpy content -> invalidate
+        if (
+          prevStatus !== undefined &&
+          prevSameCatStatus !== undefined &&
+          newStatus.createdAt > prevSameCatStatus.createdAt
+        ) {
+          statusMap.set(ev.pubkey, {
+            ...prevStatus,
+            [category]: undefined,
+          });
+        }
+      }
+
+      // sort by last updated time, newest to oldest
+      const sorted = [...statusMap.values()].sort((s1, s2) => statusLastUpdatedTime(s2) - statusLastUpdatedTime(s1));
+      updateValue?.(sorted);
+    };
+
+    const abortFetchPast = nostrSystem.fetchAllPastUserStatus(myData.followings, updateStatusMap);
+    const subscription = nostrSystem.subscribeUserStatus(myData.followings, updateStatusMap);
+
+    cancel = () => {
+      console.log("followingsStatusListAtom: canceled");
+      abortFetchPast();
+      subscription.unsubscribe();
+    };
+
+    const latestAtom = atom<UserStatus[]>([]);
+    latestAtom.onMount = (update) => {
+      updateValue = update;
+
+      return () => {
+        cancel();
+      };
+    };
+
+    return latestAtom;
+  });
+
+  const valueAtom = await get(updateValueAtom);
+  return get(valueAtom);
+});
+
 export const useCachedPubkey = () => {
   const [pubkey, setPubkey] = useState<string | undefined>(localStorage.getItem("nostr_pubkey") ?? undefined);
 
@@ -442,4 +464,164 @@ export const useCachedPubkey = () => {
   }, []);
 
   return { pubkey, savePubkey, clearPubkey };
+};
+
+export const useMyData = () => {
+  const { pubkey } = useCachedPubkey();
+
+  const [myData, setMyData] = useState<MyData | undefined>();
+
+  useEffect(() => {
+    console.log("useMyData start", pubkey);
+
+    if (pubkey === undefined) {
+      console.log("pubkey is undefined -> clear myData");
+      setMyData(undefined);
+      return;
+    }
+    if (nostrSystem === undefined) {
+      return;
+    }
+
+    console.log("fetching myData", pubkey);
+
+    nostrSystem
+      .fetchMyData(pubkey)
+      .then((myData) => {
+        setMyData(myData);
+        console.log("finish fetching myData", myData);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, [pubkey]);
+
+  return myData;
+};
+
+// type FollowingsStatusesLoadState = "init" | "fetching-user-data" | "failed-user-data" | "subscribing";
+
+export const useFollowingsStatuses = () => {
+  const myData = useMyData();
+
+  const userStatusMap = useRef(new Map<string, UserStatus>());
+
+  // const [loadState, setLoadState] = useState<FollowingsStatusesLoadState>("init");
+  const [profileMap, setProfileMap] = useState(new Map<string, UserProfile>());
+  const [userStatues, setUserStatuses] = useState<UserStatus[]>([]);
+
+  const clearAllStates = () => {
+    userStatusMap.current.clear();
+    setProfileMap(new Map<string, UserProfile>());
+    setUserStatuses([]);
+  };
+
+  useEffect(() => {
+    if (myData === undefined) {
+      console.log("myData is undefined -> clear all states");
+      clearAllStates();
+      return;
+    }
+    if (nostrSystem === undefined) {
+      return;
+    }
+
+    const updateUserProfileMap = (ev: NostrEvent) => {
+      const profile = userProfileFromEvent(ev);
+
+      setProfileMap((prev) => {
+        prev.set(ev.pubkey, profile);
+        return new Map(prev);
+      });
+    };
+
+    const updateUserStatusList = (ev: NostrEvent) => {
+      const pubkey = ev.pubkey;
+
+      const newStatus = statusDataFromEvent(ev);
+      if (newStatus.expiration !== undefined && currUnixtime() >= newStatus.expiration) {
+        // ignore already expired statuses
+        return;
+      }
+
+      const category = getTagValue(ev, "d");
+      if (!isSupportedCategory(category)) {
+        // ignore statuses other than "general" and "music"
+        return;
+      }
+
+      const prevStatus = userStatusMap.current.get(pubkey);
+      const prevSameCatStatus = prevStatus?.[category];
+
+      if (newStatus.content !== "") {
+        if (prevStatus === undefined) {
+          userStatusMap.current.set(ev.pubkey, {
+            pubkey,
+            [category]: newStatus,
+          });
+        } else if (prevSameCatStatus === undefined || newStatus.createdAt > prevSameCatStatus.createdAt) {
+          userStatusMap.current.set(ev.pubkey, {
+            ...prevStatus,
+            [category]: newStatus,
+          });
+        }
+      } else {
+        // status update with emtpy content -> invalidate
+        if (
+          prevStatus !== undefined &&
+          prevSameCatStatus !== undefined &&
+          newStatus.createdAt > prevSameCatStatus.createdAt
+        ) {
+          userStatusMap.current.set(ev.pubkey, {
+            ...prevStatus,
+            [category]: undefined,
+          });
+        }
+      }
+
+      // sort by last updated time, newest to oldest
+      const sorted = [...userStatusMap.current.values()].sort(
+        (s1, s2) => statusLastUpdatedTime(s2) - statusLastUpdatedTime(s1)
+      );
+      setUserStatuses(sorted);
+    };
+
+    const fetch = async (ns: NostrSystem, { readRelays, followings }: MyData) => {
+      await ns.addReadRelays(readRelays);
+
+      // setLoadState("subscribing");
+
+      const abortFetchProfile = ns.fetchUserProfiles(followings, (ev) => {
+        updateUserProfileMap(ev);
+      });
+      const abortFetchStatus = ns.fetchAllPastUserStatus(followings, (ev) => {
+        updateUserStatusList(ev);
+      });
+      const subStatus = ns.subscribeUserStatus(followings, (ev) => {
+        updateUserStatusList(ev);
+      });
+
+      return () => {
+        console.log("canceling fetch followings statuses");
+        abortFetchProfile();
+        abortFetchStatus();
+        subStatus.unsubscribe();
+      };
+    };
+
+    console.log("fetching followings statuses");
+
+    let cancel: (() => void) | undefined;
+    fetch(nostrSystem, myData)
+      .then((c) => {
+        cancel = c;
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+
+    return () => cancel?.();
+  }, [myData]);
+
+  return { profileMap, userStatues };
 };

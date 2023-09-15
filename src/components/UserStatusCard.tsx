@@ -1,13 +1,21 @@
-import { css } from "../../styled-system/css";
-import { circle, hstack, vstack } from "../../styled-system/patterns";
-import { UserProfile, UserStatus } from "../nostr";
+import { css } from "@shadow-panda/styled-system/css";
+import { circle, hstack, vstack } from "@shadow-panda/styled-system/patterns";
+import { useAtomValue } from "jotai";
+import { userProfileAtomFamily, userStatusAtomFamily } from "../states/atoms";
 
 type UserStatusCardProps = {
-  profile: UserProfile;
-  status: UserStatus;
+  pubkey: string;
 };
 
-export const UserStatusCard: React.FC<UserStatusCardProps> = ({ profile, status }) => {
+export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
+  const profile = useAtomValue(userProfileAtomFamily(pubkey));
+  const status = useAtomValue(userStatusAtomFamily(pubkey));
+
+  if (status === undefined) {
+    console.error("no user status for pubkey:", pubkey);
+    return null;
+  }
+
   return (
     <div
       className={vstack({
