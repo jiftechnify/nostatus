@@ -1,8 +1,10 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { hstack, vstack } from "@shadow-panda/styled-system/patterns";
+import { token } from "@shadow-panda/styled-system/tokens";
 import { useAtomValue } from "jotai";
 import { userProfileAtomFamily, userStatusAtomFamily } from "../states/atoms";
 import { AppAvatar } from "./AppAvatar";
+import { ExternalLink } from "./ExternalLink";
 
 type UserStatusCardProps = {
   pubkey: string;
@@ -33,22 +35,11 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
     >
       <div>
         {/* status */}
-        <GeneralStatus content={status.general?.content} />
+        <GeneralStatus content={status.general?.content} linkUrl={status.general?.linkUrl} />
 
         {/* now playing  */}
         {status.music && status.music.content && (
-          <div
-            className={css({
-              textStyle: "now-playing",
-              color: "slate.600",
-              _before: {
-                content: "'♫'",
-                mr: "1",
-              },
-            })}
-          >
-            {status.music.content}
-          </div>
+          <NowPlaying content={status.music.content} linkUrl={status.music.linkUrl} />
         )}
       </div>
 
@@ -69,7 +60,12 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
   );
 };
 
-const GeneralStatus = ({ content }: { content: string | undefined }) => {
+type GeneralStatusProps = {
+  content?: string;
+  linkUrl?: string;
+};
+
+const GeneralStatus = ({ content, linkUrl }: GeneralStatusProps) => {
   const text = content ?? "";
 
   return text !== "" ? (
@@ -78,7 +74,8 @@ const GeneralStatus = ({ content }: { content: string | undefined }) => {
         textStyle: "main-status",
       })}
     >
-      {text}
+      <span>{text}</span>
+      {linkUrl && <ExternalLink href={linkUrl} />}
     </p>
   ) : (
     <p
@@ -88,6 +85,29 @@ const GeneralStatus = ({ content }: { content: string | undefined }) => {
       })}
     >
       No status
+    </p>
+  );
+};
+
+type NowPlayingProps = {
+  content: string;
+  linkUrl?: string;
+};
+
+const NowPlaying = ({ content, linkUrl }: NowPlayingProps) => {
+  return (
+    <p
+      className={css({
+        textStyle: "now-playing",
+        color: "slate.600",
+        _before: {
+          content: "'♫'",
+          mr: "1",
+        },
+      })}
+    >
+      <span>{content}</span>
+      {linkUrl && <ExternalLink href={linkUrl} size={token("fontSizes.sm")} />}
     </p>
   );
 };
