@@ -3,9 +3,10 @@ import { currUnixtime } from "../utils";
 import { AccountMetadata, StatusData, UserProfile, UserStatus } from "./models";
 
 import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
-import { atom, getDefaultStore } from "jotai";
+import { atom, getDefaultStore, useAtom } from "jotai";
 import { atomFamily, atomWithStorage, loadable, selectAtom } from "jotai/utils";
 import { NostrEvent, NostrFetcher } from "nostr-fetch";
+import { useEffect, useRef } from "react";
 import { createRxForwardReq, createRxNostr, uniq, verify } from "rx-nostr";
 import { Subscription } from "rxjs";
 
@@ -66,24 +67,29 @@ export const pubkeysOrderByLastStatusUpdateTimeAtom = atom((get) => {
     .map((s) => s.pubkey);
 });
 
+const isNip07AvailableAtom = atom(false);
 const MAX_NIP07_CHECKS = 5;
-export const isNip07AvailableAtom = atom(async () => {
-  let numChecks = 0;
 
-  return new Promise<boolean>((resolve) => {
+export const useNip07Availablility = () => {
+  const [available, setAvailable] = useAtom(isNip07AvailableAtom);
+  const checkCnt = useRef(0);
+
+  useEffect(() => {
     const nip07CheckInterval = setInterval(() => {
       if (window.nostr) {
         clearInterval(nip07CheckInterval);
-        resolve(true);
-      } else if (numChecks > MAX_NIP07_CHECKS) {
+        setAvailable(true);
+      } else if (checkCnt.current > MAX_NIP07_CHECKS) {
         clearInterval(nip07CheckInterval);
-        resolve(false);
+        setAvailable(false);
       } else {
-        numChecks++;
+        checkCnt.current++;
       }
     }, 300);
-  });
-});
+  }, [setAvailable]);
+
+  return available;
+};
 
 const jotaiStore = getDefaultStore();
 

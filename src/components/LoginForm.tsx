@@ -1,10 +1,9 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { vstack } from "@shadow-panda/styled-system/patterns";
 import { SystemStyleObject } from "@shadow-panda/styled-system/types";
-import { useAtomValue } from "jotai";
 import { useState } from "react";
 import { parsePubkey } from "../nostr";
-import { isNip07AvailableAtom } from "../states/atoms";
+import { useNip07Availablility } from "../states/atoms";
 
 const loginButtonStyles: SystemStyleObject = {
   px: "3",
@@ -33,7 +32,7 @@ type LoginFormProps = {
 };
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
-  const isNip07Available = useAtomValue(isNip07AvailableAtom);
+  const isNip07Available = useNip07Availablility();
   const [pubkeyInput, setPubkeyInput] = useState("");
 
   const onClickNip07Login = async () => {
