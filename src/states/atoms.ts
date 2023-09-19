@@ -1,4 +1,4 @@
-import { getFirstTagValue, getTagValues, parseReadRelayList } from "../nostr";
+import { getFirstTagValueByName, getTagValuesByName, parseReadRelayList } from "../nostr";
 import { currUnixtime } from "../utils";
 import { AccountMetadata, StatusData, UserProfile, UserStatus } from "./models";
 
@@ -116,7 +116,7 @@ export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata>
   console.log(k0, k3, k10002);
 
   const profile = k0 !== undefined ? UserProfile.fromEvent(k0) : { srcEventId: "undefined", pubkey };
-  const followings = k3 !== undefined ? getTagValues(k3, "p") : [];
+  const followings = k3 !== undefined ? getTagValuesByName(k3, "p") : [];
 
   const relayListEvs = [k3, k10002].filter((ev) => ev !== undefined) as NostrEvent[];
   const readRelays = parseReadRelayList(relayListEvs);
@@ -128,9 +128,9 @@ const relaysSwitchedAtom = atom(false);
 
 /* processes after fetched my account data */
 jotaiStore.sub(myAcctDataAvailableAtom, async () => {
-  const available = jotaiStore.get(myAcctDataAvailableAtom);
+  const myDataAvailable = jotaiStore.get(myAcctDataAvailableAtom);
 
-  if (available) {
+  if (myDataAvailable) {
     const data = await jotaiStore.get(myAccountDataAtom);
     if (data === undefined) {
       console.error("unreachable");
@@ -208,7 +208,7 @@ const applyStatusUpdate = (ev: NostrEvent) => {
     return;
   }
 
-  const category = getFirstTagValue(ev, "d");
+  const category = getFirstTagValueByName(ev, "d");
   if (!isSupportedCategory(category)) {
     // ignore statuses other than "general" and "music"
     return;
@@ -265,13 +265,11 @@ const cancelFetchStatuses = () => {
 };
 
 jotaiStore.sub(relaysSwitchedAtom, async () => {
-  console.log("fetch statues: myAccountDataAtom updated");
-
   cancelFetchStatuses();
 
   const myData = await jotaiStore.get(myAccountDataAtom);
   if (myData === undefined) {
-    console.log("fetch statues: clear");
+    console.log("fetch statuses: clear");
     statusesMap.clear();
     jotaiStore.set(followingsStatusesAtom, new Map<string, UserStatus>());
     return;

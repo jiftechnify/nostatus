@@ -23,7 +23,7 @@ export const App = () => {
     <div
       className={vstack({
         h: "100dvh",
-        pt: "4",
+        pt: "6",
         gap: "4",
       })}
     >
@@ -33,7 +33,7 @@ export const App = () => {
           maxW: "600px",
           px: "2",
           display: "grid",
-          gridTemplateColumns: "4rem 1fr 4rem",
+          gridTemplateColumns: "minmax(auto, 1fr) auto minmax(auto, 1fr)",
           alignItems: "center",
         })}
       >
@@ -49,7 +49,7 @@ export const App = () => {
         </div>
       </header>
 
-      <main className={css({ h: "100%", w: "100vw", pt: "2" })}>
+      <main className={css({ h: "100%", w: "100vw"})}>
         <Suspense>{pubkey !== undefined ? <UserStatusList /> : <LoginForm onLogin={onLogin} />}</Suspense>
       </main>
     </div>

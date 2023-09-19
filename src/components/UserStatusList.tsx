@@ -9,6 +9,10 @@ export const UserStatusList: React.FC = () => {
 
   return (
     <VList>
+      {/* spacer above the top item */}
+      <div className={css({h: "2"})}></div>
+
+      {/* main */}
       {orderedPubkeys.length !== 0 ? (
         orderedPubkeys.map((pubkey) => {
           return (
@@ -30,6 +34,9 @@ export const UserStatusList: React.FC = () => {
       ) : (
         <p className={css({ textAlign: "center" })}>Fetching...</p>
       )}
+
+      {/* spacer below the bottom item */}
+      <div className={css({h: "4"})}></div>
     </VList>
   );
 };

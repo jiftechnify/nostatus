@@ -1,8 +1,11 @@
 import { css } from "@shadow-panda/styled-system/css";
-import { hstack, vstack } from "@shadow-panda/styled-system/patterns";
+import { circle, hstack, vstack } from "@shadow-panda/styled-system/patterns";
 import { token } from "@shadow-panda/styled-system/tokens";
 import { useAtomValue } from "jotai";
+import { useEffect, useState } from "react";
 import { userProfileAtomFamily, userStatusAtomFamily } from "../states/atoms";
+import { UserStatus } from "../states/models";
+import { currUnixtime } from "../utils";
 import { AppAvatar } from "./AppAvatar";
 import { ExternalLink } from "./ExternalLink";
 
@@ -14,6 +17,27 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
   const profile = useAtomValue(userProfileAtomFamily(pubkey));
   const status = useAtomValue(userStatusAtomFamily(pubkey));
 
+  const [recentlyUpdated, setRecentlyUpdated] = useState(false);
+  useEffect(() => {
+    if (status === undefined) {
+      return;
+    }
+    const tts = timeToStatusUpdateStaled(status);
+    if (tts <= 0) {
+      return;
+    }
+
+    setRecentlyUpdated(true);
+    const staleTimer = setTimeout(() => {
+      setRecentlyUpdated(false);
+    }, tts * 1000);
+
+    return () => {
+      setRecentlyUpdated(false);
+      clearTimeout(staleTimer);
+    }
+  }, [status]);
+
   if (status === undefined) {
     console.error("no user status for pubkey:", pubkey);
     return null;
@@ -22,6 +46,7 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
   return (
     <div
       className={vstack({
+        position: "relative",
         px: "4",
         pt: "4",
         pb: "3",
@@ -56,6 +81,20 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
           <p className={css({ textStyle: "name", color: "gray.400" })}>@{profile.name ?? "???"}</p>
         </div>
       </div>
+
+      {/* recent update badge */}
+      {recentlyUpdated && (
+        <div
+          className={circle({
+            size: "3",
+            position: "absolute",
+            top: "-1",
+            left: "-1",
+            bg: "teal.400",
+            shadow: "0 0 8px rgba(45, 212, 191, 0.6)",
+          })}
+        ></div>
+      )}
     </div>
   );
 };
@@ -111,3 +150,8 @@ const NowPlaying = ({ content, linkUrl }: NowPlayingProps) => {
     </p>
   );
 };
+
+const RECENT_UPDATE_THRESHOLD_SEC = 60 * 60; // 1 hour
+
+const timeToStatusUpdateStaled = (status: UserStatus) =>
+  RECENT_UPDATE_THRESHOLD_SEC - (currUnixtime() - UserStatus.lastUpdateTime(status));
