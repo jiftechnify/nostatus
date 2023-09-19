@@ -78,4 +78,7 @@ export const UserStatus = {
   contentId(us: UserStatus): string {
     return `${us.general?.srcEventId ?? "general_undefined"}${us.music?.srcEventId ?? "music_undefined"}`;
   },
+  isEmpty(us: UserStatus): boolean {
+    return us.general === undefined && us.music === undefined;
+  },
 };
