@@ -199,6 +199,67 @@ const isSupportedCategory = (s: string): s is UserStatusCategory => {
   return ["general", "music"].includes(s);
 };
 
+const invalidateStatus = (pubkey: string, category: UserStatusCategory) => {
+  const prevStatus = statusesMap.get(pubkey);
+  if (prevStatus === undefined) {
+    return;
+  }
+  if (prevStatus[category] === undefined) {
+    return;
+  }
+
+  const updated = { ...prevStatus, [category]: undefined };
+  if (UserStatus.isEmpty(updated)) {
+    statusesMap.delete(pubkey);
+  } else {
+    statusesMap.set(pubkey, updated);
+  }
+
+  jotaiStore.set(followingsStatusesAtom, new Map(statusesMap));
+};
+
+class StatusInvalidationScheduler {
+  #invalidations = new Map<string, NodeJS.Timeout>();
+
+  static #invalidationKey(pubkey: string, category: UserStatusCategory) {
+    return `${pubkey}:${category}`;
+  }
+
+  schedule(pubkey: string, category: UserStatusCategory, ttl: number) {
+    const key = StatusInvalidationScheduler.#invalidationKey(pubkey, category);
+    const prev = this.#invalidations.get(key);
+
+    if (prev !== undefined) {
+      clearTimeout(prev);
+      this.#invalidations.delete(key);
+    }
+
+    const timeout = setTimeout(() => {
+      invalidateStatus(pubkey, category);
+      this.#invalidations.delete(key);
+    }, ttl * 1000);
+    this.#invalidations.set(key, timeout);
+  }
+
+  cancel(pubkey: string, category: UserStatusCategory) {
+    const key = StatusInvalidationScheduler.#invalidationKey(pubkey, category);
+    const prev = this.#invalidations.get(key);
+
+    if (prev !== undefined) {
+      clearTimeout(prev);
+      this.#invalidations.delete(key);
+    }
+  }
+
+  cancelAll() {
+    for (const timeout of this.#invalidations.values()) {
+      clearTimeout(timeout);
+    }
+    this.#invalidations.clear();
+  }
+}
+const invalidationScheduler = new StatusInvalidationScheduler();
+
 const applyStatusUpdate = (ev: NostrEvent) => {
   const pubkey = ev.pubkey;
 
@@ -216,39 +277,27 @@ const applyStatusUpdate = (ev: NostrEvent) => {
 
   const prevStatus = statusesMap.get(pubkey);
   const prevSameCatStatus = prevStatus?.[category];
-
-  if (newStatus.content !== "") {
-    if (prevStatus === undefined) {
-      statusesMap.set(ev.pubkey, {
-        pubkey,
-        [category]: newStatus,
-      });
-    } else if (prevSameCatStatus === undefined || newStatus.createdAt > prevSameCatStatus.createdAt) {
-      statusesMap.set(ev.pubkey, {
-        ...prevStatus,
-        [category]: newStatus,
-      });
-    } else {
-      return;
-    }
-  } else {
-    // status update with emtpy content -> invalidate
-    if (
-      prevStatus !== undefined &&
-      prevSameCatStatus !== undefined &&
-      newStatus.createdAt > prevSameCatStatus.createdAt
-    ) {
-      statusesMap.set(ev.pubkey, {
-        ...prevStatus,
-        [category]: undefined,
-      });
-    } else {
-      return;
-    }
+  if (prevSameCatStatus !== undefined && newStatus.createdAt <= prevSameCatStatus.createdAt) {
+    // ignore older statuses
+    return;
   }
 
-  // set updated statuses to the jotai atom
-  jotaiStore.set(followingsStatusesAtom, new Map(statusesMap));
+  if (newStatus.content !== "") {
+    const updated = { ...(prevStatus ?? { pubkey }), [category]: newStatus };
+
+    statusesMap.set(pubkey, updated);
+    if (newStatus.expiration === undefined) {
+      invalidationScheduler.cancel(pubkey, category);
+    } else {
+      const ttl = newStatus.expiration - currUnixtime();
+      invalidationScheduler.schedule(pubkey, category, ttl);
+    }
+    jotaiStore.set(followingsStatusesAtom, new Map(statusesMap));
+  } else {
+    // status update with emtpy content -> invalidate
+    invalidationScheduler.cancel(pubkey, category);
+    invalidateStatus(pubkey, category);
+  }
 };
 
 let fetchPastStatusesAbortCtrl: AbortController | undefined;
@@ -271,6 +320,7 @@ jotaiStore.sub(relaysSwitchedAtom, async () => {
   if (myData === undefined) {
     console.log("fetch statuses: clear");
     statusesMap.clear();
+    invalidationScheduler.cancelAll();
     jotaiStore.set(followingsStatusesAtom, new Map<string, UserStatus>());
     return;
   }
