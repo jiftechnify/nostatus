@@ -113,8 +113,6 @@ export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata>
       )
     )
   );
-  console.log(k0, k3, k10002);
-
   const profile = k0 !== undefined ? UserProfile.fromEvent(k0) : { srcEventId: "undefined", pubkey };
   const followings = k3 !== undefined ? getTagValuesByName(k3, "p") : [];
 
@@ -124,9 +122,10 @@ export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata>
   return { profile, followings, readRelays };
 };
 
+// trigger of fetching followings profiles anmd statuses
 const relaysSwitchedAtom = atom(false);
 
-/* processes after fetched my account data */
+/* switch relays after fetched my account data */
 jotaiStore.sub(myAcctDataAvailableAtom, async () => {
   const myDataAvailable = jotaiStore.get(myAcctDataAvailableAtom);
 
@@ -137,7 +136,6 @@ jotaiStore.sub(myAcctDataAvailableAtom, async () => {
       return;
     }
 
-    console.log("switching relays", data.readRelays);
     await rxNostr.switchRelays(
       data.readRelays.map((r) => {
         return { url: r, read: true, write: false };
