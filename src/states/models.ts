@@ -1,5 +1,5 @@
 import { NostrEvent } from "nostr-fetch";
-import { getFirstTagValue } from "../nostr";
+import { getFirstTagValueByName } from "../nostr";
 
 export type UserProfile = {
   srcEventId: string;
@@ -45,9 +45,9 @@ export const StatusData = {
   fromEvent(ev: NostrEvent): StatusData {
     const content = ev.content.trim();
     const createdAt = ev.created_at;
-    const linkUrl = getFirstTagValue(ev, "r");
+    const linkUrl = getFirstTagValueByName(ev, "r");
     const expiration = (() => {
-      const expStr = getFirstTagValue(ev, "expiration");
+      const expStr = getFirstTagValueByName(ev, "expiration");
       if (expStr === "") {
         return undefined;
       }

@@ -2,10 +2,15 @@ import { NostrEvent } from "nostr-fetch";
 import { nip19 } from "nostr-tools";
 
 /* primitives */
-export const getFirstTagValue = (ev: NostrEvent, name: string): string => ev.tags.find((t) => t[0] === name)?.[1] ?? "";
+export const getFirstTagByName = (ev: NostrEvent, name: string): string[] => ev.tags.find((t) => t[0] === name) ?? [];
 
-export const getTagValues = (ev: NostrEvent, name: string): string[] =>
-  ev.tags.filter((t) => t[0] === name).map((t) => t[1]);
+export const getFirstTagValueByName = (ev: NostrEvent, name: string): string => ev.tags.find((t) => t[0] === name)?.[1] ?? "";
+
+export const getTagsByName = (ev: NostrEvent, name: string): string[][] =>
+  ev.tags.filter((t) => t[0] === name);
+
+export const getTagValuesByName = (ev: NostrEvent, name: string): string[] =>
+  ev.tags.filter((t) => t[0] === name).map((t) => t[1] ?? "");
 
 /* parsing relay list */
 type RelayList = Record<string, { read: boolean; write: boolean }>;
@@ -40,25 +45,29 @@ const parseRelayListInKind3 = (ev: NostrEvent): RelayList => {
 const parseRelayListInKind10002 = (ev: NostrEvent): RelayList => {
   const res: RelayList = {};
 
-  ev.tags
-    .filter((t) => t.length >= 2 && t[0] === "r")
+  getTagsByName(ev, "r")
     .forEach((t) => {
-      const [, url, relayType] = t as [string, string, string | undefined];
+      const [, url, usage] = t;
+      if (url === undefined) {
+        return;
+      }
+      switch (usage) {
+        case undefined:
+        case "":
+          res[url] = { read: true, write: true };
+          return;
 
-      if (relayType === undefined) {
-        res[url] = { read: true, write: true };
-      } else {
-        switch (relayType) {
-          case "read":
-            res[url] = { read: true, write: false };
-            return;
-          case "write":
-            res[url] = { read: false, write: true };
-            return;
-          default:
-            console.warn("invalid relay type in kind 10002 event:", relayType);
-            undefined;
-        }
+        case "read":
+          res[url] = { read: true, write: false };
+          return;
+
+        case "write":
+          res[url] = { read: false, write: true };
+          return;
+          
+        default:
+          console.warn("invalid relay type in kind 10002 event:", usage);
+          undefined;
       }
     });
 
