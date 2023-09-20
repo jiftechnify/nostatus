@@ -109,7 +109,6 @@ export const usePubkeyInNip07 = () => {
       try {
         if (window.nostr) {
           const pubkey = await window.nostr.getPublicKey();
-          console.log("nip07", pubkey);
           setPubkey(pubkey);
         } else {
           setPubkey(undefined);

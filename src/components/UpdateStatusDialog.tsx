@@ -41,14 +41,26 @@ export const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({ trigger 
 
   const myGeneralStatus = useAtomValue(myGeneralStatusAtom);
 
-  const [content, setContent] = useState<string>(myGeneralStatus?.content ?? "");
-  const [linkUrl, setLinkUrl] = useState<string>(myGeneralStatus?.linkUrl ?? "");
+  const initContent = myGeneralStatus?.content ?? "";
+  const initLinkUrl = myGeneralStatus?.linkUrl ?? "";
+
+  const [content, setContent] = useState<string>(initContent);
+  const [linkUrl, setLinkUrl] = useState<string>(initLinkUrl);
   const [ttlKey, setTtlKey] = useState<string>("never");
+
+  const isDirty = content !== initContent || (initContent !== "" && linkUrl !== initLinkUrl);
+  const isClearStatus = initContent !== "" && content === "";
 
   const onClickUpdate = async () => {
     const ttl = ttlTable[ttlKey as TtlKey];
     await updateMyStatus({ content, linkUrl, ttl });
 
+    setOpen(false);
+    closeHeaderMenu();
+  };
+
+  const onClickClear = async () => {
+    await updateMyStatus({ content: "", linkUrl: "", ttl: undefined });
     setOpen(false);
     closeHeaderMenu();
   };
@@ -64,10 +76,16 @@ export const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({ trigger 
         <Input id="content" value={content} onChange={(e) => setContent(e.target.value)} />
 
         <Label htmlFor="link-url">Link URL</Label>
-        <Input id="link-url" placeholder="optional" value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} />
+        <Input
+          id="link-url"
+          disabled={isClearStatus}
+          placeholder="https://"
+          value={linkUrl}
+          onChange={(e) => setLinkUrl(e.target.value)}
+        />
 
         <Label htmlFor="clear-after">Clear status after...</Label>
-        <Select value={ttlKey} onValueChange={setTtlKey}>
+        <Select disabled={isClearStatus} value={ttlKey} onValueChange={setTtlKey}>
           <SelectTrigger id="clear-after">
             <SelectValue placeholder="Please Select" />
           </SelectTrigger>
@@ -80,9 +98,15 @@ export const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({ trigger 
           </SelectContent>
         </Select>
         <DialogFooter>
-          <button className={button()} onClick={onClickUpdate}>
-            Update
-          </button>
+          {isClearStatus ? (
+            <button className={button({ color: "danger" })} onClick={onClickClear}>
+              Clear
+            </button>
+          ) : (
+            <button className={button()} disabled={!isDirty} onClick={onClickUpdate}>
+              Update
+            </button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
