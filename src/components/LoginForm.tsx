@@ -2,25 +2,24 @@ import { css } from "@shadow-panda/styled-system/css";
 import { vstack } from "@shadow-panda/styled-system/patterns";
 import { useState } from "react";
 import { parsePubkey } from "../nostr";
-import { useNip07Availability } from "../states/atoms";
+import { useLogin, useNip07Availability } from "../states/atoms";
 import { button } from "../styles/recipes";
 
-type LoginFormProps = {
-  onLogin: (pubkey: string) => void;
-};
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
+export const LoginForm: React.FC = () => {
+  const login = useLogin();
+
   const isNip07Available = useNip07Availability();
   const [pubkeyInput, setPubkeyInput] = useState("");
 
   const onClickNip07Login = async () => {
     const pubkey = await window.nostr.getPublicKey();
     if (pubkey) {
-      onLogin(pubkey);
+      login(pubkey);
     }
   };
 
-  const onClickManualLogin = () => {
+  const onClickPubkeyLogin = () => {
     const hexPubkey = parsePubkey(pubkeyInput);
     if (hexPubkey === undefined) {
       console.error("invalid pubkey");
@@ -28,7 +27,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
     }
 
     if (hexPubkey !== undefined) {
-      onLogin(hexPubkey);
+      login(hexPubkey);
     }
   };
 
@@ -51,7 +50,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
           value={pubkeyInput}
           onChange={(ev) => setPubkeyInput(ev.target.value)}
         ></input>
-        <button className={button({ expand: true })} onClick={onClickManualLogin}>
+        <button className={button({ expand: true })} onClick={onClickPubkeyLogin}>
           Login with Pubkey
         </button>
       </div>

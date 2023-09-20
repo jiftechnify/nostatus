@@ -2,7 +2,7 @@ import { css } from "@shadow-panda/styled-system/css";
 import { icon } from "@shadow-panda/styled-system/recipes";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ArrowUpCircle, LogOut } from "lucide-react";
-import { myAccountDataAtom, myPubkeyAtom, usePubkeyInNip07 } from "../states/atoms";
+import { myAccountDataAtom, useLogout, useMyPubkey, usePubkeyInNip07 } from "../states/atoms";
 import { AppAvatar } from "./AppAvatar";
 import { UpdateStatusDialog } from "./UpdateStatusDialog";
 import {
@@ -20,17 +20,13 @@ export const useCloseHeaderMenu = () => {
   return () => setOpen(false);
 }
 
-type HeaderMenuProps = {
-  onLogout: () => void;
-};
-
-export const HeaderMenu: React.FC<HeaderMenuProps> = ({ onLogout }) => {
+export const HeaderMenu: React.FC = () => {
   const [open, setOpen] = useAtom(isHeaderMenuOpenAtom);
 
   const myData = useAtomValue(myAccountDataAtom);
 
   // disable write operations if the pubkey doesn't match with NIP-07 pubkey
-  const myPubkey = useAtomValue(myPubkeyAtom);
+  const myPubkey = useMyPubkey();
   const nip07Pubkey = usePubkeyInNip07();
   const disableWriteOps = myPubkey !== nip07Pubkey;
 
@@ -45,11 +41,8 @@ export const HeaderMenu: React.FC<HeaderMenuProps> = ({ onLogout }) => {
           {myData.profile.displayName ?? myData.profile.name ?? "???"}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <UpdateStatusMenuItem disabled={disableWriteOps} />
-        <DropdownMenuItem className={css({ cursor: "pointer" })} onSelect={onLogout}>
-          <LogOut size="1rem" />
-          <span>Logout</span>
-        </DropdownMenuItem>
+        <MenuItemUpdateStatus disabled={disableWriteOps} />
+        <MenuItemLogout />
       </DropdownMenuContent>
     </DropdownMenu>
   ) : null;
@@ -61,7 +54,7 @@ type UpdateStatusMenuItemProps = {
 
 // If `disabled === true`, completely omit the dialog.
 // Just setting DropdownMenuItem's `disabled` prop to `true` doesn't prevent the dialog from being opened.
-const UpdateStatusMenuItem: React.FC<UpdateStatusMenuItemProps> = ({ disabled }) => {
+const MenuItemUpdateStatus: React.FC<UpdateStatusMenuItemProps> = ({ disabled }) => {
   const menuItem = (
     <DropdownMenuItem className={css({ cursor: "pointer" })} disabled={disabled} onSelect={(e) => e.preventDefault()}>
       <ArrowUpCircle className={icon()} size="1rem" />
@@ -71,3 +64,14 @@ const UpdateStatusMenuItem: React.FC<UpdateStatusMenuItemProps> = ({ disabled })
 
   return disabled ? menuItem : <UpdateStatusDialog trigger={menuItem} />;
 };
+
+const MenuItemLogout = () => {
+  const logout = useLogout();
+
+  return (
+    <DropdownMenuItem className={css({ cursor: "pointer", color: "danger" })} onSelect={logout}>
+      <LogOut size="1rem" />
+      <span>Logout</span>
+    </DropdownMenuItem>
+  );
+}

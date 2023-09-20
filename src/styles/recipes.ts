@@ -34,19 +34,19 @@ export const button = cva({
       primary: {
         color: "white",
         bg: {
-          base: "purple.600",
-          _hover: { _enabled: "purple.500" },
-          _focusVisible: { _enabled: "purple.500" },
-          _disabled: "purple.200",
+          base: "primary",
+          _hover: { _enabled: "primary.light" },
+          _focusVisible: { _enabled: "primary.light" },
+          _disabled: "primary.disabled",
         },
       },
       danger: {
         color: "white",
         bg: {
-          base: "red.600",
-          _hover: { _enabled: "red.500" },
-          _focusVisible: { _enabled: "red.500" },
-          _disabled: "red.200",
+          base: "danger",
+          _hover: { _enabled: "danger.light" },
+          _focusVisible: { _enabled: "danger.light" },
+          _disabled: "danger.disabled",
         },
       },
     },

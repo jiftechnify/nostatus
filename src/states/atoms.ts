@@ -3,14 +3,33 @@ import { currUnixtime } from "../utils";
 import { AccountMetadata, StatusData, UserProfile, UserStatus } from "./models";
 
 import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
-import { atom, getDefaultStore, useAtom } from "jotai";
-import { atomFamily, atomWithStorage, loadable, selectAtom } from "jotai/utils";
+import { atom, getDefaultStore, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { RESET, atomFamily, atomWithStorage, loadable, selectAtom } from "jotai/utils";
 import { NostrEvent, NostrFetcher } from "nostr-fetch";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createRxForwardReq, createRxNostr, getSignedEvent, uniq, verify } from "rx-nostr";
 import { Subscription } from "rxjs";
 
-export const myPubkeyAtom = atomWithStorage<string | undefined>("nostr_pubkey", undefined);
+const myPubkeyAtom = atomWithStorage<string | undefined>("nostr_pubkey", undefined);
+
+export const useMyPubkey = () => {
+  const myPubkey = useAtomValue(myPubkeyAtom);
+  return myPubkey
+}
+
+export const useLogin = () => {
+  const setPubkey = useSetAtom(myPubkeyAtom);
+  return setPubkey
+}
+
+export const useLogout = () => {
+  const setPubkey = useSetAtom(myPubkeyAtom);
+  const logout = useCallback(() => {
+    setPubkey(RESET);
+  }, [setPubkey])
+
+  return logout;
+}
 
 export const myAccountDataAtom = atom<Promise<AccountMetadata | undefined>>(async (get) => {
   const pubkey = get(myPubkeyAtom);
