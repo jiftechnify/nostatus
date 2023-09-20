@@ -13,23 +13,23 @@ export const getTagValuesByName = (ev: NostrEvent, name: string): string[] =>
   ev.tags.filter((t) => t[0] === name).map((t) => t[1] ?? "");
 
 /* parsing relay list */
-type RelayList = Record<string, { read: boolean; write: boolean }>;
+export type RelayList = Record<string, { read: boolean; write: boolean }>;
 
-export const parseReadRelayList = (evs: NostrEvent[]): string[] => {
+export const parseRelayList = (evs: NostrEvent[]): RelayList => {
   const relayListEvs = evs.filter((ev) => [3, 10002].includes(ev.kind));
   if (relayListEvs.length === 0) {
-    return [];
+    return {};
   }
   const latest = relayListEvs.sort((a, b) => b.created_at - a.created_at)[0] as NostrEvent;
 
   switch (latest.kind) {
     case 3:
-      return selectRelaysByUsage(parseRelayListInKind3(latest), "read");
+      return parseRelayListInKind3(latest);
     case 10002:
-      return selectRelaysByUsage(parseRelayListInKind10002(latest), "read");
+      return parseRelayListInKind10002(latest);
     default:
       console.error("parseRelayList: unreachable");
-      return [];
+      return {};
   }
 };
 
@@ -74,7 +74,7 @@ const parseRelayListInKind10002 = (ev: NostrEvent): RelayList => {
   return res;
 };
 
-const selectRelaysByUsage = (relayList: RelayList, usage: "read" | "write"): string[] =>
+export const selectRelaysByUsage = (relayList: RelayList, usage: "read" | "write"): string[] =>
   Object.entries(relayList)
     .filter(([, { read, write }]) => (usage === "read" && read) || (usage === "write" && write))
     .map(([rurl]) => rurl);

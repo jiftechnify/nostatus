@@ -1,4 +1,4 @@
-import { getFirstTagValueByName, getTagValuesByName, parseReadRelayList } from "../nostr";
+import { getFirstTagValueByName, getTagValuesByName, parseRelayList, selectRelaysByUsage } from "../nostr";
 import { currUnixtime } from "../utils";
 import { AccountMetadata, StatusData, UserProfile, UserStatus } from "./models";
 
@@ -6,8 +6,8 @@ import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
 import { atom, getDefaultStore, useAtom } from "jotai";
 import { atomFamily, atomWithStorage, loadable, selectAtom } from "jotai/utils";
 import { NostrEvent, NostrFetcher } from "nostr-fetch";
-import { useEffect, useRef } from "react";
-import { createRxForwardReq, createRxNostr, uniq, verify } from "rx-nostr";
+import { useEffect, useRef, useState } from "react";
+import { createRxForwardReq, createRxNostr, getSignedEvent, uniq, verify } from "rx-nostr";
 import { Subscription } from "rxjs";
 
 export const myPubkeyAtom = atomWithStorage<string | undefined>("nostr_pubkey", undefined);
@@ -54,6 +54,14 @@ export const userStatusAtomFamily = atomFamily((pubkey: string) => {
   );
 });
 
+export const myGeneralStatusAtom = atom((get) => {
+  const myPubkey = get(myPubkeyAtom);
+  if (myPubkey === undefined) {
+    return undefined;
+  }
+  return get(userStatusAtomFamily(myPubkey))?.general;
+})
+
 export const pubkeysOrderByLastStatusUpdateTimeAtom = atom((get) => {
   const statusesMap = get(followingsStatusesAtom);
   return [...statusesMap.values()]
@@ -68,9 +76,9 @@ export const pubkeysOrderByLastStatusUpdateTimeAtom = atom((get) => {
 });
 
 const isNip07AvailableAtom = atom(false);
-const MAX_NIP07_CHECKS = 5;
 
-export const useNip07Availablility = () => {
+const MAX_NIP07_CHECKS = 5;
+export const useNip07Availability = () => {
   const [available, setAvailable] = useAtom(isNip07AvailableAtom);
   const checkCnt = useRef(0);
 
@@ -86,9 +94,38 @@ export const useNip07Availablility = () => {
         checkCnt.current++;
       }
     }, 300);
+    return () => clearInterval(nip07CheckInterval);
   }, [setAvailable]);
 
   return available;
+};
+
+export const usePubkeyInNip07 = () => {
+  const nip07Available = useNip07Availability();
+  const [pubkey, setPubkey] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const pollPubkey = async () => {
+      try {
+        if (window.nostr) {
+          const pubkey = await window.nostr.getPublicKey();
+          console.log("nip07", pubkey);
+          setPubkey(pubkey);
+        } else {
+          setPubkey(undefined);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    if (nip07Available) {
+      pollPubkey().catch((e) => console.error(e));
+    } else {
+      setPubkey(undefined);
+    }
+  }, [nip07Available]);
+
+  return pubkey;
 };
 
 const jotaiStore = getDefaultStore();
@@ -117,9 +154,9 @@ export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata>
   const followings = k3 !== undefined ? getTagValuesByName(k3, "p") : [];
 
   const relayListEvs = [k3, k10002].filter((ev) => ev !== undefined) as NostrEvent[];
-  const readRelays = parseReadRelayList(relayListEvs);
+  const relayList = parseRelayList(relayListEvs);
 
-  return { profile, followings, readRelays };
+  return { profile, followings, relayList };
 };
 
 // trigger of fetching followings profiles anmd statuses
@@ -136,11 +173,8 @@ jotaiStore.sub(myAcctDataAvailableAtom, async () => {
       return;
     }
 
-    await rxNostr.switchRelays(
-      data.readRelays.map((r) => {
-        return { url: r, read: true, write: false };
-      })
-    );
+    console.log("switching relays to:", data.relayList);
+    await rxNostr.switchRelays(data.relayList);
 
     jotaiStore.set(relaysSwitchedAtom, true);
   } else {
@@ -172,7 +206,8 @@ jotaiStore.sub(relaysSwitchedAtom, async () => {
     return;
   }
 
-  const { followings, readRelays } = myData;
+  const { followings, relayList } = myData;
+  const readRelays = selectRelaysByUsage(relayList, "read");
 
   fetchProfilesAbortCtrl = new AbortController();
   const iter = fetcherOnRxNostr.fetchLastEventPerAuthor(
@@ -323,7 +358,8 @@ jotaiStore.sub(relaysSwitchedAtom, async () => {
     return;
   }
 
-  const { followings, readRelays } = myData;
+  const { followings, relayList } = myData;
+  const readRelays = selectRelaysByUsage(relayList, 'read');
 
   // fetch past events
   fetchPastStatusesAbortCtrl = new AbortController();
@@ -350,3 +386,29 @@ jotaiStore.sub(relaysSwitchedAtom, async () => {
     since: currUnixtime,
   });
 });
+
+type UpdateStatusInput = {
+  content: string;
+  linkUrl: string;
+  ttl: number | undefined;
+};
+
+export const updateMyStatus = async ({ content, linkUrl, ttl }: UpdateStatusInput) => {
+  const created_at = currUnixtime();
+  const exp = ttl !== undefined ? created_at + ttl : undefined;
+
+  const ev = {
+    kind: 30315,
+    content,
+    created_at,
+    tags: [
+      ["d", "general"],
+      ...(linkUrl !== "" ? [["r", linkUrl]] : []),
+      ...(exp !== undefined ? [["expiration", String(exp)]] : []),
+    ],
+  };
+  const signedEv = await getSignedEvent(ev);
+
+  applyStatusUpdate(signedEv);
+  rxNostr.send(signedEv);
+};

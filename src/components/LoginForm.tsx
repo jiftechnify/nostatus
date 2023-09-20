@@ -1,38 +1,16 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { vstack } from "@shadow-panda/styled-system/patterns";
-import { SystemStyleObject } from "@shadow-panda/styled-system/types";
 import { useState } from "react";
 import { parsePubkey } from "../nostr";
-import { useNip07Availablility } from "../states/atoms";
-
-const loginButtonStyles: SystemStyleObject = {
-  px: "3",
-  py: "2",
-  rounded: "md",
-  color: "white",
-  cursor: {
-    base: "pointer",
-    _disabled: "not-allowed",
-  },
-  bg: {
-    base: "purple.600",
-    _hover: { _enabled: "purple.700" },
-    _disabled: "purple.200",
-  },
-  shadow: {
-    base: "sm",
-    _hover: { _enabled: "md" },
-    _disabled: "none",
-  },
-  transition: "all 0.2s",
-};
+import { useNip07Availability } from "../states/atoms";
+import { button } from "../styles/recipes";
 
 type LoginFormProps = {
   onLogin: (pubkey: string) => void;
 };
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
-  const isNip07Available = useNip07Availablility();
+  const isNip07Available = useNip07Availability();
   const [pubkeyInput, setPubkeyInput] = useState("");
 
   const onClickNip07Login = async () => {
@@ -56,14 +34,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
 
   return (
     <div className={vstack({ w: "300px", mt: "4", mx: "auto", gap: "8" })}>
-      <button
-        className={css({
-          w: "100%",
-          ...loginButtonStyles,
-        })}
-        onClick={onClickNip07Login}
-        disabled={!isNip07Available}
-      >
+      <button className={button({ expand: true })} onClick={onClickNip07Login} disabled={!isNip07Available}>
         Login with NIP-07 Extension
       </button>
       <div className={vstack({ w: "100%" })}>
@@ -80,13 +51,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
           value={pubkeyInput}
           onChange={(ev) => setPubkeyInput(ev.target.value)}
         ></input>
-        <button
-          className={css({
-            w: "100%",
-            ...loginButtonStyles,
-          })}
-          onClick={onClickManualLogin}
-        >
+        <button className={button({ expand: true })} onClick={onClickManualLogin}>
           Login with Pubkey
         </button>
       </div>

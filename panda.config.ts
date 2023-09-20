@@ -29,6 +29,22 @@ export default defineConfig({
   theme: {
     extend: {
       textStyles,
+      semanticTokens: {
+        colors: {
+          bg: {
+            DEFAULT: {
+              value: {
+                base: "{colors.slate.100}",
+              },
+            },
+            ui: {
+              value: {
+                base: "{colors.slate.50}",
+              },
+            },
+          },
+        },
+      },
     },
   },
 
