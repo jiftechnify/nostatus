@@ -53,7 +53,7 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
         shadow: "md",
         rounded: "md",
         alignItems: "start",
-        bg: "slate.50",
+        bg: "bg.ui",
         lineHeight: "snug",
         gap: "2.5",
       })}

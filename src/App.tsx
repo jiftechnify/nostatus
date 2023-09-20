@@ -1,23 +1,13 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { vstack } from "@shadow-panda/styled-system/patterns";
-import { useAtom } from "jotai";
-import { RESET } from "jotai/utils";
 import { Suspense } from "react";
 import { HeaderMenu } from "./components/HeaderMenu";
 import { LoginForm } from "./components/LoginForm";
 import { UserStatusList } from "./components/UserStatusList";
-import { myPubkeyAtom } from "./states/atoms";
+import { useMyPubkey } from "./states/atoms";
 
 export const App = () => {
-  const [pubkey, setPubkey] = useAtom(myPubkeyAtom);
-
-  const onLogin = (pubkey: string) => {
-    setPubkey(pubkey);
-  };
-  const onLogout = () => {
-    console.log("logout");
-    setPubkey(RESET);
-  };
+  const pubkey = useMyPubkey();
 
   return (
     <div
@@ -44,13 +34,13 @@ export const App = () => {
         </div>
         <div className={css({ ml: "auto" })}>
           <Suspense>
-            <HeaderMenu onLogout={onLogout} />
+            <HeaderMenu />
           </Suspense>
         </div>
       </header>
 
-      <main className={css({ h: "100%", w: "100vw"})}>
-        <Suspense>{pubkey !== undefined ? <UserStatusList /> : <LoginForm onLogin={onLogin} />}</Suspense>
+      <main className={css({ h: "100%", w: "100vw" })}>
+        <Suspense>{pubkey !== undefined ? <UserStatusList /> : <LoginForm />}</Suspense>
       </main>
     </div>
   );

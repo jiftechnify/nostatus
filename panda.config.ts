@@ -29,6 +29,64 @@ export default defineConfig({
   theme: {
     extend: {
       textStyles,
+      semanticTokens: {
+        colors: {
+          primary: {
+            DEFAULT: {
+              value: {
+                base: "{colors.purple.600}",
+                _dark: "{colors.purple.600}",
+              },
+            },
+            light: {
+              value: {
+                base: "{colors.purple.500}",
+                _dark: "{colors.purple.500}",
+              },
+            },
+            disabled: {
+              value: {
+                base: "{colors.purple.200}",
+                _dark: "{colors.purple.200}",
+              },
+            },
+          },
+          danger: {
+            DEFAULT: {
+              value: {
+                base: "{colors.red.600}",
+                _dark: "{colors.red.600}",
+              },
+            },
+            light: {
+              value: {
+                base: "{colors.red.500}",
+                _dark: "{colors.red.500}",
+              },
+            },
+            disabled: {
+              value: {
+                base: "{colors.red.200}",
+                _dark: "{colors.red.200}",
+              },
+            },
+          },
+          bg: {
+            DEFAULT: {
+              value: {
+                base: "{colors.slate.100}",
+                _dark: "{colors.slate.100}",
+              },
+            },
+            ui: {
+              value: {
+                base: "{colors.slate.50}",
+                _dark: "{colors.slate.50}",
+              },
+            },
+          },
+        },
+      },
     },
   },
 

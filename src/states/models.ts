@@ -1,5 +1,5 @@
 import { NostrEvent } from "nostr-fetch";
-import { getFirstTagValueByName } from "../nostr";
+import { RelayList, getFirstTagValueByName } from "../nostr";
 
 export type UserProfile = {
   srcEventId: string;
@@ -62,7 +62,7 @@ export const StatusData = {
 export type AccountMetadata = {
   profile: UserProfile;
   followings: string[];
-  readRelays: string[];
+  relayList: RelayList;
 };
 
 export type UserStatus = {
