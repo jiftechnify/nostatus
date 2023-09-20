@@ -1,7 +1,7 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { icon } from "@shadow-panda/styled-system/recipes";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { ArrowUpCircle, LogOut } from "lucide-react";
+import { ArrowUpCircle, Github, LogOut } from "lucide-react";
 import { myAccountDataAtom, useLogout, useMyPubkey, usePubkeyInNip07 } from "../states/atoms";
 import { AppAvatar } from "./AppAvatar";
 import { UpdateStatusDialog } from "./UpdateStatusDialog";
@@ -42,6 +42,9 @@ export const HeaderMenu: React.FC = () => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <MenuItemUpdateStatus disabled={disableWriteOps} />
+        <DropdownMenuSeparator />
+        <MenuItemGitHubRepo />
+        <DropdownMenuSeparator />
         <MenuItemLogout />
       </DropdownMenuContent>
     </DropdownMenu>
@@ -57,7 +60,7 @@ type UpdateStatusMenuItemProps = {
 const MenuItemUpdateStatus: React.FC<UpdateStatusMenuItemProps> = ({ disabled }) => {
   const menuItem = (
     <DropdownMenuItem className={css({ cursor: "pointer" })} disabled={disabled} onSelect={(e) => e.preventDefault()}>
-      <ArrowUpCircle className={icon()} size="1rem" />
+      <ArrowUpCircle className={icon()} />
       <span>Update Status</span>
     </DropdownMenuItem>
   );
@@ -70,8 +73,19 @@ const MenuItemLogout = () => {
 
   return (
     <DropdownMenuItem className={css({ cursor: "pointer", color: "danger" })} onSelect={logout}>
-      <LogOut size="1rem" />
+      <LogOut className={icon()} />
       <span>Logout</span>
+    </DropdownMenuItem>
+  );
+}
+
+const MenuItemGitHubRepo = () => {
+  return (
+    <DropdownMenuItem asChild>
+      <a className={css({cursor: "pointer"})} href="https://github.com/jiftechnify/nostatus" target="_blank" rel="external noreferrer">
+        <Github className={icon()} />
+        <span>View Code on GitHub</span>
+      </a>
     </DropdownMenuItem>
   );
 }
