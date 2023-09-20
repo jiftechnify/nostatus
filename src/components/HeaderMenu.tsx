@@ -38,7 +38,7 @@ export const HeaderMenu: React.FC = () => {
       <DropdownMenuContent>
         <DropdownMenuLabel>
           <span className={css({ mr: "1.5", fontWeight: "normal" })}>Logged in as</span>
-          {myData.profile.displayName ?? myData.profile.name ?? "???"}
+          {myData.profile.displayName || myData.profile.name || "???"}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <MenuItemUpdateStatus disabled={disableWriteOps} />
