@@ -1,7 +1,7 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { icon } from "@shadow-panda/styled-system/recipes";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { ArrowUpCircle, Github, LogOut } from "lucide-react";
+import { ArrowUpCircle, Github, LogOut, Zap } from "lucide-react";
 import { myAccountDataAtom, useLogout, useMyPubkey, usePubkeyInNip07 } from "../states/atoms";
 import { AppAvatar } from "./AppAvatar";
 import { UpdateStatusDialog } from "./UpdateStatusDialog";
@@ -18,7 +18,7 @@ const isHeaderMenuOpenAtom = atom(false);
 export const useCloseHeaderMenu = () => {
   const setOpen = useSetAtom(isHeaderMenuOpenAtom);
   return () => setOpen(false);
-}
+};
 
 export const HeaderMenu: React.FC = () => {
   const [open, setOpen] = useAtom(isHeaderMenuOpenAtom);
@@ -43,6 +43,7 @@ export const HeaderMenu: React.FC = () => {
         <DropdownMenuSeparator />
         <MenuItemUpdateStatus disabled={disableWriteOps} />
         <DropdownMenuSeparator />
+        <MenuItemZap />
         <MenuItemGitHubRepo />
         <DropdownMenuSeparator />
         <MenuItemLogout />
@@ -77,15 +78,32 @@ const MenuItemLogout = () => {
       <span>Logout</span>
     </DropdownMenuItem>
   );
-}
+};
+
+const MenuItemZap = () => {
+  return (
+    <DropdownMenuItem
+      className={css({ cursor: "pointer" })}
+      data-npub="npub168ghgug469n4r2tuyw05dmqhqv5jcwm7nxytn67afmz8qkc4a4zqsu2dlc"
+    >
+      <Zap className={icon()} />
+      <span>Zap Author</span>
+    </DropdownMenuItem>
+  );
+};
 
 const MenuItemGitHubRepo = () => {
   return (
     <DropdownMenuItem asChild>
-      <a className={css({cursor: "pointer"})} href="https://github.com/jiftechnify/nostatus" target="_blank" rel="external noreferrer">
+      <a
+        className={css({ cursor: "pointer" })}
+        href="https://github.com/jiftechnify/nostatus"
+        target="_blank"
+        rel="external noreferrer"
+      >
         <Github className={icon()} />
         <span>View Code on GitHub</span>
       </a>
     </DropdownMenuItem>
   );
-}
+};
