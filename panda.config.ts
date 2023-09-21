@@ -26,6 +26,9 @@ export default defineConfig({
     "input.input": {
       color: "foreground",
     },
+    "dialog.nostr-zap-dialog": {
+      bg: "white",
+    }
   },
 
   // Useful for theme customization
