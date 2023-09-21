@@ -35,7 +35,7 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
     return () => {
       setRecentlyUpdated(false);
       clearTimeout(staleTimer);
-    }
+    };
   }, [status]);
 
   if (status === undefined) {
@@ -53,7 +53,7 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
         shadow: "md",
         rounded: "md",
         alignItems: "start",
-        bg: "bg.ui",
+        bg: "card",
         lineHeight: "snug",
         gap: "2.5",
       })}
@@ -78,7 +78,7 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
           })}
         >
           {profile.displayName && <p className={css({ textStyle: "display-name" })}>{profile.displayName}</p>}
-          <p className={css({ textStyle: "name", color: "gray.400" })}>{profile.name ?? "???"}</p>
+          <p className={css({ textStyle: "name", color: "text.sub" })}>{profile.name ?? "???"}</p>
         </div>
       </div>
 
@@ -120,7 +120,7 @@ const GeneralStatus = ({ content, linkUrl }: GeneralStatusProps) => {
     <p
       className={css({
         textStyle: "main-status",
-        color: "slate.300",
+        color: "text.no-status",
       })}
     >
       No status
@@ -138,7 +138,7 @@ const NowPlaying = ({ content, linkUrl }: NowPlayingProps) => {
     <p
       className={css({
         textStyle: "now-playing",
-        color: "slate.600",
+        color: "text.now-playing",
         _before: {
           content: "'♫'",
           mr: "1",

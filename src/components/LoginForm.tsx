@@ -50,7 +50,7 @@ export const LoginForm: React.FC = () => {
           value={pubkeyInput}
           onChange={(ev) => setPubkeyInput(ev.target.value)}
         ></input>
-        <button className={button({ expand: true })} onClick={onClickPubkeyLogin}>
+        <button className={button({ expand: true })} onClick={onClickPubkeyLogin} >
           Login with Pubkey
         </button>
       </div>

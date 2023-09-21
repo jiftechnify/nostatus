@@ -9,7 +9,7 @@ type ExternalLinkProps = {
 export const ExternalLink: React.FC<ExternalLinkProps> = ({ href, size }) => {
   return (
     <a
-      className={css({ ml: "1.5", color: { base: "purple.400", _visited: "slate.400" } })}
+      className={css({ ml: "1.5", color: { base: "ext-link", _visited: "ext-link.visited" } })}
       href={href}
       target="_blank"
       rel="external noreferrer"
