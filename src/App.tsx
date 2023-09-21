@@ -5,8 +5,10 @@ import { HeaderMenu } from "./components/HeaderMenu";
 import { LoginForm } from "./components/LoginForm";
 import { UserStatusList } from "./components/UserStatusList";
 import { useMyPubkey } from "./states/atoms";
+import { useColorTheme } from "./states/theme";
 
 export const App = () => {
+  useColorTheme();
   const pubkey = useMyPubkey();
 
   return (
@@ -15,6 +17,8 @@ export const App = () => {
         h: "100dvh",
         pt: "6",
         gap: "4",
+        bg: "background",
+        color: "foreground",
       })}
     >
       <header
@@ -30,7 +34,7 @@ export const App = () => {
         <div className={css({ mr: "auto" })}></div>
         <div className={css({ lineHeight: "tight", textAlign: "center" })}>
           <h1 className={css({ textStyle: "title" })}>nostatus</h1>
-          <p className={css({ textStyle: "tagline", color: "gray.500" })}>Have an eye on your friends' status.</p>
+          <p className={css({ textStyle: "tagline", color: "text.sub" })}>Have an eye on your friends' status.</p>
         </div>
         <div className={css({ ml: "auto" })}>
           <Suspense>

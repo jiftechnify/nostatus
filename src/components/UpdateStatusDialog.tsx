@@ -68,16 +68,17 @@ export const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({ trigger 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className={css({ w: "100%" })}>{trigger}</DialogTrigger>
-      <DialogContent>
+      <DialogContent className={css({bg: "card"})}>
         <DialogHeader>
           <DialogTitle>Update Your Status</DialogTitle>
         </DialogHeader>
         <Label htmlFor="content">Status</Label>
-        <Input id="content" value={content} onChange={(e) => setContent(e.target.value)} />
+        <Input id="content" type="text" value={content} onChange={(e) => setContent(e.target.value)} />
 
         <Label htmlFor="link-url">Link URL</Label>
         <Input
           id="link-url"
+          type="url"
           disabled={isClearStatus}
           placeholder="https://"
           value={linkUrl}
@@ -99,7 +100,7 @@ export const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({ trigger 
         </Select>
         <DialogFooter>
           {isClearStatus ? (
-            <button className={button({ color: "danger" })} onClick={onClickClear}>
+            <button className={button({ color: "destructive" })} onClick={onClickClear}>
               Clear
             </button>
           ) : (

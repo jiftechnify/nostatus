@@ -32,21 +32,27 @@ export const button = cva({
   variants: {
     color: {
       primary: {
-        color: "white",
+        color: {
+          base: "primary.foreground",
+          _disabled: "primary.muted.fg"
+        },
         bg: {
           base: "primary",
-          _hover: { _enabled: "primary.light" },
-          _focusVisible: { _enabled: "primary.light" },
-          _disabled: "primary.disabled",
+          _hover: { _enabled: "primary.focused" },
+          _focusVisible: { _enabled: "primary.focused" },
+          _disabled: "primary.muted.bg",
         },
       },
-      danger: {
-        color: "white",
+      destructive: {
+        color: {
+          base: "destructive.foreground",
+          _disabled: "destructive.muted.fg"
+        },
         bg: {
-          base: "danger",
-          _hover: { _enabled: "danger.light" },
-          _focusVisible: { _enabled: "danger.light" },
-          _disabled: "danger.disabled",
+          base: "destructive",
+          _hover: { _enabled: "destructive.focused" },
+          _focusVisible: { _enabled: "destructive.focused" },
+          _disabled: "destructive.muted.bg",
         },
       },
     },
@@ -62,3 +68,31 @@ export const button = cva({
     expand: false,
   },
 });
+
+export const menuItem = cva({
+  base: {
+    cursor: "pointer",
+  },
+  variants: {
+    color: {
+      default: {
+        color: "foreground"
+      },
+      primary: {
+        color: {
+          base: "primary",
+          _dark: "purple.400"
+        }
+      },
+      destructive: {
+        color: {
+          base: "destructive",
+          _dark: "red.400"
+        }
+      },
+    }
+  },
+  defaultVariants: {
+    color: "default"
+  }
+})

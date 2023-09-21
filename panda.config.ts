@@ -1,4 +1,5 @@
 import { defineConfig } from "@pandacss/dev";
+import { semanticTokens } from "./semantic-tokens";
 import { textStyles } from "./text-styles";
 
 export default defineConfig({
@@ -19,9 +20,11 @@ export default defineConfig({
         base: "14px", // width < 640px
         sm: "16px",
       },
+      color: "foreground",
+      bg: "background",
     },
-    body: {
-      backgroundColor: "slate.100",
+    "input.input": {
+      color: "foreground",
     },
   },
 
@@ -29,64 +32,7 @@ export default defineConfig({
   theme: {
     extend: {
       textStyles,
-      semanticTokens: {
-        colors: {
-          primary: {
-            DEFAULT: {
-              value: {
-                base: "{colors.purple.600}",
-                _dark: "{colors.purple.600}",
-              },
-            },
-            light: {
-              value: {
-                base: "{colors.purple.500}",
-                _dark: "{colors.purple.500}",
-              },
-            },
-            disabled: {
-              value: {
-                base: "{colors.purple.200}",
-                _dark: "{colors.purple.200}",
-              },
-            },
-          },
-          danger: {
-            DEFAULT: {
-              value: {
-                base: "{colors.red.600}",
-                _dark: "{colors.red.600}",
-              },
-            },
-            light: {
-              value: {
-                base: "{colors.red.500}",
-                _dark: "{colors.red.500}",
-              },
-            },
-            disabled: {
-              value: {
-                base: "{colors.red.200}",
-                _dark: "{colors.red.200}",
-              },
-            },
-          },
-          bg: {
-            DEFAULT: {
-              value: {
-                base: "{colors.slate.100}",
-                _dark: "{colors.slate.100}",
-              },
-            },
-            ui: {
-              value: {
-                base: "{colors.slate.50}",
-                _dark: "{colors.slate.50}",
-              },
-            },
-          },
-        },
-      },
+      semanticTokens,
     },
   },
 
