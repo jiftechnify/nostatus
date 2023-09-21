@@ -4,6 +4,7 @@ import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ArrowUpCircle, Github, LogOut, Zap } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { myAccountDataAtom, useLogout, useMyPubkey, usePubkeyInNip07 } from "../states/atoms";
+import { AccountMetadata } from "../states/models";
 import { AppAvatar } from "./AppAvatar";
 import { UpdateStatusDialog } from "./UpdateStatusDialog";
 import {
@@ -22,16 +23,23 @@ export const useCloseHeaderMenu = () => {
 };
 
 export const HeaderMenu: React.FC = () => {
-  const [open, setOpen] = useAtom(isHeaderMenuOpenAtom);
-
   const myData = useAtomValue(myAccountDataAtom);
+  return myData !== undefined ? <HeaderMenuBody myData={myData} /> : null;
+};
+
+type HeaderMenuBodyProps = {
+  myData: AccountMetadata;
+};
+
+const HeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
+  const [open, setOpen] = useAtom(isHeaderMenuOpenAtom);
 
   // disable write operations if the pubkey doesn't match with NIP-07 pubkey
   const myPubkey = useMyPubkey();
   const nip07Pubkey = usePubkeyInNip07();
   const disableWriteOps = myPubkey !== nip07Pubkey;
 
-  return myData !== undefined ? (
+  return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger className={css({ cursor: "pointer" })}>
         <AppAvatar imgSrc={myData.profile.picture} size="md" />
@@ -50,7 +58,7 @@ export const HeaderMenu: React.FC = () => {
         <MenuItemLogout />
       </DropdownMenuContent>
     </DropdownMenu>
-  ) : null;
+  );
 };
 
 type UpdateStatusMenuItemProps = {
@@ -90,12 +98,12 @@ const MenuItemZap = () => {
       return;
     }
 
-    // remove zap dialogs created by previous render 
+    // remove zap dialogs created by previous render
     document.querySelectorAll("dialog.nostr-zap-dialog").forEach((e) => e.remove());
 
-    window.nostrZap.initTarget(menuItem.current)
+    window.nostrZap.initTarget(menuItem.current);
     handlerInitialized.current = true;
-  }, [])
+  }, []);
 
   return (
     <DropdownMenuItem
