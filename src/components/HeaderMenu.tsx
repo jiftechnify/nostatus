@@ -2,6 +2,7 @@ import { css } from "@shadow-panda/styled-system/css";
 import { icon } from "@shadow-panda/styled-system/recipes";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ArrowUpCircle, Github, LogOut, Zap } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { myAccountDataAtom, useLogout, useMyPubkey, usePubkeyInNip07 } from "../states/atoms";
 import { AppAvatar } from "./AppAvatar";
 import { UpdateStatusDialog } from "./UpdateStatusDialog";
@@ -35,7 +36,7 @@ export const HeaderMenu: React.FC = () => {
       <DropdownMenuTrigger className={css({ cursor: "pointer" })}>
         <AppAvatar imgSrc={myData.profile.picture} size="md" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent forceMount>
         <DropdownMenuLabel>
           <span className={css({ mr: "1.5", fontWeight: "normal" })}>Logged in as</span>
           {myData.profile.displayName || myData.profile.name || "???"}
@@ -81,10 +82,27 @@ const MenuItemLogout = () => {
 };
 
 const MenuItemZap = () => {
+  // initialize click handler which opens zap dialog
+  const menuItem = useRef<HTMLDivElement>(null);
+  const handlerInitialized = useRef(false);
+  useEffect(() => {
+    if (handlerInitialized.current || menuItem.current === null) {
+      return;
+    }
+
+    // remove zap dialogs created by previous render 
+    document.querySelectorAll("dialog.nostr-zap-dialog").forEach((e) => e.remove());
+
+    window.nostrZap.initTarget(menuItem.current)
+    handlerInitialized.current = true;
+  }, [])
+
   return (
     <DropdownMenuItem
-      className={css({ cursor: "pointer" })}
+      ref={menuItem}
       data-npub="npub168ghgug469n4r2tuyw05dmqhqv5jcwm7nxytn67afmz8qkc4a4zqsu2dlc"
+      data-relays="wss://relay.nostr.band,wss://relayable.org,wss://relay.damus.io,wss://relay.nostr.wirednet.jp"
+      className={css({ cursor: "pointer" })}
     >
       <Zap className={icon()} />
       <span>Zap Author</span>

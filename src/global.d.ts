@@ -6,5 +6,9 @@ declare global {
       getPublicKey: () => Promise<string>;
       getRelays: () => Promise<RelayList>;
     };
+
+    nostrZap: {
+      initTarget: (targetEl: HTMLElement) => void;
+    }
   }
 }
