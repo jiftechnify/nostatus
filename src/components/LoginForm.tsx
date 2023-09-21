@@ -4,7 +4,7 @@ import { useState } from "react";
 import { parsePubkey } from "../nostr";
 import { useLogin, useNip07Availability } from "../states/atoms";
 import { button } from "../styles/recipes";
-
+import { Input } from "./ui/input";
 
 export const LoginForm: React.FC = () => {
   const login = useLogin();
@@ -37,20 +37,14 @@ export const LoginForm: React.FC = () => {
         Login with NIP-07 Extension
       </button>
       <div className={vstack({ w: "100%" })}>
-        <input
-          className={css({
-            w: "100%",
-            px: "1",
-            py: "0.5",
-            rounded: "sm",
-            fontSize: "sm",
-          })}
+        <Input
+          className={css({ h: "8", px: "1", py: "0.5" })}
           type="text"
           placeholder="npub or hex pubkey"
           value={pubkeyInput}
-          onChange={(ev) => setPubkeyInput(ev.target.value)}
-        ></input>
-        <button className={button({ expand: true })} onClick={onClickPubkeyLogin} >
+          onChange={(e) => setPubkeyInput(e.target.value)}
+        />
+        <button className={button({ expand: true })} onClick={onClickPubkeyLogin}>
           Login with Pubkey
         </button>
       </div>

@@ -73,11 +73,12 @@ export const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({ trigger 
           <DialogTitle>Update Your Status</DialogTitle>
         </DialogHeader>
         <Label htmlFor="content">Status</Label>
-        <Input id="content" value={content} onChange={(e) => setContent(e.target.value)} />
+        <Input id="content" type="text" value={content} onChange={(e) => setContent(e.target.value)} />
 
         <Label htmlFor="link-url">Link URL</Label>
         <Input
           id="link-url"
+          type="url"
           disabled={isClearStatus}
           placeholder="https://"
           value={linkUrl}
