@@ -155,17 +155,29 @@ export const usePubkeyInNip07 = () => {
 
 const jotaiStore = getDefaultStore();
 
-const bootstrapRelays = ["wss://relay.nostr.band", "wss://relayable.org", "wss://yabu.me"];
 const bootstrapFetcher = NostrFetcher.init();
 
 const rxNostr = createRxNostr();
 const fetcherOnRxNostr = NostrFetcher.withCustomPool(rxNostrAdapter(rxNostr));
+
+const defaultBootstrapRelays = ["wss://relay.nostr.band", "wss://relayable.org", "wss://yabu.me"];
 
 const fallbackRelayList: RelayList = {
   "wss://relay.nostr.band": { read: true, write: true },
   "wss://relayable.org": { read: true, write: true },
   "wss://relay.damus.io": { read: false, write: true },
   "wss://yabu.me": { read: true, write: false },
+};
+
+// first, get read relays from NIP-07 extension if available. if no relays found, use default relays.
+// 2nd element of return value: whether relays are default or not
+const getBootstrapRelays = async (): Promise<[string[], boolean]> => {
+  if (window.nostr === undefined || typeof window.nostr.getRelays !== "function") {
+    return [defaultBootstrapRelays, true];
+  }
+  const nip07Relays = await window.nostr.getRelays();
+  const nip07ReadRelays = nip07Relays !== undefined ? selectRelaysByUsage(nip07Relays, "read") : [];
+  return nip07ReadRelays.length > 0 ? [nip07ReadRelays, false] : [defaultBootstrapRelays, true];
 };
 
 const extractRelayListOrDefault = (evs: (NostrEvent | undefined)[]): RelayList => {
@@ -192,23 +204,34 @@ const extractRelayListOrDefault = (evs: (NostrEvent | undefined)[]): RelayList =
 
 /* fetch account data */
 export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata> => {
-  const [k0, k3, k10002] = await Promise.all(
-    [0, 3, 10002].map((kind) =>
-      bootstrapFetcher.fetchLastEvent(
-        bootstrapRelays,
-        {
-          authors: [pubkey],
-          kinds: [kind],
-        },
-        { connectTimeoutMs: 3000 }
+  const fetchBody = async (bootstrapRelays: string[], isDefault: boolean): Promise<AccountMetadata> => {
+    const [k0, k3, k10002] = await Promise.all(
+      [0, 3, 10002].map((kind) =>
+        bootstrapFetcher.fetchLastEvent(
+          bootstrapRelays,
+          {
+            authors: [pubkey],
+            kinds: [kind],
+          },
+          { connectTimeoutMs: 3000 }
+        )
       )
-    )
-  );
-  const profile = k0 !== undefined ? UserProfile.fromEvent(k0) : { srcEventId: "undefined", pubkey };
-  const followings = k3 !== undefined ? getTagValuesByName(k3, "p") : [];
-  const relayList = extractRelayListOrDefault([k3, k10002]);
+    );
+    if (!isDefault && (k0 === undefined || [k3, k10002].every((ev) => ev === undefined))) {
+      // if some of event are not found in relays from NIP-07 ext, fallback to default relays
+      console.log("fallback to default bootstrap relays");
+      return fetchBody(defaultBootstrapRelays, true);
+    }
 
-  return { profile, followings, relayList };
+    const profile = k0 !== undefined ? UserProfile.fromEvent(k0) : { srcEventId: "undefined", pubkey };
+    const followings = k3 !== undefined ? getTagValuesByName(k3, "p") : [];
+    const relayList = extractRelayListOrDefault([k3, k10002]);
+    return { profile, followings, relayList };
+  };
+
+  const [bootstrapRelays, isDefault] = await getBootstrapRelays();
+  console.log("bootstrapRelays:", bootstrapRelays);
+  return fetchBody(bootstrapRelays, isDefault);
 };
 
 // turn into `true` when rxNostr.switchRelays() has finished
