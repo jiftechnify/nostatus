@@ -15,23 +15,31 @@ export const semanticTokens = defineSemanticTokens({
       },
     },
     popover: {
-      value: {
-        base: "{colors.white}",
-        _dark: "{colors.slate.800}",
+      DEFAULT: {
+        value: {
+          base: "{colors.white}",
+          _dark: "{colors.slate.800}",
+        },
+      },
+      foreground: {
+        value: {
+          base: "{colors.slate.950}",
+          _dark: "{colors.slate.50}",
+        },
       },
     },
     border: {
       // for borders of various shadow panda components
       value: {
         base: "{colors.slate.200}",
-        _dark: "{colors.slate.800}",
+        _dark: "{colors.slate.700}",
       },
     },
     input: {
       // for borders of inputs
       value: {
         base: "{colors.slate.200}",
-        _dark: "{colors.slate.800}",
+        _dark: "{colors.slate.700}",
       },
     },
     muted: {

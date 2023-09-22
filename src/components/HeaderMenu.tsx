@@ -5,7 +5,7 @@ import { ArrowUpCircle, Github, LogOut, Moon, Sun, Zap } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { myAccountDataAtom, useLogout, useMyPubkey, usePubkeyInNip07 } from "../states/nostr";
 import { AccountMetadata } from "../states/nostrModels";
-import { togglableColorThemeAtom } from "../states/theme";
+import { ColorTheme, colorThemeAtom } from "../states/theme";
 import { menuItem } from "../styles/recipes";
 import { AppAvatar } from "./AppAvatar";
 import { UpdateStatusDialog } from "./UpdateStatusDialog";
@@ -14,7 +14,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
@@ -46,7 +52,7 @@ const HeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
       <DropdownMenuTrigger className={css({ cursor: "pointer" })}>
         <AppAvatar imgSrc={myData.profile.picture} size="md" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent align="start">
         <DropdownMenuLabel>
           <span className={css({ mr: "1.5", fontWeight: "normal" })}>Logged in as</span>
           {myData.profile.displayName || myData.profile.name || "???"}
@@ -85,18 +91,32 @@ const MenuItemUpdateStatus: React.FC<UpdateStatusMenuItemProps> = ({ disabled })
   return disabled ? menuItemBody : <UpdateStatusDialog trigger={menuItemBody} />;
 };
 
+const radioItemClassNames = css({ display: "flex", gap: "1.5", cursor: "pointer" });
+
 const MenuItemToggleColorTheme: React.FC = () => {
-  const [theme, toggleTheme] = useAtom(togglableColorThemeAtom);
-  const onSelect = (e: Event) => {
-    e.preventDefault();
-    toggleTheme();
-  }
+  const [theme, setTheme] = useAtom(colorThemeAtom);
 
   return (
-    <DropdownMenuItem className={menuItem()} onSelect={onSelect}>
-      {theme === "light" ? <Sun className={icon()} /> : <Moon className={icon()} />}
-      <span>Toggle Theme</span>
-    </DropdownMenuItem>
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>
+        {theme === "light" ? <Sun className={icon()} /> : <Moon className={icon()} />}
+        <span>Color Theme</span>
+      </DropdownMenuSubTrigger>
+      <DropdownMenuPortal>
+        <DropdownMenuSubContent>
+          <DropdownMenuRadioGroup value={theme} onValueChange={(v) => setTheme(v as ColorTheme)}>
+            <DropdownMenuRadioItem className={radioItemClassNames} value="light">
+              <Sun className={icon()} />
+              <span>Light</span>
+            </DropdownMenuRadioItem>
+            <DropdownMenuRadioItem className={radioItemClassNames} value="dark">
+              <Moon className={icon()} />
+              <span>Dark</span>
+            </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuSubContent>
+      </DropdownMenuPortal>
+    </DropdownMenuSub>
   );
 };
 
