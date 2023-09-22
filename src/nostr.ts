@@ -4,10 +4,10 @@ import { nip19 } from "nostr-tools";
 /* primitives */
 export const getFirstTagByName = (ev: NostrEvent, name: string): string[] => ev.tags.find((t) => t[0] === name) ?? [];
 
-export const getFirstTagValueByName = (ev: NostrEvent, name: string): string => ev.tags.find((t) => t[0] === name)?.[1] ?? "";
+export const getFirstTagValueByName = (ev: NostrEvent, name: string): string =>
+  ev.tags.find((t) => t[0] === name)?.[1] ?? "";
 
-export const getTagsByName = (ev: NostrEvent, name: string): string[][] =>
-  ev.tags.filter((t) => t[0] === name);
+export const getTagsByName = (ev: NostrEvent, name: string): string[][] => ev.tags.filter((t) => t[0] === name);
 
 export const getTagValuesByName = (ev: NostrEvent, name: string): string[] =>
   ev.tags.filter((t) => t[0] === name).map((t) => t[1] ?? "");
@@ -15,62 +15,62 @@ export const getTagValuesByName = (ev: NostrEvent, name: string): string[] =>
 /* parsing relay list */
 export type RelayList = Record<string, { read: boolean; write: boolean }>;
 
-export const parseRelayList = (evs: NostrEvent[]): RelayList => {
-  const relayListEvs = evs.filter((ev) => [3, 10002].includes(ev.kind));
-  if (relayListEvs.length === 0) {
-    return {};
-  }
-  const latest = relayListEvs.sort((a, b) => b.created_at - a.created_at)[0] as NostrEvent;
-
-  switch (latest.kind) {
+export const parseRelayListInEvent = (ev: NostrEvent): RelayList | undefined => {
+  switch (ev.kind) {
     case 3:
-      return parseRelayListInKind3(latest);
+      return parseRelayListInKind3(ev);
     case 10002:
-      return parseRelayListInKind10002(latest);
+      return parseRelayListInKind10002(ev);
     default:
-      console.error("parseRelayList: unreachable");
-      return {};
+      console.error("parseRelayListInEvent: unreachable");
+      return undefined;
   }
 };
 
-const parseRelayListInKind3 = (ev: NostrEvent): RelayList => {
+const parseRelayListInKind3 = (ev: NostrEvent): RelayList | undefined => {
+  if (ev.content === "") {
+    return undefined;
+  }
+
   try {
     return JSON.parse(ev.content) as RelayList; // TODO: schema validation
   } catch (err) {
     console.error("failed to parse kind 3 event:", err);
-    return {};
+    return undefined;
   }
 };
 
-const parseRelayListInKind10002 = (ev: NostrEvent): RelayList => {
-  const res: RelayList = {};
+const parseRelayListInKind10002 = (ev: NostrEvent): RelayList | undefined => {
+  const res: RelayList = Object.create(null);
 
-  getTagsByName(ev, "r")
-    .forEach((t) => {
-      const [, url, usage] = t;
-      if (url === undefined) {
+  getTagsByName(ev, "r").forEach((t) => {
+    const [, url, usage] = t;
+    if (url === undefined) {
+      return;
+    }
+    switch (usage) {
+      case undefined:
+      case "":
+        res[url] = { read: true, write: true };
         return;
-      }
-      switch (usage) {
-        case undefined:
-        case "":
-          res[url] = { read: true, write: true };
-          return;
 
-        case "read":
-          res[url] = { read: true, write: false };
-          return;
+      case "read":
+        res[url] = { read: true, write: false };
+        return;
 
-        case "write":
-          res[url] = { read: false, write: true };
-          return;
-          
-        default:
-          console.warn("invalid relay type in kind 10002 event:", usage);
-          undefined;
-      }
-    });
+      case "write":
+        res[url] = { read: false, write: true };
+        return;
 
+      default:
+        console.warn("invalid relay type in kind 10002 event:", usage);
+        return;
+    }
+  });
+
+  if (Object.keys(res).length === 0) {
+    return undefined;
+  }
   return res;
 };
 

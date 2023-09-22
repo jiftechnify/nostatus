@@ -1,7 +1,7 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
-import { myGeneralStatusAtom, updateMyStatus } from "../states/atoms";
+import { myGeneralStatusAtom, updateMyStatus } from "../states/nostr";
 import { button } from "../styles/recipes";
 import { useCloseHeaderMenu } from "./HeaderMenu";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";

@@ -1,6 +1,12 @@
-import { getFirstTagValueByName, getTagValuesByName, parseRelayList, selectRelaysByUsage } from "../nostr";
+import {
+  RelayList,
+  getFirstTagValueByName,
+  getTagValuesByName,
+  parseRelayListInEvent,
+  selectRelaysByUsage,
+} from "../nostr";
 import { currUnixtime } from "../utils";
-import { AccountMetadata, StatusData, UserProfile, UserStatus } from "./models";
+import { AccountMetadata, StatusData, UserProfile, UserStatus } from "./nostrModels";
 
 import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
 import { atom, getDefaultStore, useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -14,22 +20,22 @@ const myPubkeyAtom = atomWithStorage<string | undefined>("nostr_pubkey", undefin
 
 export const useMyPubkey = () => {
   const myPubkey = useAtomValue(myPubkeyAtom);
-  return myPubkey
-}
+  return myPubkey;
+};
 
 export const useLogin = () => {
   const setPubkey = useSetAtom(myPubkeyAtom);
-  return setPubkey
-}
+  return setPubkey;
+};
 
 export const useLogout = () => {
   const setPubkey = useSetAtom(myPubkeyAtom);
   const logout = useCallback(() => {
     setPubkey(RESET);
-  }, [setPubkey])
+  }, [setPubkey]);
 
   return logout;
-}
+};
 
 export const myAccountDataAtom = atom<Promise<AccountMetadata | undefined>>(async (get) => {
   const pubkey = get(myPubkeyAtom);
@@ -79,7 +85,7 @@ export const myGeneralStatusAtom = atom((get) => {
     return undefined;
   }
   return get(userStatusAtomFamily(myPubkey))?.general;
-})
+});
 
 export const pubkeysOrderByLastStatusUpdateTimeAtom = atom((get) => {
   const statusesMap = get(followingsStatusesAtom);
@@ -154,6 +160,35 @@ const bootstrapFetcher = NostrFetcher.init();
 const rxNostr = createRxNostr();
 const fetcherOnRxNostr = NostrFetcher.withCustomPool(rxNostrAdapter(rxNostr));
 
+const fallbackRelayList: RelayList = {
+  "wss://relay.nostr.band": { read: true, write: true },
+  "wss://relayable.org": { read: true, write: true },
+  "wss://relay.damus.io": { read: false, write: true },
+  "wss://yabu.me": { read: true, write: false },
+};
+
+const extractRelayListOrDefault = (evs: (NostrEvent | undefined)[]): RelayList => {
+  const relayListEvs = evs.filter((ev): ev is NostrEvent => ev !== undefined && [3, 10002].includes(ev.kind));
+  if (relayListEvs.length === 0) {
+    console.warn("failed to fetch events that have relay list; using fallback relays");
+    return fallbackRelayList;
+  }
+
+  // 1. try newer one out of kind:3 and kind:10002
+  // 2. if fails, try older one
+  // 3. if both fail, return default
+  const evsLatestOrder = relayListEvs.sort((a, b) => b.created_at - a.created_at);
+  for (const ev of evsLatestOrder) {
+    const res = parseRelayListInEvent(ev);
+    if (res !== undefined) {
+      console.log("extracted relay list from kind %d: %O", ev.kind, res);
+      return res;
+    }
+  }
+  console.warn("failed to extract relay list from events; using fallback relays");
+  return fallbackRelayList;
+};
+
 /* fetch account data */
 export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata> => {
   const [k0, k3, k10002] = await Promise.all(
@@ -170,9 +205,7 @@ export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata>
   );
   const profile = k0 !== undefined ? UserProfile.fromEvent(k0) : { srcEventId: "undefined", pubkey };
   const followings = k3 !== undefined ? getTagValuesByName(k3, "p") : [];
-
-  const relayListEvs = [k3, k10002].filter((ev) => ev !== undefined) as NostrEvent[];
-  const relayList = parseRelayList(relayListEvs);
+  const relayList = extractRelayListOrDefault([k3, k10002]);
 
   return { profile, followings, relayList };
 };
@@ -377,7 +410,7 @@ jotaiStore.sub(relaysSwitchedAtom, async () => {
   }
 
   const { followings, relayList } = myData;
-  const readRelays = selectRelaysByUsage(relayList, 'read');
+  const readRelays = selectRelaysByUsage(relayList, "read");
 
   // fetch past events
   fetchPastStatusesAbortCtrl = new AbortController();
