@@ -2,7 +2,7 @@ import { css } from "@shadow-panda/styled-system/css";
 import { vstack } from "@shadow-panda/styled-system/patterns";
 import { useState } from "react";
 import { parsePubkey } from "../nostr";
-import { useLogin, useNip07Availability } from "../states/atoms";
+import { useLogin, useNip07Availability } from "../states/nostr";
 import { button } from "../styles/recipes";
 import { Input } from "./ui/input";
 

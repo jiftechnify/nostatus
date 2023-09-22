@@ -1,7 +1,7 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { useAtomValue } from "jotai";
 import { VList } from "virtua";
-import { pubkeysOrderByLastStatusUpdateTimeAtom } from "../states/atoms";
+import { pubkeysOrderByLastStatusUpdateTimeAtom } from "../states/nostr";
 import { UserStatusCard } from "./UserStatusCard";
 
 export const UserStatusList: React.FC = () => {

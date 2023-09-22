@@ -1,12 +1,19 @@
-import { getFirstTagValueByName, getTagValuesByName, parseRelayList, selectRelaysByUsage } from "../nostr";
+import {
+  RelayList,
+  getFirstTagValueByName,
+  getTagValuesByName,
+  parseRelayListInEvent,
+  selectRelaysByUsage,
+} from "../nostr";
 import { currUnixtime } from "../utils";
-import { AccountMetadata, StatusData, UserProfile, UserStatus } from "./models";
+import { AccountMetadata, StatusData, UserProfile, UserStatus } from "./nostrModels";
 
-import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
 import { atom, getDefaultStore, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { RESET, atomFamily, atomWithStorage, loadable, selectAtom } from "jotai/utils";
-import { NostrEvent, NostrFetcher } from "nostr-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
+import { NostrEvent, NostrFetcher } from "nostr-fetch";
 import { createRxForwardReq, createRxNostr, getSignedEvent, uniq, verify } from "rx-nostr";
 import { Subscription } from "rxjs";
 
@@ -14,22 +21,22 @@ const myPubkeyAtom = atomWithStorage<string | undefined>("nostr_pubkey", undefin
 
 export const useMyPubkey = () => {
   const myPubkey = useAtomValue(myPubkeyAtom);
-  return myPubkey
-}
+  return myPubkey;
+};
 
 export const useLogin = () => {
   const setPubkey = useSetAtom(myPubkeyAtom);
-  return setPubkey
-}
+  return setPubkey;
+};
 
 export const useLogout = () => {
   const setPubkey = useSetAtom(myPubkeyAtom);
   const logout = useCallback(() => {
     setPubkey(RESET);
-  }, [setPubkey])
+  }, [setPubkey]);
 
   return logout;
-}
+};
 
 export const myAccountDataAtom = atom<Promise<AccountMetadata | undefined>>(async (get) => {
   const pubkey = get(myPubkeyAtom);
@@ -79,7 +86,7 @@ export const myGeneralStatusAtom = atom((get) => {
     return undefined;
   }
   return get(userStatusAtomFamily(myPubkey))?.general;
-})
+});
 
 export const pubkeysOrderByLastStatusUpdateTimeAtom = atom((get) => {
   const statusesMap = get(followingsStatusesAtom);
@@ -148,37 +155,88 @@ export const usePubkeyInNip07 = () => {
 
 const jotaiStore = getDefaultStore();
 
-const bootstrapRelays = ["wss://relay.nostr.band", "wss://relayable.org", "wss://yabu.me"];
 const bootstrapFetcher = NostrFetcher.init();
 
 const rxNostr = createRxNostr();
 const fetcherOnRxNostr = NostrFetcher.withCustomPool(rxNostrAdapter(rxNostr));
 
-/* fetch account data */
-export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata> => {
-  const [k0, k3, k10002] = await Promise.all(
-    [0, 3, 10002].map((kind) =>
-      bootstrapFetcher.fetchLastEvent(
-        bootstrapRelays,
-        {
-          authors: [pubkey],
-          kinds: [kind],
-        },
-        { connectTimeoutMs: 5000 }
-      )
-    )
-  );
-  const profile = k0 !== undefined ? UserProfile.fromEvent(k0) : { srcEventId: "undefined", pubkey };
-  const followings = k3 !== undefined ? getTagValuesByName(k3, "p") : [];
+const defaultBootstrapRelays = ["wss://relay.nostr.band", "wss://relayable.org", "wss://yabu.me"];
 
-  const relayListEvs = [k3, k10002].filter((ev) => ev !== undefined) as NostrEvent[];
-  const relayList = parseRelayList(relayListEvs);
-
-  return { profile, followings, relayList };
+const fallbackRelayList: RelayList = {
+  "wss://relay.nostr.band": { read: true, write: true },
+  "wss://relayable.org": { read: true, write: true },
+  "wss://relay.damus.io": { read: false, write: true },
+  "wss://yabu.me": { read: true, write: false },
 };
 
-// trigger of fetching followings profiles anmd statuses
-const relaysSwitchedAtom = atom(false);
+// first, get read relays from NIP-07 extension if available. if no relays found, use default relays.
+// 2nd element of return value: whether relays are default or not
+const getBootstrapRelays = async (): Promise<[string[], boolean]> => {
+  if (window.nostr === undefined || typeof window.nostr.getRelays !== "function") {
+    return [defaultBootstrapRelays, true];
+  }
+  const nip07Relays = await window.nostr.getRelays();
+  const nip07ReadRelays = nip07Relays !== undefined ? selectRelaysByUsage(nip07Relays, "read") : [];
+  return nip07ReadRelays.length > 0 ? [nip07ReadRelays, false] : [defaultBootstrapRelays, true];
+};
+
+const extractRelayListOrDefault = (evs: (NostrEvent | undefined)[]): RelayList => {
+  const relayListEvs = evs.filter((ev): ev is NostrEvent => ev !== undefined && [3, 10002].includes(ev.kind));
+  if (relayListEvs.length === 0) {
+    console.warn("failed to fetch events that have relay list; using fallback relays");
+    return fallbackRelayList;
+  }
+
+  // 1. try newer one out of kind:3 and kind:10002
+  // 2. if fails, try older one
+  // 3. if both fail, return default
+  const evsLatestOrder = relayListEvs.sort((a, b) => b.created_at - a.created_at);
+  for (const ev of evsLatestOrder) {
+    const res = parseRelayListInEvent(ev);
+    if (res !== undefined) {
+      console.log("extracted relay list from kind %d: %O", ev.kind, res);
+      return res;
+    }
+  }
+  console.warn("failed to extract relay list from events; using fallback relays");
+  return fallbackRelayList;
+};
+
+/* fetch account data */
+export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata> => {
+  const fetchBody = async (bootstrapRelays: string[], isDefault: boolean): Promise<AccountMetadata> => {
+    const [k0, k3, k10002] = await Promise.all(
+      [0, 3, 10002].map((kind) =>
+        bootstrapFetcher.fetchLastEvent(
+          bootstrapRelays,
+          {
+            authors: [pubkey],
+            kinds: [kind],
+          },
+          { connectTimeoutMs: 3000 }
+        )
+      )
+    );
+    if (!isDefault && (k0 === undefined || [k3, k10002].every((ev) => ev === undefined))) {
+      // if some of event are not found in relays from NIP-07 ext, fallback to default relays
+      console.log("fallback to default bootstrap relays");
+      return fetchBody(defaultBootstrapRelays, true);
+    }
+
+    const profile = k0 !== undefined ? UserProfile.fromEvent(k0) : { srcEventId: "undefined", pubkey };
+    const followings = k3 !== undefined ? getTagValuesByName(k3, "p") : [];
+    const relayList = extractRelayListOrDefault([k3, k10002]);
+    return { profile, followings, relayList };
+  };
+
+  const [bootstrapRelays, isDefault] = await getBootstrapRelays();
+  console.log("bootstrapRelays:", bootstrapRelays);
+  return fetchBody(bootstrapRelays, isDefault);
+};
+
+// turn into `true` when rxNostr.switchRelays() has finished
+// triggers fetching followings profiles and statuses
+const bootstrapFinishedAtom = atom(false);
 
 /* switch relays after fetched my account data */
 jotaiStore.sub(myAcctDataAvailableAtom, async () => {
@@ -190,15 +248,15 @@ jotaiStore.sub(myAcctDataAvailableAtom, async () => {
       console.error("unreachable");
       return;
     }
-
     console.log("switching relays to:", data.relayList);
     await rxNostr.switchRelays(data.relayList);
 
-    jotaiStore.set(relaysSwitchedAtom, true);
+    jotaiStore.set(bootstrapFinishedAtom, true);
   } else {
+    // myData cleared -> disconnect from all relays
     console.log("disconnect from all relays");
     await rxNostr.switchRelays([]);
-    jotaiStore.set(relaysSwitchedAtom, false);
+    jotaiStore.set(bootstrapFinishedAtom, false);
   }
 });
 
@@ -213,7 +271,7 @@ const cancelFetchProfiles = () => {
   }
 };
 
-jotaiStore.sub(relaysSwitchedAtom, async () => {
+jotaiStore.sub(bootstrapFinishedAtom, async () => {
   cancelFetchProfiles();
 
   const myData = await jotaiStore.get(myAccountDataAtom);
@@ -250,12 +308,10 @@ const isSupportedCategory = (s: string): s is UserStatusCategory => {
   return ["general", "music"].includes(s);
 };
 
+// status invalidation logic
 const invalidateStatus = (pubkey: string, category: UserStatusCategory) => {
   const prevStatus = statusesMap.get(pubkey);
-  if (prevStatus === undefined) {
-    return;
-  }
-  if (prevStatus[category] === undefined) {
+  if (prevStatus === undefined || prevStatus[category] === undefined) {
     return;
   }
 
@@ -269,6 +325,7 @@ const invalidateStatus = (pubkey: string, category: UserStatusCategory) => {
   jotaiStore.set(followingsStatusesAtom, new Map(statusesMap));
 };
 
+// manages timers for automatic status invalidation
 class StatusInvalidationScheduler {
   #invalidations = new Map<string, NodeJS.Timeout>();
 
@@ -276,14 +333,20 @@ class StatusInvalidationScheduler {
     return `${pubkey}:${category}`;
   }
 
-  schedule(pubkey: string, category: UserStatusCategory, ttl: number) {
-    const key = StatusInvalidationScheduler.#invalidationKey(pubkey, category);
+  #clearTimer(key: string) {
     const prev = this.#invalidations.get(key);
-
     if (prev !== undefined) {
       clearTimeout(prev);
       this.#invalidations.delete(key);
     }
+  }
+
+  // schedule status invalidation for given pubkey and category
+  // cancel previous timer and schedule new one
+  schedule(pubkey: string, category: UserStatusCategory, ttl: number) {
+    const key = StatusInvalidationScheduler.#invalidationKey(pubkey, category);
+
+    this.#clearTimer(key);
 
     const timeout = setTimeout(() => {
       invalidateStatus(pubkey, category);
@@ -292,16 +355,13 @@ class StatusInvalidationScheduler {
     this.#invalidations.set(key, timeout);
   }
 
+  // cancel status invalidation
   cancel(pubkey: string, category: UserStatusCategory) {
     const key = StatusInvalidationScheduler.#invalidationKey(pubkey, category);
-    const prev = this.#invalidations.get(key);
-
-    if (prev !== undefined) {
-      clearTimeout(prev);
-      this.#invalidations.delete(key);
-    }
+    this.#clearTimer(key);
   }
 
+  // cancel all status invalidations
   cancelAll() {
     for (const timeout of this.#invalidations.values()) {
       clearTimeout(timeout);
@@ -319,13 +379,11 @@ const applyStatusUpdate = (ev: NostrEvent) => {
     // ignore already expired statuses
     return;
   }
-
   const category = getFirstTagValueByName(ev, "d");
   if (!isSupportedCategory(category)) {
     // ignore statuses other than "general" and "music"
     return;
   }
-
   const prevStatus = statusesMap.get(pubkey);
   const prevSameCatStatus = prevStatus?.[category];
   if (prevSameCatStatus !== undefined && newStatus.createdAt <= prevSameCatStatus.createdAt) {
@@ -364,7 +422,7 @@ const cancelFetchStatuses = () => {
   }
 };
 
-jotaiStore.sub(relaysSwitchedAtom, async () => {
+jotaiStore.sub(bootstrapFinishedAtom, async () => {
   cancelFetchStatuses();
 
   const myData = await jotaiStore.get(myAccountDataAtom);
@@ -377,7 +435,7 @@ jotaiStore.sub(relaysSwitchedAtom, async () => {
   }
 
   const { followings, relayList } = myData;
-  const readRelays = selectRelaysByUsage(relayList, 'read');
+  const readRelays = selectRelaysByUsage(relayList, "read");
 
   // fetch past events
   fetchPastStatusesAbortCtrl = new AbortController();
@@ -411,6 +469,8 @@ type UpdateStatusInput = {
   ttl: number | undefined;
 };
 
+// update my general status
+// update local statuses map, then send a user status event (kind:30315) to write relays
 export const updateMyStatus = async ({ content, linkUrl, ttl }: UpdateStatusInput) => {
   const created_at = currUnixtime();
   const exp = ttl !== undefined ? created_at + ttl : undefined;

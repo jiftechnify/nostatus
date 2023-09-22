@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { HeaderMenu } from "./components/HeaderMenu";
 import { LoginForm } from "./components/LoginForm";
 import { UserStatusList } from "./components/UserStatusList";
-import { useMyPubkey } from "./states/atoms";
+import { useMyPubkey } from "./states/nostr";
 import { useColorTheme } from "./states/theme";
 
 export const App = () => {
