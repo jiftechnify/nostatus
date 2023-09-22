@@ -8,11 +8,12 @@ import {
 import { currUnixtime } from "../utils";
 import { AccountMetadata, StatusData, UserProfile, UserStatus } from "./nostrModels";
 
-import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
 import { atom, getDefaultStore, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { RESET, atomFamily, atomWithStorage, loadable, selectAtom } from "jotai/utils";
-import { NostrEvent, NostrFetcher } from "nostr-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
+import { NostrEvent, NostrFetcher } from "nostr-fetch";
 import { createRxForwardReq, createRxNostr, getSignedEvent, uniq, verify } from "rx-nostr";
 import { Subscription } from "rxjs";
 
@@ -199,7 +200,7 @@ export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata>
           authors: [pubkey],
           kinds: [kind],
         },
-        { connectTimeoutMs: 5000 }
+        { connectTimeoutMs: 3000 }
       )
     )
   );
@@ -210,8 +211,9 @@ export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata>
   return { profile, followings, relayList };
 };
 
-// trigger of fetching followings profiles anmd statuses
-const relaysSwitchedAtom = atom(false);
+// turn into `true` when rxNostr.switchRelays() has finished
+// triggers fetching followings profiles and statuses
+const bootstrapFinishedAtom = atom(false);
 
 /* switch relays after fetched my account data */
 jotaiStore.sub(myAcctDataAvailableAtom, async () => {
@@ -223,15 +225,15 @@ jotaiStore.sub(myAcctDataAvailableAtom, async () => {
       console.error("unreachable");
       return;
     }
-
     console.log("switching relays to:", data.relayList);
     await rxNostr.switchRelays(data.relayList);
 
-    jotaiStore.set(relaysSwitchedAtom, true);
+    jotaiStore.set(bootstrapFinishedAtom, true);
   } else {
+    // myData cleared -> disconnect from all relays
     console.log("disconnect from all relays");
     await rxNostr.switchRelays([]);
-    jotaiStore.set(relaysSwitchedAtom, false);
+    jotaiStore.set(bootstrapFinishedAtom, false);
   }
 });
 
@@ -246,7 +248,7 @@ const cancelFetchProfiles = () => {
   }
 };
 
-jotaiStore.sub(relaysSwitchedAtom, async () => {
+jotaiStore.sub(bootstrapFinishedAtom, async () => {
   cancelFetchProfiles();
 
   const myData = await jotaiStore.get(myAccountDataAtom);
@@ -283,12 +285,10 @@ const isSupportedCategory = (s: string): s is UserStatusCategory => {
   return ["general", "music"].includes(s);
 };
 
+// status invalidation logic
 const invalidateStatus = (pubkey: string, category: UserStatusCategory) => {
   const prevStatus = statusesMap.get(pubkey);
-  if (prevStatus === undefined) {
-    return;
-  }
-  if (prevStatus[category] === undefined) {
+  if (prevStatus === undefined || prevStatus[category] === undefined) {
     return;
   }
 
@@ -302,6 +302,7 @@ const invalidateStatus = (pubkey: string, category: UserStatusCategory) => {
   jotaiStore.set(followingsStatusesAtom, new Map(statusesMap));
 };
 
+// manages timers for automatic status invalidation
 class StatusInvalidationScheduler {
   #invalidations = new Map<string, NodeJS.Timeout>();
 
@@ -309,14 +310,20 @@ class StatusInvalidationScheduler {
     return `${pubkey}:${category}`;
   }
 
-  schedule(pubkey: string, category: UserStatusCategory, ttl: number) {
-    const key = StatusInvalidationScheduler.#invalidationKey(pubkey, category);
+  #clearTimer(key: string) {
     const prev = this.#invalidations.get(key);
-
     if (prev !== undefined) {
       clearTimeout(prev);
       this.#invalidations.delete(key);
     }
+  }
+
+  // schedule status invalidation for given pubkey and category
+  // cancel previous timer and schedule new one
+  schedule(pubkey: string, category: UserStatusCategory, ttl: number) {
+    const key = StatusInvalidationScheduler.#invalidationKey(pubkey, category);
+
+    this.#clearTimer(key);
 
     const timeout = setTimeout(() => {
       invalidateStatus(pubkey, category);
@@ -325,16 +332,13 @@ class StatusInvalidationScheduler {
     this.#invalidations.set(key, timeout);
   }
 
+  // cancel status invalidation
   cancel(pubkey: string, category: UserStatusCategory) {
     const key = StatusInvalidationScheduler.#invalidationKey(pubkey, category);
-    const prev = this.#invalidations.get(key);
-
-    if (prev !== undefined) {
-      clearTimeout(prev);
-      this.#invalidations.delete(key);
-    }
+    this.#clearTimer(key);
   }
 
+  // cancel all status invalidations
   cancelAll() {
     for (const timeout of this.#invalidations.values()) {
       clearTimeout(timeout);
@@ -352,13 +356,11 @@ const applyStatusUpdate = (ev: NostrEvent) => {
     // ignore already expired statuses
     return;
   }
-
   const category = getFirstTagValueByName(ev, "d");
   if (!isSupportedCategory(category)) {
     // ignore statuses other than "general" and "music"
     return;
   }
-
   const prevStatus = statusesMap.get(pubkey);
   const prevSameCatStatus = prevStatus?.[category];
   if (prevSameCatStatus !== undefined && newStatus.createdAt <= prevSameCatStatus.createdAt) {
@@ -397,7 +399,7 @@ const cancelFetchStatuses = () => {
   }
 };
 
-jotaiStore.sub(relaysSwitchedAtom, async () => {
+jotaiStore.sub(bootstrapFinishedAtom, async () => {
   cancelFetchStatuses();
 
   const myData = await jotaiStore.get(myAccountDataAtom);
@@ -444,6 +446,8 @@ type UpdateStatusInput = {
   ttl: number | undefined;
 };
 
+// update my general status
+// update local statuses map, then send a user status event (kind:30315) to write relays
 export const updateMyStatus = async ({ content, linkUrl, ttl }: UpdateStatusInput) => {
   const created_at = currUnixtime();
   const exp = ttl !== undefined ? created_at + ttl : undefined;
