@@ -52,7 +52,7 @@ const HeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
       <DropdownMenuTrigger className={css({ cursor: "pointer" })}>
         <AppAvatar imgSrc={myData.profile.picture} size="md" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent align="start" collisionPadding={8}>
         <DropdownMenuLabel>
           <span className={css({ mr: "1.5", fontWeight: "normal" })}>Logged in as</span>
           {myData.profile.displayName || myData.profile.name || "???"}
