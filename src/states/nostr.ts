@@ -40,11 +40,11 @@ export const useLogout = () => {
   return logout;
 };
 
-const ACCT_DATA_TTL = 12 * 60 * 60; // 12 hour
+const ACCT_DATA_CACHE_TTL = 12 * 60 * 60; // 12 hour
 
 const saveMyAccountDataCache = (metadata: AccountMetadata) => {
   localStorage.setItem("nostr_my_data", JSON.stringify(metadata));
-}
+};
 const getMyAccountDataCache = (): AccountMetadata | undefined => {
   const json = localStorage.getItem("nostr_my_data");
   if (json === null) {
@@ -57,7 +57,7 @@ const getMyAccountDataCache = (): AccountMetadata | undefined => {
     console.error(err);
     return undefined;
   }
-}
+};
 
 export const myAccountDataAtom = atom<Promise<AccountMetadata | undefined>>(async (get) => {
   const pubkey = get(myPubkeyAtom);
@@ -65,12 +65,8 @@ export const myAccountDataAtom = atom<Promise<AccountMetadata | undefined>>(asyn
     return undefined;
   }
   const cache = getMyAccountDataCache();
-  if (
-    cache !== undefined &&
-    currUnixtime() - cache.lastFetchedAt <= ACCT_DATA_TTL &&
-    cache.profile.pubkey === pubkey
-  ) {
-    console.log("using cached account data")
+  if (cache !== undefined && currUnixtime() - cache.lastFetchedAt <= ACCT_DATA_CACHE_TTL && cache.profile.pubkey === pubkey) {
+    console.log("using cached account data");
     return cache;
   }
 
@@ -305,6 +301,50 @@ const cancelFetchProfiles = () => {
   }
 };
 
+// profiles cache
+type UserProfileCache = {
+  profile: UserProfile;
+  lastFetchedAt: number;
+};
+const PROFILE_CACHE_TTL = 12 * 60 * 60; // 12 hour
+
+const getProfilesFromCache = (pubkeys: string[]): [UserProfile[], string[]] => {
+  const json = localStorage.getItem("nostr_profiles");
+  if (json === null) {
+    return [[], pubkeys];
+  }
+  try {
+    const cache = JSON.parse(json) as UserProfileCache[];
+    const cacheMap = new Map(cache.map((c) => [c.profile.pubkey, c]));
+
+    const cachedProfiles: UserProfile[] = [];
+    const cacheMissPubkeys: string[] = [];
+
+    for (const pubkey of pubkeys) {
+      const c = cacheMap.get(pubkey);
+      if (c !== undefined && currUnixtime() - c.lastFetchedAt <= PROFILE_CACHE_TTL) {
+        cachedProfiles.push(c.profile);
+      } else {
+        cacheMissPubkeys.push(pubkey);
+      }
+    }
+    return [cachedProfiles, cacheMissPubkeys];
+  } catch (err) {
+    console.error(err);
+    return [[], pubkeys];
+  }
+};
+const saveProfilesCache = (newProfiles: UserProfile[]) => {
+  const json = localStorage.getItem("nostr_profiles");
+  const cache = json !== null ? JSON.parse(json) as UserProfileCache[] : [];
+  const cacheMap = new Map(cache.map((c: UserProfileCache) => [c.profile.pubkey, c]));
+
+  for (const profile of newProfiles) {
+    cacheMap.set(profile.pubkey, { profile, lastFetchedAt: currUnixtime() });
+  }
+  localStorage.setItem("nostr_profiles", JSON.stringify([...cacheMap.values()]));
+}
+
 jotaiStore.sub(bootstrapFinishedAtom, async () => {
   cancelFetchProfiles();
 
@@ -317,21 +357,35 @@ jotaiStore.sub(bootstrapFinishedAtom, async () => {
   }
 
   const { followings, relayList } = myData;
+
+  // restore from cache
+  const [cached, cacheMissPubkeys] = getProfilesFromCache(followings);
+  for (const profile of cached) {
+    profilesMap.set(profile.pubkey, profile);
+  }
+  jotaiStore.set(followingsProfilesAtom, new Map(profilesMap));
+
+  // fetch cache-missed profiles
   const readRelays = selectRelaysByUsage(relayList, "read");
 
   fetchProfilesAbortCtrl = new AbortController();
   const iter = fetcherOnRxNostr.fetchLastEventPerAuthor(
-    { authors: followings, relayUrls: readRelays },
+    { authors: cacheMissPubkeys, relayUrls: readRelays },
     { kinds: [0] },
     { abortSignal: fetchProfilesAbortCtrl.signal, connectTimeoutMs: 3000 }
   );
+
+  const newProfiles: UserProfile[] = [];
   for await (const { event } of iter) {
     if (event !== undefined) {
       const profile = UserProfile.fromEvent(event);
       profilesMap.set(profile.pubkey, profile);
       jotaiStore.set(followingsProfilesAtom, new Map(profilesMap));
+
+      newProfiles.push(profile);
     }
   }
+  saveProfilesCache(newProfiles);
 });
 
 /* fetch user status of followings */
