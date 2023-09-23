@@ -17,6 +17,8 @@ import { NostrEvent, NostrFetcher } from "nostr-fetch";
 import { createRxForwardReq, createRxNostr, getSignedEvent, uniq, verify } from "rx-nostr";
 import { Subscription } from "rxjs";
 
+const jotaiStore = getDefaultStore();
+
 const myPubkeyAtom = atomWithStorage<string | undefined>("nostr_pubkey", undefined);
 
 export const useMyPubkey = () => {
@@ -38,11 +40,41 @@ export const useLogout = () => {
   return logout;
 };
 
+const ACCT_DATA_TTL = 12 * 60 * 60; // 12 hour
+
+const saveMyAccountDataCache = (metadata: AccountMetadata) => {
+  localStorage.setItem("nostr_my_data", JSON.stringify(metadata));
+}
+const getMyAccountDataCache = (): AccountMetadata | undefined => {
+  const json = localStorage.getItem("nostr_my_data");
+  if (json === null) {
+    return undefined;
+  }
+  try {
+    const data = JSON.parse(json) as AccountMetadata;
+    return data;
+  } catch (err) {
+    console.error(err);
+    return undefined;
+  }
+}
+
 export const myAccountDataAtom = atom<Promise<AccountMetadata | undefined>>(async (get) => {
   const pubkey = get(myPubkeyAtom);
   if (pubkey === undefined) {
     return undefined;
   }
+  const cache = getMyAccountDataCache();
+  if (
+    cache !== undefined &&
+    currUnixtime() - cache.lastFetchedAt <= ACCT_DATA_TTL &&
+    cache.profile.pubkey === pubkey
+  ) {
+    console.log("using cached account data")
+    return cache;
+  }
+
+  console.log("cache not found; fetching account data from relays");
   return fetchAccountData(pubkey);
 });
 
@@ -153,8 +185,6 @@ export const usePubkeyInNip07 = () => {
   return pubkey;
 };
 
-const jotaiStore = getDefaultStore();
-
 const bootstrapFetcher = NostrFetcher.init();
 
 const rxNostr = createRxNostr();
@@ -226,12 +256,16 @@ export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata>
     const profile = k0 !== undefined ? UserProfile.fromEvent(k0) : { srcEventId: "undefined", pubkey };
     const followings = k3 !== undefined ? getTagValuesByName(k3, "p") : [];
     const relayList = extractRelayListOrDefault([k3, k10002]);
-    return { profile, followings, relayList };
+    return { profile, followings, relayList, lastFetchedAt: currUnixtime() };
   };
 
   const [bootstrapRelays, isDefault] = await getBootstrapRelays();
   console.log("bootstrapRelays:", bootstrapRelays);
-  return fetchBody(bootstrapRelays, isDefault);
+  const data = await fetchBody(bootstrapRelays, isDefault);
+
+  saveMyAccountDataCache(data);
+
+  return data;
 };
 
 // turn into `true` when rxNostr.switchRelays() has finished
