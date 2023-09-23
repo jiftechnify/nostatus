@@ -63,6 +63,7 @@ export type AccountMetadata = {
   profile: UserProfile;
   followings: string[];
   relayList: RelayList;
+  lastFetchedAt: number; // unix timestamp in seconds
 };
 
 export type UserStatus = {

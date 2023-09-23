@@ -17,6 +17,8 @@ import { NostrEvent, NostrFetcher } from "nostr-fetch";
 import { createRxForwardReq, createRxNostr, getSignedEvent, uniq, verify } from "rx-nostr";
 import { Subscription } from "rxjs";
 
+const jotaiStore = getDefaultStore();
+
 const myPubkeyAtom = atomWithStorage<string | undefined>("nostr_pubkey", undefined);
 
 export const useMyPubkey = () => {
@@ -38,11 +40,37 @@ export const useLogout = () => {
   return logout;
 };
 
+const ACCT_DATA_CACHE_TTL = 12 * 60 * 60; // 12 hour
+
+const saveMyAccountDataCache = (metadata: AccountMetadata) => {
+  localStorage.setItem("nostr_my_data", JSON.stringify(metadata));
+};
+const getMyAccountDataCache = (): AccountMetadata | undefined => {
+  const json = localStorage.getItem("nostr_my_data");
+  if (json === null) {
+    return undefined;
+  }
+  try {
+    const data = JSON.parse(json) as AccountMetadata;
+    return data;
+  } catch (err) {
+    console.error(err);
+    return undefined;
+  }
+};
+
 export const myAccountDataAtom = atom<Promise<AccountMetadata | undefined>>(async (get) => {
   const pubkey = get(myPubkeyAtom);
   if (pubkey === undefined) {
     return undefined;
   }
+  const cache = getMyAccountDataCache();
+  if (cache !== undefined && currUnixtime() - cache.lastFetchedAt <= ACCT_DATA_CACHE_TTL && cache.profile.pubkey === pubkey) {
+    console.log("using cached account data");
+    return cache;
+  }
+
+  console.log("cache not found; fetching account data from relays");
   return fetchAccountData(pubkey);
 });
 
@@ -153,8 +181,6 @@ export const usePubkeyInNip07 = () => {
   return pubkey;
 };
 
-const jotaiStore = getDefaultStore();
-
 const bootstrapFetcher = NostrFetcher.init();
 
 const rxNostr = createRxNostr();
@@ -226,12 +252,16 @@ export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata>
     const profile = k0 !== undefined ? UserProfile.fromEvent(k0) : { srcEventId: "undefined", pubkey };
     const followings = k3 !== undefined ? getTagValuesByName(k3, "p") : [];
     const relayList = extractRelayListOrDefault([k3, k10002]);
-    return { profile, followings, relayList };
+    return { profile, followings, relayList, lastFetchedAt: currUnixtime() };
   };
 
   const [bootstrapRelays, isDefault] = await getBootstrapRelays();
   console.log("bootstrapRelays:", bootstrapRelays);
-  return fetchBody(bootstrapRelays, isDefault);
+  const data = await fetchBody(bootstrapRelays, isDefault);
+
+  saveMyAccountDataCache(data);
+
+  return data;
 };
 
 // turn into `true` when rxNostr.switchRelays() has finished
@@ -271,6 +301,50 @@ const cancelFetchProfiles = () => {
   }
 };
 
+// profiles cache
+type UserProfileCache = {
+  profile: UserProfile;
+  lastFetchedAt: number;
+};
+const PROFILE_CACHE_TTL = 12 * 60 * 60; // 12 hour
+
+const getProfilesFromCache = (pubkeys: string[]): [UserProfile[], string[]] => {
+  const json = localStorage.getItem("nostr_profiles");
+  if (json === null) {
+    return [[], pubkeys];
+  }
+  try {
+    const cache = JSON.parse(json) as UserProfileCache[];
+    const cacheMap = new Map(cache.map((c) => [c.profile.pubkey, c]));
+
+    const cachedProfiles: UserProfile[] = [];
+    const cacheMissPubkeys: string[] = [];
+
+    for (const pubkey of pubkeys) {
+      const c = cacheMap.get(pubkey);
+      if (c !== undefined && currUnixtime() - c.lastFetchedAt <= PROFILE_CACHE_TTL) {
+        cachedProfiles.push(c.profile);
+      } else {
+        cacheMissPubkeys.push(pubkey);
+      }
+    }
+    return [cachedProfiles, cacheMissPubkeys];
+  } catch (err) {
+    console.error(err);
+    return [[], pubkeys];
+  }
+};
+const saveProfilesCache = (newProfiles: UserProfile[]) => {
+  const json = localStorage.getItem("nostr_profiles");
+  const cache = json !== null ? JSON.parse(json) as UserProfileCache[] : [];
+  const cacheMap = new Map(cache.map((c: UserProfileCache) => [c.profile.pubkey, c]));
+
+  for (const profile of newProfiles) {
+    cacheMap.set(profile.pubkey, { profile, lastFetchedAt: currUnixtime() });
+  }
+  localStorage.setItem("nostr_profiles", JSON.stringify([...cacheMap.values()]));
+}
+
 jotaiStore.sub(bootstrapFinishedAtom, async () => {
   cancelFetchProfiles();
 
@@ -283,21 +357,35 @@ jotaiStore.sub(bootstrapFinishedAtom, async () => {
   }
 
   const { followings, relayList } = myData;
+
+  // restore from cache
+  const [cached, cacheMissPubkeys] = getProfilesFromCache(followings);
+  for (const profile of cached) {
+    profilesMap.set(profile.pubkey, profile);
+  }
+  jotaiStore.set(followingsProfilesAtom, new Map(profilesMap));
+
+  // fetch cache-missed profiles
   const readRelays = selectRelaysByUsage(relayList, "read");
 
   fetchProfilesAbortCtrl = new AbortController();
   const iter = fetcherOnRxNostr.fetchLastEventPerAuthor(
-    { authors: followings, relayUrls: readRelays },
+    { authors: cacheMissPubkeys, relayUrls: readRelays },
     { kinds: [0] },
     { abortSignal: fetchProfilesAbortCtrl.signal, connectTimeoutMs: 3000 }
   );
+
+  const newProfiles: UserProfile[] = [];
   for await (const { event } of iter) {
     if (event !== undefined) {
       const profile = UserProfile.fromEvent(event);
       profilesMap.set(profile.pubkey, profile);
       jotaiStore.set(followingsProfilesAtom, new Map(profilesMap));
+
+      newProfiles.push(profile);
     }
   }
+  saveProfilesCache(newProfiles);
 });
 
 /* fetch user status of followings */
