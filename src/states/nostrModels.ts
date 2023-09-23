@@ -34,7 +34,7 @@ export const UserProfile = {
 } as const;
 
 export type StatusData = {
-  srcEventId: string;
+  srcEvent: NostrEvent;
   content: string;
   linkUrl: string;
   createdAt: number;
@@ -55,7 +55,7 @@ export const StatusData = {
       return !isNaN(exp) ? exp : undefined;
     })();
 
-    return { srcEventId: ev.id, content, linkUrl, createdAt, expiration };
+    return { srcEvent: ev, content, linkUrl, createdAt, expiration };
   },
 } as const;
 
@@ -77,9 +77,15 @@ export const UserStatus = {
     return Math.max(us.general?.createdAt ?? 0, us.music?.createdAt ?? 0);
   },
   contentId(us: UserStatus): string {
-    return `${us.general?.srcEventId ?? "general_undefined"}${us.music?.srcEventId ?? "music_undefined"}`;
+    return `${us.general?.srcEvent.id ?? "general_undefined"}${us.music?.srcEvent.id ?? "music_undefined"}`;
   },
   isEmpty(us: UserStatus): boolean {
     return us.general === undefined && us.music === undefined;
   },
 };
+
+export const userStatusCategories = ["general", "music"] as const;
+
+export type UserStatusCategory = (typeof userStatusCategories)[number];
+export const isSupportedUserStatusCategory = (s: string): s is UserStatusCategory =>
+  (userStatusCategories as readonly string[]).includes(s);
