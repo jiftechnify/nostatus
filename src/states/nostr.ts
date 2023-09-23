@@ -6,7 +6,14 @@ import {
   selectRelaysByUsage,
 } from "../nostr";
 import { currUnixtime } from "../utils";
-import { AccountMetadata, StatusData, UserProfile, UserStatus } from "./nostrModels";
+import {
+  AccountMetadata,
+  StatusData,
+  UserProfile,
+  UserStatus,
+  UserStatusCategory,
+  isSupportedUserStatusCategory,
+} from "./nostrModels";
 
 import { atom, getDefaultStore, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { RESET, atomFamily, atomWithStorage, loadable, selectAtom } from "jotai/utils";
@@ -65,7 +72,11 @@ export const myAccountDataAtom = atom<Promise<AccountMetadata | undefined>>(asyn
     return undefined;
   }
   const cache = getMyAccountDataCache();
-  if (cache !== undefined && currUnixtime() - cache.lastFetchedAt <= ACCT_DATA_CACHE_TTL && cache.profile.pubkey === pubkey) {
+  if (
+    cache !== undefined &&
+    currUnixtime() - cache.lastFetchedAt <= ACCT_DATA_CACHE_TTL &&
+    cache.profile.pubkey === pubkey
+  ) {
     console.log("using cached account data");
     return cache;
   }
@@ -336,14 +347,14 @@ const getProfilesFromCache = (pubkeys: string[]): [UserProfile[], string[]] => {
 };
 const saveProfilesCache = (newProfiles: UserProfile[]) => {
   const json = localStorage.getItem("nostr_profiles");
-  const cache = json !== null ? JSON.parse(json) as UserProfileCache[] : [];
+  const cache = json !== null ? (JSON.parse(json) as UserProfileCache[]) : [];
   const cacheMap = new Map(cache.map((c: UserProfileCache) => [c.profile.pubkey, c]));
 
   for (const profile of newProfiles) {
     cacheMap.set(profile.pubkey, { profile, lastFetchedAt: currUnixtime() });
   }
   localStorage.setItem("nostr_profiles", JSON.stringify([...cacheMap.values()]));
-}
+};
 
 jotaiStore.sub(bootstrapFinishedAtom, async () => {
   cancelFetchProfiles();
@@ -390,11 +401,6 @@ jotaiStore.sub(bootstrapFinishedAtom, async () => {
 
 /* fetch user status of followings */
 const statusesMap = new Map<string, UserStatus>();
-
-type UserStatusCategory = "general" | "music";
-const isSupportedCategory = (s: string): s is UserStatusCategory => {
-  return ["general", "music"].includes(s);
-};
 
 // status invalidation logic
 const invalidateStatus = (pubkey: string, category: UserStatusCategory) => {
@@ -468,7 +474,7 @@ const applyStatusUpdate = (ev: NostrEvent) => {
     return;
   }
   const category = getFirstTagValueByName(ev, "d");
-  if (!isSupportedCategory(category)) {
+  if (!isSupportedUserStatusCategory(category)) {
     // ignore statuses other than "general" and "music"
     return;
   }

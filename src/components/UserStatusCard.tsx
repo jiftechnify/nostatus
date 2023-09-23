@@ -1,13 +1,17 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { circle, hstack, vstack } from "@shadow-panda/styled-system/patterns";
+import { icon } from "@shadow-panda/styled-system/recipes";
 import { token } from "@shadow-panda/styled-system/tokens";
 import { useAtomValue } from "jotai";
+import { Braces } from "lucide-react";
 import { useEffect, useState } from "react";
 import { userProfileAtomFamily, userStatusAtomFamily } from "../states/nostr";
 import { UserStatus } from "../states/nostrModels";
 import { currUnixtime } from "../utils";
 import { AppAvatar } from "./AppAvatar";
 import { ExternalLink } from "./ExternalLink";
+import { StatusDetailView } from "./StatusDetailView";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 
 type UserStatusCardProps = {
   pubkey: string;
@@ -95,6 +99,24 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
           })}
         ></div>
       )}
+
+      {/* open detail dialog */}
+      <Dialog>
+        <DialogTrigger
+          className={css({
+            position: "absolute",
+            color: "muted.foreground",
+            bottom: "3",
+            right: "3",
+            cursor: "pointer",
+          })}
+        >
+          <Braces className={icon()} />
+        </DialogTrigger>
+        <DialogContent className={css({ minW: "max-content" })}>
+          <StatusDetailView status={status} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

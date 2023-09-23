@@ -40,4 +40,24 @@ export const textStyles = defineTextStyles({
       fontSize: "xs",
     },
   },
+  "detail-title": {
+    description: "title of detail dialog",
+    value: {
+      fontSize: "2xl",
+      fontWeight: "semibold",
+    },
+  },
+  "detail-subject": {
+    description: "subject of detail item",
+    value: {
+      fontSize: "xl",
+      fontWeight: "semibold",
+    },
+  },
+  mono: {
+    description: "monospace text",
+    value: {
+      fontFamily: "monospace",
+    },
+  },
 });
