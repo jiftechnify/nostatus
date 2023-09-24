@@ -16,33 +16,52 @@ import {
 } from "./nostrModels";
 
 import { atom, getDefaultStore, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { RESET, atomFamily, atomWithStorage, loadable, selectAtom } from "jotai/utils";
+import { RESET, atomFamily, atomWithReset, atomWithStorage, loadable, selectAtom } from "jotai/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
 import { NostrEvent, NostrFetcher } from "nostr-fetch";
+import { getPublicKey } from "nostr-tools";
 import { createRxForwardReq, createRxNostr, getSignedEvent, uniq, verify } from "rx-nostr";
 import { Subscription } from "rxjs";
 
 const jotaiStore = getDefaultStore();
 
-const myPubkeyAtom = atomWithStorage<string | undefined>("nostr_pubkey", undefined);
+const inputPubkeyAtom = atomWithStorage<string | undefined>("nostr_pubkey", undefined);
+const inputPrivkeyAtom = atomWithReset<string | undefined>(undefined);
+
+const myPubkeyAtom = atom((get) => {
+  const pubkey = get(inputPubkeyAtom);
+  if (pubkey !== undefined) {
+    return pubkey;
+  }
+  const privkey = get(inputPrivkeyAtom);
+  if (privkey !== undefined) {
+    return getPublicKey(privkey);
+  }
+  return undefined;
+});
 
 export const useMyPubkey = () => {
-  const myPubkey = useAtomValue(myPubkeyAtom);
-  return myPubkey;
+  return useAtomValue(myPubkeyAtom);
 };
 
-export const useLogin = () => {
-  const setPubkey = useSetAtom(myPubkeyAtom);
-  return setPubkey;
+export const useLoginWithPubkey = () => {
+  return useSetAtom(inputPubkeyAtom);
+};
+
+export const useLoginWithPrivkey = () => {
+  return useSetAtom(inputPrivkeyAtom);
 };
 
 export const useLogout = () => {
-  const setPubkey = useSetAtom(myPubkeyAtom);
+  const setPubkey = useSetAtom(inputPubkeyAtom);
+  const setPrivkey = useSetAtom(inputPrivkeyAtom);
+
   const logout = useCallback(() => {
     setPubkey(RESET);
-  }, [setPubkey]);
+    setPrivkey(RESET);
+  }, [setPubkey, setPrivkey]);
 
   return logout;
 };
@@ -190,6 +209,19 @@ export const usePubkeyInNip07 = () => {
   }, [nip07Available]);
 
   return pubkey;
+};
+
+// write ops are enabled if:
+// - logged in via privkey
+// - logged in via NIP-07 extension
+// - logged in via pubkey and it matches with pubkey in NIP-07 extension
+export const useWriteOpsEnabled = () => {
+  const inputPrivkey = useAtomValue(inputPrivkeyAtom);
+
+  const inputPubkey = useAtomValue(inputPubkeyAtom);
+  const pubkeyInNip07 = usePubkeyInNip07();
+
+  return inputPrivkey !== undefined || (inputPubkey !== undefined && inputPubkey === pubkeyInNip07);
 };
 
 const bootstrapFetcher = NostrFetcher.init();
@@ -579,7 +611,11 @@ export const updateMyStatus = async ({ content, linkUrl, ttl }: UpdateStatusInpu
       ...(exp !== undefined ? [["expiration", String(exp)]] : []),
     ],
   };
-  const signedEv = await getSignedEvent(ev);
+
+  // precondition: logged in via privkey or NIP-07 extension is available
+  // in latter case, privkey will be undefined and getSignedEvent() will use NIP-07 extension to sign
+  const privkey = jotaiStore.get(inputPrivkeyAtom);
+  const signedEv = await getSignedEvent(ev, privkey);
 
   applyStatusUpdate(signedEv);
   rxNostr.send(signedEv);

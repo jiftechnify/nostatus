@@ -79,7 +79,7 @@ export const selectRelaysByUsage = (relayList: RelayList, usage: "read" | "write
     .filter(([, { read, write }]) => (usage === "read" && read) || (usage === "write" && write))
     .map(([rurl]) => rurl);
 
-/* pubkey */
+/* keys */
 const regexp32BytesHexStr = /^[a-f0-9]{64}$/;
 
 export const parsePubkey = (pubkey: string): string | undefined => {
@@ -89,7 +89,7 @@ export const parsePubkey = (pubkey: string): string | undefined => {
       if (res.type === "npub") {
         return res.data;
       }
-      console.log("toHexPrivateKey: unexpected decode result");
+      console.error("parsePubkey: unexpected decode result");
       return undefined;
     } catch (err) {
       console.error(err);
@@ -97,4 +97,21 @@ export const parsePubkey = (pubkey: string): string | undefined => {
     }
   }
   return regexp32BytesHexStr.test(pubkey) ? pubkey : undefined;
+};
+
+export const parsePrivkey = (nsec: string): string | undefined => {
+  if (!nsec.startsWith("nsec1")) {
+    return undefined;
+  }
+  try {
+    const res = nip19.decode(nsec);
+    if (res.type === "nsec") {
+      return res.data;
+    }
+    console.error("parsePrivkey: unexpected decode result");
+    return undefined;
+  } catch (err) {
+    console.error(err);
+    return undefined;
+  }
 };
