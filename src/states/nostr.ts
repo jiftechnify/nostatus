@@ -5,7 +5,7 @@ import {
   parseRelayListInEvent,
   selectRelaysByUsage,
 } from "../nostr";
-import { currUnixtime } from "../utils";
+import { currUnixtime, wait } from "../utils";
 import {
   AccountMetadata,
   StatusData,
@@ -43,6 +43,15 @@ const myPubkeyAtom = atom((get) => {
   return undefined;
 });
 
+// temporarily mask my pubkey. used to cause hard reload
+const isMyPubkeyMaskedAtom = atom(false)
+const maskedMyPubkeyAtom = atom((get) => {
+  if (get(isMyPubkeyMaskedAtom)) {
+    return undefined
+  }
+  return get(myPubkeyAtom)
+})
+
 export const useMyPubkey = () => {
   return useAtomValue(myPubkeyAtom);
 };
@@ -67,6 +76,26 @@ export const useLogout = () => {
   return logout;
 };
 
+export const useHardReload = () => {
+  const setIsPubkeyMasked = useSetAtom(isMyPubkeyMaskedAtom);
+
+  const hardReload = useCallback(async () => {
+    setIsPubkeyMasked(true);
+
+    // clear all caches
+    localStorage.removeItem(ACCT_DATA_CACHE_KEY);
+    localStorage.removeItem(PROFILE_CACHE_KEY);
+    localStorage.removeItem(STATUSES_CACHE_KEY);
+
+    // TODO: properly wait for state reset
+    await wait(200);
+
+    setIsPubkeyMasked(false);
+  }, [setIsPubkeyMasked]);
+
+  return hardReload;
+}
+
 const ACCT_DATA_CACHE_KEY = "nostr_my_data";
 const ACCT_DATA_CACHE_TTL = 12 * 60 * 60; // 12 hour
 
@@ -88,7 +117,7 @@ const getMyAccountDataCache = (): AccountMetadata | undefined => {
 };
 
 export const myAccountDataAtom = atom<Promise<AccountMetadata | undefined>>(async (get) => {
-  const pubkey = get(myPubkeyAtom);
+  const pubkey = get(maskedMyPubkeyAtom);
   if (pubkey === undefined) {
     return undefined;
   }
@@ -141,7 +170,7 @@ export const userStatusAtomFamily = atomFamily((pubkey: string) => {
 });
 
 export const myGeneralStatusAtom = atom((get) => {
-  const myPubkey = get(myPubkeyAtom);
+  const myPubkey = get(maskedMyPubkeyAtom);
   if (myPubkey === undefined) {
     return undefined;
   }

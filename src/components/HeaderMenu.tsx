@@ -1,9 +1,9 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { icon } from "@shadow-panda/styled-system/recipes";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { ArrowUpCircle, Github, LogOut, Moon, Sun, Zap } from "lucide-react";
+import { ArrowUpCircle, Github, LogOut, Moon, RotateCw, Sun, Zap } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { myAccountDataAtom, useLogout, useWriteOpsEnabled } from "../states/nostr";
+import { myAccountDataAtom, useHardReload, useLogout, useWriteOpsEnabled } from "../states/nostr";
 import { AccountMetadata } from "../states/nostrModels";
 import { ColorTheme, colorThemeAtom } from "../states/theme";
 import { menuItem } from "../styles/recipes";
@@ -41,7 +41,7 @@ type HeaderMenuBodyProps = {
 
 const HeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
   const [open, setOpen] = useAtom(isHeaderMenuOpenAtom);
-  
+
   const writeOpsEnabled = useWriteOpsEnabled();
 
   return (
@@ -61,6 +61,7 @@ const HeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
         <MenuItemZap />
         <MenuItemGitHubRepo />
         <DropdownMenuSeparator />
+        <MenuItemHardReload />
         <MenuItemLogout />
       </DropdownMenuContent>
     </DropdownMenu>
@@ -117,17 +118,6 @@ const MenuItemToggleColorTheme: React.FC = () => {
   );
 };
 
-const MenuItemLogout = () => {
-  const logout = useLogout();
-
-  return (
-    <DropdownMenuItem className={menuItem({ color: "destructive" })} onSelect={logout}>
-      <LogOut className={icon()} />
-      <span>Logout</span>
-    </DropdownMenuItem>
-  );
-};
-
 const MenuItemZap = () => {
   // initialize click handler which opens zap dialog
   const menuItemRef = useRef<HTMLDivElement>(null);
@@ -169,6 +159,28 @@ const MenuItemGitHubRepo = () => {
         <Github className={icon()} />
         <span>View Code on GitHub</span>
       </a>
+    </DropdownMenuItem>
+  );
+};
+
+const MenuItemHardReload = () => {
+  const hardReload = useHardReload();
+
+  return (
+    <DropdownMenuItem className={menuItem({ color: "destructive" })} onSelect={hardReload}>
+      <RotateCw className={icon()} />
+      <span>Hard Reload</span>
+    </DropdownMenuItem>
+  );
+};
+
+const MenuItemLogout = () => {
+  const logout = useLogout();
+
+  return (
+    <DropdownMenuItem className={menuItem({ color: "destructive" })} onSelect={logout}>
+      <LogOut className={icon()} />
+      <span>Logout</span>
     </DropdownMenuItem>
   );
 };
