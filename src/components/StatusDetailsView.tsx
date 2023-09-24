@@ -5,25 +5,57 @@ import { getFirstTagValueByName } from "../nostr";
 import { StatusData, UserStatus, UserStatusCategory, userStatusCategories } from "../states/nostrModels";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
-type StatusDetailsViewProps = {
-  status: UserStatus;
-};
+const tabsListStyle = css({
+  w: "full",
+  p: "0",
+  justifyContent: "flex-start",
+  rounded: "0",
+  borderBottom: "base",
+  bg: "transparent",
+  gap: "4",
+});
+
+const tabsTrigStyle = css({
+  position: "relative",
+  h: "9",
+  rounded: "0",
+  borderBottom: "2px solid transparent",
+  bg: "transparent",
+  px: "2",
+  pb: "3",
+  pt: "2",
+  fontWeight: "semibold",
+  color: "muted.foreground",
+  shadow: "none",
+  transition: "none",
+  cursor: "pointer",
+
+  "&[data-state=active]": {
+    borderBottomColor: "primary",
+    color: "foreground",
+    shadow: "none",
+  },
+});
 
 const categoryLabelTable: Record<UserStatusCategory, string> = {
   general: "General",
   music: "Music",
 };
 
+type StatusDetailsViewProps = {
+  status: UserStatus;
+};
+
 export const StatusDetailsView: React.FC<StatusDetailsViewProps> = ({ status }) => {
   const availableCategories = userStatusCategories.filter((cat) => status[cat] !== undefined);
 
   return (
-    <div className={css({ w: "95vw", maxW: "800px"})}>
-      <h2 className={css({ mb: '3', textStyle: 'detail-title', border: "none" })}>Details</h2>
+    <div className={css({ w: "95vw", maxW: "800px" })}>
+      <h2 className={css({ mb: "1.5", textStyle: "detail-title", border: "none" })}>Details</h2>
       <Tabs defaultValue={availableCategories[0]}>
-        <TabsList>
+        <TabsList className={tabsListStyle}>
           {availableCategories.map((cat) => (
-            <TabsTrigger key={cat} value={cat}>
+            <TabsTrigger className={tabsTrigStyle} key={cat} value={cat}>
               {categoryLabelTable[cat]}
             </TabsTrigger>
           ))}
@@ -47,7 +79,7 @@ export const StatusDetailsView: React.FC<StatusDetailsViewProps> = ({ status }) 
 type StatusDetailsContentProps = {
   data: StatusData;
 };
-const subjectStyle = css({textStyle: 'detail-subject', mb: '1'});
+const subjectStyle = css({ textStyle: "detail-subject", mb: "1" });
 
 const StatusDetailsContent: React.FC<StatusDetailsContentProps> = ({ data }) => {
   const { srcEvent } = data;
@@ -59,7 +91,7 @@ const StatusDetailsContent: React.FC<StatusDetailsContentProps> = ({ data }) => 
   });
 
   return (
-    <div className={vstack({ gap: "3.5", alignItems: "start" })}>
+    <div className={vstack({ pt: "1", gap: "3.5", alignItems: "start" })}>
       <div className={css({ maxW: "100%" })}>
         <h3 className={subjectStyle}>Lifetime</h3>
         <p>
@@ -76,7 +108,7 @@ const StatusDetailsContent: React.FC<StatusDetailsContentProps> = ({ data }) => 
       </div>
       <div className={css({ maxW: "100%" })}>
         <h3 className={subjectStyle}>Raw Event</h3>
-        <pre className={css({ maxH: '300px', overflow: "scroll", fontFamily: "monospace", lineHeight: "1.05" })}>
+        <pre className={css({ maxH: "300px", overflow: "scroll", fontFamily: "monospace", lineHeight: "1.05" })}>
           {JSON.stringify(srcEvent, undefined, 2)}
         </pre>
       </div>
@@ -84,7 +116,7 @@ const StatusDetailsContent: React.FC<StatusDetailsContentProps> = ({ data }) => 
   );
 };
 
-const EventIdentifier: React.FC<{ id: string }> = ({  id }) => {
+const EventIdentifier: React.FC<{ id: string }> = ({ id }) => {
   return (
     <p
       className={css({
