@@ -2,6 +2,12 @@ import { defineSemanticTokens } from "@pandacss/dev";
 
 export const semanticTokens = defineSemanticTokens({
   colors: {
+    foreground: {
+      value: {
+        base: "{colors.slate.950}",
+        _dark: "{colors.slate.50}",
+      },
+    },
     background: {
       value: {
         base: "{colors.slate.100}",
@@ -70,12 +76,6 @@ export const semanticTokens = defineSemanticTokens({
           base: "{colors.slate.900}",
           _dark: "{colors.slate.50}",
         },
-      },
-    },
-    foreground: {
-      value: {
-        base: "{colors.slate.950}",
-        _dark: "{colors.slate.50}",
       },
     },
     primary: {
@@ -184,6 +184,12 @@ export const semanticTokens = defineSemanticTokens({
       value: {
         base: "{colors.slate.400}",
         _dark: "{colors.slate.500}",
+      },
+    },
+    "detail-trigger": {
+      value: {
+        base: "{colors.slate.300}",
+        _dark: "{colors.slate.700}",
       },
     },
   },
