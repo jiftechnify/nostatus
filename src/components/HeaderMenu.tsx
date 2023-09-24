@@ -3,7 +3,7 @@ import { icon } from "@shadow-panda/styled-system/recipes";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ArrowUpCircle, Github, LogOut, Moon, Sun, Zap } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { myAccountDataAtom, useLogout, useMyPubkey, usePubkeyInNip07 } from "../states/nostr";
+import { myAccountDataAtom, useLogout, useWriteOpsEnabled } from "../states/nostr";
 import { AccountMetadata } from "../states/nostrModels";
 import { ColorTheme, colorThemeAtom } from "../states/theme";
 import { menuItem } from "../styles/recipes";
@@ -41,11 +41,8 @@ type HeaderMenuBodyProps = {
 
 const HeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
   const [open, setOpen] = useAtom(isHeaderMenuOpenAtom);
-
-  // disable write operations if the pubkey doesn't match with NIP-07 pubkey
-  const myPubkey = useMyPubkey();
-  const nip07Pubkey = usePubkeyInNip07();
-  const disableWriteOps = myPubkey !== nip07Pubkey;
+  
+  const writeOpsEnabled = useWriteOpsEnabled();
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -58,7 +55,7 @@ const HeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
           {myData.profile.displayName || myData.profile.name || "???"}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <MenuItemUpdateStatus disabled={disableWriteOps} />
+        <MenuItemUpdateStatus disabled={!writeOpsEnabled} />
         <MenuItemToggleColorTheme />
         <DropdownMenuSeparator />
         <MenuItemZap />
