@@ -3,14 +3,14 @@ import { circle, hstack, vstack } from "@shadow-panda/styled-system/patterns";
 import { icon } from "@shadow-panda/styled-system/recipes";
 import { token } from "@shadow-panda/styled-system/tokens";
 import { useAtomValue } from "jotai";
-import { Braces } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 import { userProfileAtomFamily, userStatusAtomFamily } from "../states/nostr";
 import { UserStatus } from "../states/nostrModels";
 import { currUnixtime } from "../utils";
 import { AppAvatar } from "./AppAvatar";
 import { ExternalLink } from "./ExternalLink";
-import { StatusDetailView } from "./StatusDetailView";
+import { StatusDetailsView } from "./StatusDetailsView";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 
 type UserStatusCardProps = {
@@ -100,21 +100,21 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
         ></div>
       )}
 
-      {/* open detail dialog */}
+      {/* open details dialog */}
       <Dialog>
         <DialogTrigger
           className={css({
             position: "absolute",
-            color: "muted.foreground",
+            color: "detail-trigger",
             bottom: "3",
             right: "3",
             cursor: "pointer",
           })}
         >
-          <Braces className={icon()} />
+          <MoreHorizontal className={icon()} />
         </DialogTrigger>
         <DialogContent className={css({ minW: "max-content" })}>
-          <StatusDetailView status={status} />
+          <StatusDetailsView status={status} />
         </DialogContent>
       </Dialog>
     </div>
