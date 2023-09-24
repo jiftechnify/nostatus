@@ -10,7 +10,6 @@ const tabsListStyle = css({
   p: "0",
   justifyContent: "flex-start",
   rounded: "0",
-  borderBottom: "base",
   bg: "transparent",
   gap: "4",
 });
