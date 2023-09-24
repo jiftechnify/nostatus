@@ -13,6 +13,7 @@ import {
   UserStatus,
   UserStatusCategory,
   isSupportedUserStatusCategory,
+  userStatusCategories,
 } from "./nostrModels";
 
 import { atom, getDefaultStore, useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -66,13 +67,14 @@ export const useLogout = () => {
   return logout;
 };
 
+const ACCT_DATA_CACHE_KEY = "nostr_my_data";
 const ACCT_DATA_CACHE_TTL = 12 * 60 * 60; // 12 hour
 
 const saveMyAccountDataCache = (metadata: AccountMetadata) => {
-  localStorage.setItem("nostr_my_data", JSON.stringify(metadata));
+  localStorage.setItem(ACCT_DATA_CACHE_KEY, JSON.stringify(metadata));
 };
 const getMyAccountDataCache = (): AccountMetadata | undefined => {
-  const json = localStorage.getItem("nostr_my_data");
+  const json = localStorage.getItem(ACCT_DATA_CACHE_KEY);
   if (json === null) {
     return undefined;
   }
@@ -349,10 +351,11 @@ type UserProfileCache = {
   profile: UserProfile;
   lastFetchedAt: number;
 };
+const PROFILE_CACHE_KEY = "nostr_profiles";
 const PROFILE_CACHE_TTL = 12 * 60 * 60; // 12 hour
 
 const getProfilesFromCache = (pubkeys: string[]): [UserProfile[], string[]] => {
-  const json = localStorage.getItem("nostr_profiles");
+  const json = localStorage.getItem(PROFILE_CACHE_KEY);
   if (json === null) {
     return [[], pubkeys];
   }
@@ -378,14 +381,14 @@ const getProfilesFromCache = (pubkeys: string[]): [UserProfile[], string[]] => {
   }
 };
 const saveProfilesCache = (newProfiles: UserProfile[]) => {
-  const json = localStorage.getItem("nostr_profiles");
+  const json = localStorage.getItem(PROFILE_CACHE_KEY);
   const cache = json !== null ? (JSON.parse(json) as UserProfileCache[]) : [];
   const cacheMap = new Map(cache.map((c: UserProfileCache) => [c.profile.pubkey, c]));
 
   for (const profile of newProfiles) {
     cacheMap.set(profile.pubkey, { profile, lastFetchedAt: currUnixtime() });
   }
-  localStorage.setItem("nostr_profiles", JSON.stringify([...cacheMap.values()]));
+  localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify([...cacheMap.values()]));
 };
 
 jotaiStore.sub(bootstrapFinishedAtom, async () => {
@@ -535,16 +538,76 @@ const applyStatusUpdate = (ev: NostrEvent) => {
   }
 };
 
+// statuses cache
+type StatusesCache = {
+  statuses: UserStatus[];
+  latestUpdateTime: number | undefined;
+};
+const STATUSES_CACHE_KEY = "nostr_statuses";
+
+const getStatusesCache = (pubkeys: string[]): [StatusesCache, string[]] => {
+  const json = localStorage.getItem(STATUSES_CACHE_KEY);
+  if (json === null) {
+    return [{ statuses: [], latestUpdateTime: undefined }, pubkeys];
+  }
+  try {
+    const cache = JSON.parse(json) as StatusesCache;
+    const cacheMap = new Map(cache.statuses.map((s) => [s.pubkey, s]));
+
+    const cachedStatuses: UserStatus[] = [];
+    const cacheMissPubkeys: string[] = [];
+
+    for (const pubkey of pubkeys) {
+      const s = cacheMap.get(pubkey);
+      if (s !== undefined) {
+        // invalidate expired statuses
+        for (const cat of userStatusCategories) {
+          const statusData = s[cat];
+          if (statusData?.expiration !== undefined && currUnixtime() >= statusData.expiration) {
+            s[cat] = undefined;
+          }
+        }
+        if (UserStatus.isEmpty(s)) {
+          continue;
+        }
+        cachedStatuses.push(s);
+      } else {
+        cacheMissPubkeys.push(pubkey);
+      }
+    }
+    return [{ statuses: cachedStatuses, latestUpdateTime: cache.latestUpdateTime }, cacheMissPubkeys];
+  } catch (err) {
+    console.error(err);
+    return [{ statuses: [], latestUpdateTime: undefined }, pubkeys];
+  }
+};
+
+const saveStatusesCache = (statuses: UserStatus[]) => {
+  if (statuses.length === 0) {
+    localStorage.removeItem(STATUSES_CACHE_KEY);
+    return;
+  }
+  const latestUpdateTime = statuses.reduce((latest, s) => Math.max(UserStatus.lastUpdateTime(s), latest), 0);
+  const cache = { statuses, latestUpdateTime };
+  localStorage.setItem(STATUSES_CACHE_KEY, JSON.stringify(cache));
+};
+
 let fetchPastStatusesAbortCtrl: AbortController | undefined;
-let statusUpdateSub: Subscription | undefined;
+let statusEventsSubscription: Subscription | undefined;
+let unsubStatusesMapUpdate: (() => void) | undefined;
+
 const cancelFetchStatuses = () => {
   if (fetchPastStatusesAbortCtrl !== undefined) {
     fetchPastStatusesAbortCtrl.abort();
     fetchPastStatusesAbortCtrl = undefined;
   }
-  if (statusUpdateSub !== undefined) {
-    statusUpdateSub.unsubscribe();
-    statusUpdateSub = undefined;
+  if (statusEventsSubscription !== undefined) {
+    statusEventsSubscription.unsubscribe();
+    statusEventsSubscription = undefined;
+  }
+  if (unsubStatusesMapUpdate !== undefined) {
+    unsubStatusesMapUpdate();
+    unsubStatusesMapUpdate = undefined;
   }
 };
 
@@ -557,27 +620,59 @@ jotaiStore.sub(bootstrapFinishedAtom, async () => {
     statusesMap.clear();
     invalidationScheduler.cancelAll();
     jotaiStore.set(followingsStatusesAtom, new Map<string, UserStatus>());
+    saveStatusesCache([]); // remove statuses cache
     return;
   }
 
   const { followings, relayList } = myData;
   const readRelays = selectRelaysByUsage(relayList, "read");
 
-  // fetch past events
+  const [{ statuses, latestUpdateTime }, cacheMissPubkeys] = getStatusesCache(followings);
+  if (statuses.length > 0) {
+    // restore from cache
+    for (const status of statuses) {
+      statusesMap.set(status.pubkey, status);
+    }
+    jotaiStore.set(followingsStatusesAtom, new Map(statusesMap));
+
+    // fetch status updates for status-cached pubkeys
+    const statusCachedPubkeys = statuses.map((s) => s.pubkey);
+
+    fetchPastStatusesAbortCtrl = new AbortController();
+    const pastStatusEvIter = fetcherOnRxNostr.allEventsIterator(
+      readRelays,
+      { kinds: [30315], authors: statusCachedPubkeys, "#d": ["general", "music"] },
+      { since: latestUpdateTime },
+      { abortSignal: fetchPastStatusesAbortCtrl.signal, connectTimeoutMs: 3000 }
+    );
+    for await (const ev of pastStatusEvIter) {
+      applyStatusUpdate(ev);
+    }
+    saveStatusesCache([...statusesMap.values()]);
+  }
+
+  // fetch all the past status events for cache-missed pubkeys
   fetchPastStatusesAbortCtrl = new AbortController();
   const pastStatusEvIter = fetcherOnRxNostr.allEventsIterator(
     readRelays,
-    { kinds: [30315], authors: followings, "#d": ["general", "music"] },
+    { kinds: [30315], authors: cacheMissPubkeys, "#d": ["general", "music"] },
     {},
     { abortSignal: fetchPastStatusesAbortCtrl.signal, connectTimeoutMs: 3000 }
   );
   for await (const ev of pastStatusEvIter) {
     applyStatusUpdate(ev);
   }
+  saveStatusesCache([...statusesMap.values()]);
+
+  // subscribe statusMap's update and update cache every time it's updated
+  unsubStatusesMapUpdate = jotaiStore.sub(followingsStatusesAtom, () => {
+    const statusesMap = jotaiStore.get(followingsStatusesAtom);
+    saveStatusesCache([...statusesMap.values()]);
+  });
 
   // subscribe realtime updates
   const req = createRxForwardReq();
-  statusUpdateSub = rxNostr
+  statusEventsSubscription = rxNostr
     .use(req)
     .pipe(verify(), uniq())
     .subscribe((p) => applyStatusUpdate(p.event));
