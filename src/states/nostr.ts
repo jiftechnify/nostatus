@@ -5,7 +5,7 @@ import {
   parseRelayListInEvent,
   selectRelaysByUsage,
 } from "../nostr";
-import { currUnixtime } from "../utils";
+import { currUnixtime, wait } from "../utils";
 import {
   AccountMetadata,
   StatusData,
@@ -13,6 +13,7 @@ import {
   UserStatus,
   UserStatusCategory,
   isSupportedUserStatusCategory,
+  userStatusCategories,
 } from "./nostrModels";
 
 import { atom, getDefaultStore, useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -42,6 +43,15 @@ const myPubkeyAtom = atom((get) => {
   return undefined;
 });
 
+// temporarily mask my pubkey. used to cause hard reload
+const isMyPubkeyMaskedAtom = atom(false)
+const maskedMyPubkeyAtom = atom((get) => {
+  if (get(isMyPubkeyMaskedAtom)) {
+    return undefined
+  }
+  return get(myPubkeyAtom)
+})
+
 export const useMyPubkey = () => {
   return useAtomValue(myPubkeyAtom);
 };
@@ -66,13 +76,34 @@ export const useLogout = () => {
   return logout;
 };
 
+export const useHardReload = () => {
+  const setIsPubkeyMasked = useSetAtom(isMyPubkeyMaskedAtom);
+
+  const hardReload = useCallback(async () => {
+    setIsPubkeyMasked(true);
+
+    // clear all caches
+    localStorage.removeItem(ACCT_DATA_CACHE_KEY);
+    localStorage.removeItem(PROFILE_CACHE_KEY);
+    localStorage.removeItem(STATUSES_CACHE_KEY);
+
+    // TODO: properly wait for state reset
+    await wait(200);
+
+    setIsPubkeyMasked(false);
+  }, [setIsPubkeyMasked]);
+
+  return hardReload;
+}
+
+const ACCT_DATA_CACHE_KEY = "nostr_my_data";
 const ACCT_DATA_CACHE_TTL = 12 * 60 * 60; // 12 hour
 
 const saveMyAccountDataCache = (metadata: AccountMetadata) => {
-  localStorage.setItem("nostr_my_data", JSON.stringify(metadata));
+  localStorage.setItem(ACCT_DATA_CACHE_KEY, JSON.stringify(metadata));
 };
 const getMyAccountDataCache = (): AccountMetadata | undefined => {
-  const json = localStorage.getItem("nostr_my_data");
+  const json = localStorage.getItem(ACCT_DATA_CACHE_KEY);
   if (json === null) {
     return undefined;
   }
@@ -86,7 +117,7 @@ const getMyAccountDataCache = (): AccountMetadata | undefined => {
 };
 
 export const myAccountDataAtom = atom<Promise<AccountMetadata | undefined>>(async (get) => {
-  const pubkey = get(myPubkeyAtom);
+  const pubkey = get(maskedMyPubkeyAtom);
   if (pubkey === undefined) {
     return undefined;
   }
@@ -139,7 +170,7 @@ export const userStatusAtomFamily = atomFamily((pubkey: string) => {
 });
 
 export const myGeneralStatusAtom = atom((get) => {
-  const myPubkey = get(myPubkeyAtom);
+  const myPubkey = get(maskedMyPubkeyAtom);
   if (myPubkey === undefined) {
     return undefined;
   }
@@ -349,10 +380,11 @@ type UserProfileCache = {
   profile: UserProfile;
   lastFetchedAt: number;
 };
+const PROFILE_CACHE_KEY = "nostr_profiles";
 const PROFILE_CACHE_TTL = 12 * 60 * 60; // 12 hour
 
 const getProfilesFromCache = (pubkeys: string[]): [UserProfile[], string[]] => {
-  const json = localStorage.getItem("nostr_profiles");
+  const json = localStorage.getItem(PROFILE_CACHE_KEY);
   if (json === null) {
     return [[], pubkeys];
   }
@@ -378,14 +410,14 @@ const getProfilesFromCache = (pubkeys: string[]): [UserProfile[], string[]] => {
   }
 };
 const saveProfilesCache = (newProfiles: UserProfile[]) => {
-  const json = localStorage.getItem("nostr_profiles");
+  const json = localStorage.getItem(PROFILE_CACHE_KEY);
   const cache = json !== null ? (JSON.parse(json) as UserProfileCache[]) : [];
   const cacheMap = new Map(cache.map((c: UserProfileCache) => [c.profile.pubkey, c]));
 
   for (const profile of newProfiles) {
     cacheMap.set(profile.pubkey, { profile, lastFetchedAt: currUnixtime() });
   }
-  localStorage.setItem("nostr_profiles", JSON.stringify([...cacheMap.values()]));
+  localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify([...cacheMap.values()]));
 };
 
 jotaiStore.sub(bootstrapFinishedAtom, async () => {
@@ -535,16 +567,78 @@ const applyStatusUpdate = (ev: NostrEvent) => {
   }
 };
 
+// statuses cache
+type StatusesCache = {
+  statuses: UserStatus[];
+  latestUpdateTime: number;
+  myPubkey: string;
+};
+const STATUSES_CACHE_KEY = "nostr_statuses";
+
+const getStatusesCache = (myPubkey: string, followings: string[]): [StatusesCache | undefined, string[]] => {
+  const json = localStorage.getItem(STATUSES_CACHE_KEY);
+  if (json === null) {
+    return [undefined, followings];
+  }
+  try {
+    const cache = JSON.parse(json) as StatusesCache;
+
+    if (myPubkey !== cache.myPubkey) {
+      // ignore cache when logged in as different account from previous session
+      localStorage.removeItem(STATUSES_CACHE_KEY);
+      return [undefined, followings];
+    }
+
+    const cacheMap = new Map(cache.statuses.map((s) => [s.pubkey, s]));
+
+    const cachedStatuses: UserStatus[] = [];
+    const cacheMissPubkeys: string[] = [];
+
+    for (const pubkey of followings) {
+      const s = cacheMap.get(pubkey);
+      if (s !== undefined) {
+        // invalidate expired statuses
+        for (const cat of userStatusCategories) {
+          const statusData = s[cat];
+          if (statusData?.expiration !== undefined && currUnixtime() >= statusData.expiration) {
+            s[cat] = undefined;
+          }
+        }
+        if (UserStatus.isEmpty(s)) {
+          continue;
+        }
+        cachedStatuses.push(s);
+      } else {
+        cacheMissPubkeys.push(pubkey);
+      }
+    }
+    return [{ statuses: cachedStatuses, latestUpdateTime: cache.latestUpdateTime, myPubkey: cache.myPubkey }, cacheMissPubkeys];
+  } catch (err) {
+    console.error(err);
+    return [undefined, followings];
+  }
+};
+
+const saveStatusesCache = (myPubkey: string, statuses: UserStatus[]) => {
+  if (statuses.length === 0) {
+    localStorage.removeItem(STATUSES_CACHE_KEY);
+    return;
+  }
+  const latestUpdateTime = statuses.reduce((latest, s) => Math.max(UserStatus.lastUpdateTime(s), latest), 0);
+  const cache: StatusesCache = { statuses, latestUpdateTime, myPubkey };
+  localStorage.setItem(STATUSES_CACHE_KEY, JSON.stringify(cache));
+};
+
 let fetchPastStatusesAbortCtrl: AbortController | undefined;
-let statusUpdateSub: Subscription | undefined;
+let statusEventsSubscription: Subscription | undefined;
+
 const cancelFetchStatuses = () => {
   if (fetchPastStatusesAbortCtrl !== undefined) {
     fetchPastStatusesAbortCtrl.abort();
-    fetchPastStatusesAbortCtrl = undefined;
   }
-  if (statusUpdateSub !== undefined) {
-    statusUpdateSub.unsubscribe();
-    statusUpdateSub = undefined;
+  if (statusEventsSubscription !== undefined) {
+    statusEventsSubscription.unsubscribe();
+    statusEventsSubscription = undefined;
   }
 };
 
@@ -560,33 +654,74 @@ jotaiStore.sub(bootstrapFinishedAtom, async () => {
     return;
   }
 
-  const { followings, relayList } = myData;
+  const { followings, relayList, profile } = myData;
+  const myPubkey = profile.pubkey;
   const readRelays = selectRelaysByUsage(relayList, "read");
-
-  // fetch past events
-  fetchPastStatusesAbortCtrl = new AbortController();
-  const pastStatusEvIter = fetcherOnRxNostr.allEventsIterator(
-    readRelays,
-    { kinds: [30315], authors: followings, "#d": ["general", "music"] },
-    {},
-    { abortSignal: fetchPastStatusesAbortCtrl.signal, connectTimeoutMs: 3000 }
-  );
-  for await (const ev of pastStatusEvIter) {
-    applyStatusUpdate(ev);
-  }
 
   // subscribe realtime updates
   const req = createRxForwardReq();
-  statusUpdateSub = rxNostr
+  statusEventsSubscription = rxNostr
     .use(req)
     .pipe(verify(), uniq())
-    .subscribe((p) => applyStatusUpdate(p.event));
+    .subscribe((p) => {
+      applyStatusUpdate(p.event);
+      saveStatusesCache(myPubkey, [...statusesMap.values()]);
+    });
   req.emit({
     kinds: [30315],
     authors: followings,
     "#d": ["general", "music"],
     since: currUnixtime,
   });
+
+  const [cache, cacheMissPubkeys] = getStatusesCache(myPubkey, followings);
+  if (cache !== undefined) {
+    // restore from cache
+    const { statuses, latestUpdateTime } = cache;
+
+    for (const status of statuses) {
+      statusesMap.set(status.pubkey, status);
+    }
+    jotaiStore.set(followingsStatusesAtom, new Map(statusesMap));
+
+    // fetch status updates for status-cached pubkeys
+    const statusCachedPubkeys = statuses.map((s) => s.pubkey);
+
+    fetchPastStatusesAbortCtrl = new AbortController();
+    const pastStatusEvIter = fetcherOnRxNostr.allEventsIterator(
+      readRelays,
+      { kinds: [30315], authors: statusCachedPubkeys, "#d": ["general", "music"] },
+      { since: latestUpdateTime },
+      { abortSignal: fetchPastStatusesAbortCtrl.signal, connectTimeoutMs: 3000 }
+    );
+    for await (const ev of pastStatusEvIter) {
+      applyStatusUpdate(ev);
+    }
+    const { aborted } = fetchPastStatusesAbortCtrl.signal;
+    fetchPastStatusesAbortCtrl = undefined;
+    if (aborted) {
+      return;
+    }
+    saveStatusesCache(myPubkey, [...statusesMap.values()]);
+  }
+
+  // fetch all the past status events for cache-missed pubkeys
+  fetchPastStatusesAbortCtrl = new AbortController();
+  const pastStatusEvIter = fetcherOnRxNostr.allEventsIterator(
+    readRelays,
+    { kinds: [30315], authors: cacheMissPubkeys, "#d": ["general", "music"] },
+    {},
+    { abortSignal: fetchPastStatusesAbortCtrl.signal, connectTimeoutMs: 3000 }
+  );
+  for await (const ev of pastStatusEvIter) {
+    applyStatusUpdate(ev);
+  }
+  const { aborted } = fetchPastStatusesAbortCtrl.signal;
+  fetchPastStatusesAbortCtrl = undefined;
+  if (aborted) {
+    return;
+  }
+  saveStatusesCache(myPubkey, [...statusesMap.values()]);
 });
 
 type UpdateStatusInput = {
