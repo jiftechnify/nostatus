@@ -27,7 +27,10 @@ import {
 const isHeaderMenuOpenAtom = atom(false);
 export const useCloseHeaderMenu = () => {
   const setOpen = useSetAtom(isHeaderMenuOpenAtom);
-  return () => setOpen(false);
+  return () => {
+    setOpen(false);
+    document.querySelector("body")?.style.removeProperty("pointer-events");
+  }
 };
 
 export const HeaderMenu: React.FC = () => {
