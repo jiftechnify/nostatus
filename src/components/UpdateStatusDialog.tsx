@@ -48,12 +48,12 @@ export const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({ trigger 
   const [linkUrl, setLinkUrl] = useState<string>(initLinkUrl);
   const [ttlKey, setTtlKey] = useState<string>("never");
 
-  const isDirty = content !== initContent || (initContent !== "" && linkUrl !== initLinkUrl);
-  const isClearStatus = initContent !== "" && content === "";
+  const isDirty = content.trim() !== initContent || (initContent !== "" && linkUrl !== initLinkUrl);
+  const isClearStatus = initContent !== "" && content.trim() === "";
 
   const onClickUpdate = async () => {
     const ttl = ttlTable[ttlKey as TtlKey];
-    await updateMyStatus({ content, linkUrl, ttl });
+    await updateMyStatus({ content: content.trim(), linkUrl: linkUrl.trim(), ttl });
 
     setOpen(false);
     closeHeaderMenu();
