@@ -30,7 +30,7 @@ export const useCloseHeaderMenu = () => {
   return () => {
     setOpen(false);
     document.querySelector("body")?.style.removeProperty("pointer-events");
-  }
+  };
 };
 
 export const HeaderMenu: React.FC = () => {

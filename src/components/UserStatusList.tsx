@@ -10,7 +10,7 @@ export const UserStatusList: React.FC = () => {
   return (
     <VList>
       {/* spacer above the top item */}
-      <div className={css({h: "2"})}></div>
+      <div className={css({ h: "2" })}></div>
 
       {/* main */}
       {orderedPubkeys.length !== 0 ? (
@@ -36,7 +36,7 @@ export const UserStatusList: React.FC = () => {
       )}
 
       {/* spacer below the bottom item */}
-      <div className={css({h: "4"})}></div>
+      <div className={css({ h: "4" })}></div>
     </VList>
   );
 };

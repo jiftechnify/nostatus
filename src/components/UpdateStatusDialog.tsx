@@ -51,24 +51,37 @@ export const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({ trigger 
   const isDirty = content.trim() !== initContent || (initContent !== "" && linkUrl !== initLinkUrl);
   const isClearStatus = initContent !== "" && content.trim() === "";
 
-  const onClickUpdate = async () => {
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      // reset my current general status on open dialog
+      setContent(myGeneralStatus?.content ?? "");
+      setLinkUrl(myGeneralStatus?.linkUrl ?? "");
+    }
+    setOpen(open);
+  };
+
+  const closeDialog = () => {
+    setOpen(false);
+    closeHeaderMenu();
+  };
+
+  const handleClickUpdate = async () => {
     const ttl = ttlTable[ttlKey as TtlKey];
     await updateMyStatus({ content: content.trim(), linkUrl: linkUrl.trim(), ttl });
 
-    setOpen(false);
-    closeHeaderMenu();
+    closeDialog();
   };
 
-  const onClickClear = async () => {
+  const handleClickClear = async () => {
     await updateMyStatus({ content: "", linkUrl: "", ttl: undefined });
-    setOpen(false);
-    closeHeaderMenu();
+
+    closeDialog();
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger className={css({ w: "100%" })}>{trigger}</DialogTrigger>
-      <DialogContent className={css({bg: "card"})}>
+      <DialogContent className={css({ bg: "card" })}>
         <DialogHeader>
           <DialogTitle>Update Your Status</DialogTitle>
         </DialogHeader>
@@ -100,11 +113,11 @@ export const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({ trigger 
         </Select>
         <DialogFooter>
           {isClearStatus ? (
-            <button className={button({ color: "destructive" })} onClick={onClickClear}>
+            <button className={button({ color: "destructive" })} onClick={handleClickClear}>
               Clear
             </button>
           ) : (
-            <button className={button()} disabled={!isDirty} onClick={onClickUpdate}>
+            <button className={button()} disabled={!isDirty} onClick={handleClickUpdate}>
               Update
             </button>
           )}
