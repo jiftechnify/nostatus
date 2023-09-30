@@ -4,6 +4,7 @@ import { nip19 } from "nostr-tools";
 import { getFirstTagValueByName } from "../nostr";
 import { StatusData, UserStatus, UserStatusCategory, userStatusCategories } from "../states/nostrModels";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { useTranslation } from "react-i18next";
 
 const tabsListStyle = css({
   w: "full",
@@ -48,9 +49,11 @@ type StatusDetailsViewProps = {
 export const StatusDetailsView: React.FC<StatusDetailsViewProps> = ({ status }) => {
   const availableCategories = userStatusCategories.filter((cat) => status[cat] !== undefined);
 
+  const {t} = useTranslation();
+
   return (
     <div className={css({ w: "95vw", maxW: "800px" })}>
-      <h2 className={css({ mb: "1.5", textStyle: "detail-title", border: "none" })}>Details</h2>
+      <h2 className={css({ mb: "1.5", textStyle: "detail-title", border: "none" })}>{t("Details")}</h2>
       <Tabs defaultValue={availableCategories[0]}>
         <TabsList className={tabsListStyle}>
           {availableCategories.map((cat) => (
@@ -89,24 +92,26 @@ const StatusDetailsContent: React.FC<StatusDetailsContentProps> = ({ data }) => 
     identifier: getFirstTagValueByName(srcEvent, "d"),
   });
 
+  const { t } = useTranslation();
+
   return (
     <div className={vstack({ pt: "1", gap: "3.5", alignItems: "start" })}>
       <div className={css({ maxW: "100%" })}>
-        <h3 className={subjectStyle}>Lifetime</h3>
+        <h3 className={subjectStyle}>{t("Lifetime")}</h3>
         <p>
           <span>{new Date(data.createdAt * 1000).toLocaleString()}</span> -{" "}
           {data.expiration && <span>{new Date(data.expiration * 1000).toLocaleString()}</span>}
         </p>
       </div>
       <div className={css({ maxW: "100%" })}>
-        <h3 className={subjectStyle}>Event Identifiers</h3>
+        <h3 className={subjectStyle}>{t("Event Identifiers")}</h3>
         <div className={vstack({ gap: "1.5", alignItems: "start" })}>
           <EventIdentifier id={nevent} />
           <EventIdentifier id={naddr} />
         </div>
       </div>
       <div className={css({ maxW: "100%" })}>
-        <h3 className={subjectStyle}>Raw Event</h3>
+        <h3 className={subjectStyle}>{t("Raw Event")}</h3>
         <pre className={css({ maxH: "300px", overflow: "scroll", fontFamily: "monospace", lineHeight: "1.05" })}>
           {JSON.stringify(srcEvent, undefined, 2)}
         </pre>

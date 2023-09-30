@@ -3,6 +3,7 @@ import { icon } from "@shadow-panda/styled-system/recipes";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ArrowUpCircle, Github, LogOut, Moon, RotateCw, Sun, Zap } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { myAccountDataAtom, useHardReload, useLogout, useWriteOpsEnabled } from "../states/nostr";
 import { AccountMetadata } from "../states/nostrModels";
 import { ColorTheme, colorThemeAtom } from "../states/theme";
@@ -44,8 +45,8 @@ type HeaderMenuBodyProps = {
 
 const HeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
   const [open, setOpen] = useAtom(isHeaderMenuOpenAtom);
-
   const writeOpsEnabled = useWriteOpsEnabled();
+  const myName = myData.profile.displayName || myData.profile.name || "???";
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -54,8 +55,10 @@ const HeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" collisionPadding={8}>
         <DropdownMenuLabel>
-          <span className={css({ mr: "1.5", fontWeight: "normal" })}>Logged in as</span>
-          {myData.profile.displayName || myData.profile.name || "???"}
+          <Trans i18nKey="loggedInAs">
+            <span className={css({ mr: "1.5", fontWeight: "normal" })}>Logged in as</span>
+            {{myName}}
+          </Trans>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <MenuItemUpdateStatus disabled={!writeOpsEnabled} />
@@ -78,6 +81,8 @@ type UpdateStatusMenuItemProps = {
 // If `disabled === true`, completely omit the dialog.
 // Just setting DropdownMenuItem's `disabled` prop to `true` doesn't prevent the dialog from being opened.
 const MenuItemUpdateStatus: React.FC<UpdateStatusMenuItemProps> = ({ disabled }) => {
+  const { t } = useTranslation();
+
   const menuItemBody = (
     <DropdownMenuItem
       className={menuItem({ color: "primary" })}
@@ -85,7 +90,7 @@ const MenuItemUpdateStatus: React.FC<UpdateStatusMenuItemProps> = ({ disabled })
       onSelect={(e) => e.preventDefault()}
     >
       <ArrowUpCircle className={icon()} />
-      <span>Update Status</span>
+      <span>{t("Update Status")}</span>
     </DropdownMenuItem>
   );
 
@@ -97,22 +102,24 @@ const radioItemClassNames = css({ display: "flex", gap: "1.5", cursor: "pointer"
 const MenuItemToggleColorTheme: React.FC = () => {
   const [theme, setTheme] = useAtom(colorThemeAtom);
 
+  const { t } = useTranslation();
+
   return (
     <DropdownMenuSub>
       <DropdownMenuSubTrigger>
         {theme === "light" ? <Sun className={icon()} /> : <Moon className={icon()} />}
-        <span>Color Theme</span>
+        <span>{t("Color Theme")}</span>
       </DropdownMenuSubTrigger>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
           <DropdownMenuRadioGroup value={theme} onValueChange={(v) => setTheme(v as ColorTheme)}>
             <DropdownMenuRadioItem className={radioItemClassNames} value="light">
               <Sun className={icon()} />
-              <span>Light</span>
+              <span>{t("Light")}</span>
             </DropdownMenuRadioItem>
             <DropdownMenuRadioItem className={radioItemClassNames} value="dark">
               <Moon className={icon()} />
-              <span>Dark</span>
+              <span>{t("Dark")}</span>
             </DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
         </DropdownMenuSubContent>
@@ -137,6 +144,8 @@ const MenuItemZap = () => {
     handlerInitialized.current = true;
   }, []);
 
+  const { t } = useTranslation();
+
   return (
     <DropdownMenuItem
       ref={menuItemRef}
@@ -145,12 +154,14 @@ const MenuItemZap = () => {
       data-relays="wss://relay.nostr.band,wss://relayable.org,wss://relay.damus.io,wss://relay.nostr.wirednet.jp"
     >
       <Zap className={icon()} />
-      <span>Zap Author</span>
+      <span>{t("Zap Author")}</span>
     </DropdownMenuItem>
   );
 };
 
 const MenuItemGitHubRepo = () => {
+  const { t } = useTranslation();
+
   return (
     <DropdownMenuItem asChild>
       <a
@@ -160,7 +171,7 @@ const MenuItemGitHubRepo = () => {
         rel="external noreferrer"
       >
         <Github className={icon()} />
-        <span>View Code on GitHub</span>
+        <span>{t("View Code on GitHub")}</span>
       </a>
     </DropdownMenuItem>
   );
@@ -169,10 +180,12 @@ const MenuItemGitHubRepo = () => {
 const MenuItemHardReload = () => {
   const hardReload = useHardReload();
 
+  const { t } = useTranslation();
+
   return (
     <DropdownMenuItem className={menuItem({ color: "destructive" })} onSelect={hardReload}>
       <RotateCw className={icon()} />
-      <span>Hard Reload</span>
+      <span>{t("Hard Reload")}</span>
     </DropdownMenuItem>
   );
 };
@@ -180,10 +193,12 @@ const MenuItemHardReload = () => {
 const MenuItemLogout = () => {
   const logout = useLogout();
 
+  const { t } = useTranslation();
+
   return (
     <DropdownMenuItem className={menuItem({ color: "destructive" })} onSelect={logout}>
       <LogOut className={icon()} />
-      <span>Logout</span>
+      <span>{t("Logout")}</span>
     </DropdownMenuItem>
   );
 };
