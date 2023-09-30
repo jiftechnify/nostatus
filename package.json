@@ -14,7 +14,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "i18n-extract": "i18next src/**/*.tsx --config i18next-parser.config.js"
   },
   "dependencies": {
     "@nostr-fetch/adapter-rx-nostr": "^0.13.0",
@@ -25,12 +26,15 @@
     "@radix-ui/react-select": "^1.2.2",
     "@radix-ui/react-tabs": "^1.0.4",
     "@shadow-panda/style-context": "^0.6.0",
+    "i18next": "^23.5.1",
+    "i18next-browser-languagedetector": "^7.1.0",
     "jotai": "^2.4.2",
     "lucide-react": "^0.277.0",
     "nostr-fetch": "^0.13.0",
     "nostr-tools": "^1.15.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-i18next": "^13.2.2",
     "rx-nostr": "^1.8.0",
     "rxjs": "^7.8.1",
     "virtua": "^0.8.2"
@@ -47,6 +51,7 @@
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
+    "i18next-parser": "^8.7.0",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
     "vite-plugin-pwa": "^0.16.5"

@@ -1,6 +1,7 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { vstack } from "@shadow-panda/styled-system/patterns";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { parsePrivkey, parsePubkey } from "../nostr";
 import { useLoginWithPrivkey, useLoginWithPubkey, useNip07Availability } from "../states/nostr";
 import { button } from "../styles/recipes";
@@ -13,6 +14,8 @@ export const LoginForm: React.FC = () => {
   const isNip07Available = useNip07Availability();
   const [pubkeyInput, setPubkeyInput] = useState("");
   const [nsecInput, setNsecInput] = useState("");
+
+  const { t } = useTranslation();
 
   const onClickNip07Login = async () => {
     const pubkey = await window.nostr.getPublicKey();
@@ -46,19 +49,19 @@ export const LoginForm: React.FC = () => {
   return (
     <div className={vstack({ w: "300px", mt: "4", mx: "auto", gap: "10" })}>
       <button className={button({ expand: true })} onClick={onClickNip07Login} disabled={!isNip07Available}>
-        Login with NIP-07 Extension
+        {t("Login with NIP-07 Extension")}
       </button>
 
       <div className={vstack({ w: "100%", gap: "1.5" })}>
         <Input
           className={css({ h: "8", px: "1", py: "0.5" })}
           type="text"
-          placeholder="npub or hex pubkey"
+          placeholder={t("npub or hex pubkey")}
           value={pubkeyInput}
           onChange={(e) => setPubkeyInput(e.target.value)}
         />
         <button className={button({ expand: true })} onClick={onClickPubkeyLogin}>
-          Login with Pubkey
+          {t("Login with Pubkey")}
         </button>
       </div>
 
@@ -71,7 +74,7 @@ export const LoginForm: React.FC = () => {
           onChange={(e) => setNsecInput(e.target.value)}
         />
         <button className={button({ expand: true })} onClick={onClickNsecLogin}>
-          Login with nsec
+          {t("Login with nsec")}
         </button>
       </div>
     </div>

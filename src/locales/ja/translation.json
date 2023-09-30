@@ -1,0 +1,6 @@
+{
+  "Login with NIP-07 Extension": "NIP-07 拡張機能でログイン",
+  "npub or hex pubkey": "npub または hex 形式の公開鍵",
+  "Login with Pubkey": "公開鍵でログイン",
+  "Login with nsec": "秘密鍵(nsec)でログイン"
+}
