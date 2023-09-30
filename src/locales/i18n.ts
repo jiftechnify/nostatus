@@ -5,8 +5,12 @@ import { initReactI18next } from "react-i18next";
 import en from "./en/translation.json";
 import ja from "./ja/translation.json";
 
-export const supportedLangCodes = ["en", "ja"];
+export const supportedLangCodes = ["en", "ja"] as const;
 export type LangCode = (typeof supportedLangCodes)[number];
+export const langNameTable: Record<LangCode, string> = {
+  en: "English",
+  ja: "日本語",
+};
 
 const resources = {
   en: {
