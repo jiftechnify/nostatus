@@ -5,6 +5,9 @@ import { initReactI18next } from "react-i18next";
 import en from "./en/translation.json";
 import ja from "./ja/translation.json";
 
+export const supportedLangCodes = ["en", "ja"];
+export type LangCode = (typeof supportedLangCodes)[number];
+
 const resources = {
   en: {
     translation: en,
@@ -19,7 +22,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: "en",
+    fallbackLng: supportedLangCodes,
     interpolation: {
       escapeValue: false,
     },

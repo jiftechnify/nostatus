@@ -1,9 +1,10 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { icon } from "@shadow-panda/styled-system/recipes";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { ArrowUpCircle, Github, LogOut, Moon, RotateCw, Sun, Zap } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { ArrowUpCircle, Github, Globe, LogOut, Moon, RotateCw, Sun, Zap } from "lucide-react";
+import React, { useEffect, useRef } from "react";
 import { Trans, useTranslation } from "react-i18next";
+import { supportedLangCodes } from "../locales/i18n";
 import { myAccountDataAtom, useHardReload, useLogout, useWriteOpsEnabled } from "../states/nostr";
 import { AccountMetadata } from "../states/nostrModels";
 import { ColorTheme, colorThemeAtom } from "../states/theme";
@@ -57,12 +58,13 @@ const HeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
         <DropdownMenuLabel>
           <Trans i18nKey="loggedInAs">
             <span className={css({ mr: "1.5", fontWeight: "normal" })}>Logged in as</span>
-            {{myName}}
+            {{ myName }}
           </Trans>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <MenuItemUpdateStatus disabled={!writeOpsEnabled} />
         <MenuItemToggleColorTheme />
+        <MenuItemSwitchLangage />
         <DropdownMenuSeparator />
         <MenuItemZap />
         <MenuItemGitHubRepo />
@@ -121,6 +123,34 @@ const MenuItemToggleColorTheme: React.FC = () => {
               <Moon className={icon()} />
               <span>{t("Dark")}</span>
             </DropdownMenuRadioItem>
+          </DropdownMenuRadioGroup>
+        </DropdownMenuSubContent>
+      </DropdownMenuPortal>
+    </DropdownMenuSub>
+  );
+};
+
+const MenuItemSwitchLangage: React.FC = () => {
+  const { t, i18n } = useTranslation();
+
+  const onLangChange = (v: string) => {
+    i18n.changeLanguage(v);
+  };
+
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>
+        <Globe className={icon()} />
+        <span>{t("Language")}</span>
+      </DropdownMenuSubTrigger>
+      <DropdownMenuPortal>
+        <DropdownMenuSubContent>
+          <DropdownMenuRadioGroup value={i18n.language} onValueChange={(v) => onLangChange(v)}>
+            {supportedLangCodes.map((lang) => (
+              <DropdownMenuRadioItem className={radioItemClassNames} value={lang}>
+                <span>{t(`languages.${lang}`)}</span>
+              </DropdownMenuRadioItem>
+            ))}
           </DropdownMenuRadioGroup>
         </DropdownMenuSubContent>
       </DropdownMenuPortal>
