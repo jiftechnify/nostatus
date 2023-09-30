@@ -1,0 +1,39 @@
+{
+  "loggedInAs": "<0>Logged in as</0>{{myName}}",
+  "Update Status": "Update Status",
+  "Color Theme": "Color Theme",
+  "Light": "Light",
+  "Dark": "Dark",
+  "Language": "Language",
+  "languages": {
+    "en": "English",
+    "ja": "Japanese"
+  },
+  "Zap Author": "Zap Author",
+  "View Code on GitHub": "View Code on GitHub",
+  "Hard Reload": "Hard Reload",
+  "Logout": "Logout",
+  "Login with NIP-07 Extension": "Login with NIP-07 Extension",
+  "npub or hex pubkey": "npub or hex pubkey",
+  "Login with Pubkey": "Login with Pubkey",
+  "Login with nsec": "Login with nsec",
+  "Details": "Details",
+  "Lifetime": "Lifetime",
+  "Event Identifiers": "Event Identifiers",
+  "Raw Event": "Raw Event",
+  "Update Your Status": "Update Your Status",
+  "Status": "Status",
+  "Link URL": "Link URL",
+  "Clear status after": "Clear status after...",
+  "ttl": {
+    "never": "Never",
+    "10min": "10 Minutes",
+    "30min": "30 Minutes",
+    "1hr": "1 Hour",
+    "4hr": "4 Hours",
+    "8hr": "8 Hours",
+    "1day": "1 Day"
+  },
+  "Clear": "Clear",
+  "Update": "Update"
+}

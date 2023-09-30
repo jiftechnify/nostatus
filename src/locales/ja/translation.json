@@ -1,0 +1,39 @@
+{
+  "loggedInAs": "{{myName}}<0>としてログイン中</0>",
+  "Update Status": "ステータスを更新",
+  "Color Theme": "カラーテーマ",
+  "Light": "ライト",
+  "Dark": "ダーク",
+  "Language": "言語",
+  "languages": {
+    "en": "English",
+    "ja": "日本語"
+  },
+  "Zap Author": "作者に Zap",
+  "View Code on GitHub": "GitHub でコードを見る",
+  "Hard Reload": "ハードリロード",
+  "Logout": "ログアウト",
+  "Login with NIP-07 Extension": "NIP-07 拡張機能でログイン",
+  "npub or hex pubkey": "npub または hex 形式の公開鍵",
+  "Login with Pubkey": "公開鍵でログイン",
+  "Login with nsec": "秘密鍵(nsec)でログイン",
+  "Details": "詳細",
+  "Lifetime": "期間",
+  "Event Identifiers": "イベント識別子",
+  "Raw Event": "元イベント",
+  "Update Your Status": "ステータスを更新",
+  "Status": "ステータス",
+  "Link URL": "リンク URL",
+  "Clear status after": "指定時間後にステータスをクリア",
+  "ttl": {
+    "never": "クリアしない",
+    "10min": "10分",
+    "30min": "30分",
+    "1hr": "1時間",
+    "4hr": "4時間",
+    "8hr": "8時間",
+    "1day": "1日"
+  },
+  "Clear": "クリア",
+  "Update": "更新"
+}

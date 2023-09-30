@@ -1,6 +1,7 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { myGeneralStatusAtom, updateMyStatus } from "../states/nostr";
 import { button } from "../styles/recipes";
 import { useCloseHeaderMenu } from "./HeaderMenu";
@@ -21,15 +22,15 @@ const ttlTable = {
 
 type TtlKey = keyof typeof ttlTable;
 
-const ttlLabels = {
-  never: "Never",
-  "10min": "10 Minutes",
-  "30min": "30 Minutes",
-  "1hr": "1 Hour",
-  "4hr": "4 Hours",
-  "8hr": "8 Hours",
-  "1day": "1 Day",
-} satisfies Record<TtlKey, string>;
+// const ttlLabelKeys = {
+//   never: "Never",
+//   "10min": "10 Minutes",
+//   "30min": "30 Minutes",
+//   "1hr": "1 Hour",
+//   "4hr": "4 Hours",
+//   "8hr": "8 Hours",
+//   "1day": "1 Day",
+// } satisfies Record<TtlKey, string>;
 
 type UpdateStatusDialogProps = {
   trigger: React.ReactNode;
@@ -78,17 +79,19 @@ export const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({ trigger 
     closeDialog();
   };
 
+  const { t } = useTranslation();
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger className={css({ w: "100%" })}>{trigger}</DialogTrigger>
       <DialogContent className={css({ bg: "card" })}>
         <DialogHeader>
-          <DialogTitle>Update Your Status</DialogTitle>
+          <DialogTitle>{t("Update Your Status")}</DialogTitle>
         </DialogHeader>
-        <Label htmlFor="content">Status</Label>
+        <Label htmlFor="content">{t("Status")}</Label>
         <Input id="content" type="text" value={content} onChange={(e) => setContent(e.target.value)} />
 
-        <Label htmlFor="link-url">Link URL</Label>
+        <Label htmlFor="link-url">{t("Link URL")}</Label>
         <Input
           id="link-url"
           type="url"
@@ -98,15 +101,15 @@ export const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({ trigger 
           onChange={(e) => setLinkUrl(e.target.value)}
         />
 
-        <Label htmlFor="clear-after">Clear status after...</Label>
+        <Label htmlFor="clear-after">{t("Clear status after")}</Label>
         <Select disabled={isClearStatus} value={ttlKey} onValueChange={setTtlKey}>
           <SelectTrigger id="clear-after">
             <SelectValue placeholder="Please Select" />
           </SelectTrigger>
           <SelectContent>
-            {Object.entries(ttlLabels).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
+            {Object.keys(ttlTable).map((ttlKey) => (
+              <SelectItem key={ttlKey} value={ttlKey}>
+                {t(`ttl.${ttlKey}`)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -114,11 +117,11 @@ export const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({ trigger 
         <DialogFooter>
           {isClearStatus ? (
             <button className={button({ color: "destructive" })} onClick={handleClickClear}>
-              Clear
+              {t("Clear")}
             </button>
           ) : (
             <button className={button()} disabled={!isDirty} onClick={handleClickUpdate}>
-              Update
+              {t("Update")}
             </button>
           )}
         </DialogFooter>
