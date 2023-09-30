@@ -5,10 +5,6 @@
   "Light": "ライト",
   "Dark": "ダーク",
   "Language": "言語",
-  "languages": {
-    "en": "English",
-    "ja": "日本語"
-  },
   "Zap Author": "作者に Zap",
   "View Code on GitHub": "GitHub でコードを見る",
   "Hard Reload": "ハードリロード",

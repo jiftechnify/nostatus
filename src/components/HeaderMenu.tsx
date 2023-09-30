@@ -4,7 +4,7 @@ import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ArrowUpCircle, Github, Globe, LogOut, Moon, RotateCw, Sun, Zap } from "lucide-react";
 import React, { useEffect, useRef } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { supportedLangCodes } from "../locales/i18n";
+import { langNameTable, supportedLangCodes } from "../locales/i18n";
 import { myAccountDataAtom, useHardReload, useLogout, useWriteOpsEnabled } from "../states/nostr";
 import { AccountMetadata } from "../states/nostrModels";
 import { ColorTheme, colorThemeAtom } from "../states/theme";
@@ -148,7 +148,7 @@ const MenuItemSwitchLangage: React.FC = () => {
           <DropdownMenuRadioGroup value={i18n.language} onValueChange={(v) => onLangChange(v)}>
             {supportedLangCodes.map((lang) => (
               <DropdownMenuRadioItem className={radioItemClassNames} value={lang}>
-                <span>{t(`languages.${lang}`)}</span>
+                <span>{langNameTable[lang]}</span>
               </DropdownMenuRadioItem>
             ))}
           </DropdownMenuRadioGroup>
