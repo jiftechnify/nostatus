@@ -44,14 +44,14 @@ export const textStyles = defineTextStyles({
     description: "title of detail dialog",
     value: {
       fontSize: "2xl",
-      fontWeight: "semibold",
+      fontWeight: "bold",
     },
   },
   "detail-subject": {
     description: "subject of detail item",
     value: {
       fontSize: "xl",
-      fontWeight: "semibold",
+      fontWeight: "bold",
     },
   },
   mono: {
