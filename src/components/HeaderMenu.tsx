@@ -54,11 +54,20 @@ const HeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
       <DropdownMenuTrigger className={css({ cursor: "pointer" })}>
         <AppAvatar imgSrc={myData.profile.picture} size="md" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" collisionPadding={8}>
+      <DropdownMenuContent className={css({ w: "16rem" })} align="start" collisionPadding={8}>
         <DropdownMenuLabel>
-          <Trans i18nKey="loggedInAs">
-            <span className={css({ mr: "1.5", fontWeight: "normal" })}>Logged in as</span>
-            {{ myName }}
+          <Trans i18nKey="loggedInAs" values={{ myName }}>
+            <div className={css({ fontWeight: "normal", fontSize: "xs" })}>Logged in as</div>
+            <div
+              className={css({
+                fontWeight: "bold",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+                textOverflow: "ellipsis",
+              })}
+            >
+              { myName }
+            </div>
           </Trans>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

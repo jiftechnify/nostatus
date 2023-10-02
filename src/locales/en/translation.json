@@ -1,5 +1,5 @@
 {
-  "loggedInAs": "<0>Logged in as</0>{{myName}}",
+  "loggedInAs": "<0>Logged in as</0><1>{{myName}}</1>",
   "Update Status": "Update Status",
   "Color Theme": "Color Theme",
   "Light": "Light",
@@ -21,6 +21,8 @@
   "Status": "Status",
   "Link URL": "Link URL",
   "Clear status after": "Clear status after...",
+  "Clear": "Clear",
+  "Update": "Update",
   "ttl": {
     "never": "Never",
     "10min": "10 Minutes",
@@ -29,7 +31,5 @@
     "4hr": "4 Hours",
     "8hr": "8 Hours",
     "1day": "1 Day"
-  },
-  "Clear": "Clear",
-  "Update": "Update"
+  }
 }
