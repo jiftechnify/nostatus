@@ -1,5 +1,5 @@
 {
-  "loggedInAs": "{{myName}}<0>としてログイン中</0>",
+  "loggedInAs": "<1>{{myName}}</1><0>としてログイン中</0>",
   "Update Status": "ステータスを更新",
   "Color Theme": "カラーテーマ",
   "Light": "ライト",
@@ -21,6 +21,8 @@
   "Status": "ステータス",
   "Link URL": "リンク URL",
   "Clear status after": "指定時間後にステータスをクリア",
+  "Clear": "クリア",
+  "Update": "更新",
   "ttl": {
     "never": "クリアしない",
     "10min": "10分",
@@ -29,7 +31,5 @@
     "4hr": "4時間",
     "8hr": "8時間",
     "1day": "1日"
-  },
-  "Clear": "クリア",
-  "Update": "更新"
+  }
 }
