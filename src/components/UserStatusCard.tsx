@@ -133,6 +133,7 @@ const GeneralStatus = ({ content, linkUrl }: GeneralStatusProps) => {
     <p
       className={css({
         textStyle: "main-status",
+        wordBreak: "break-all",
       })}
     >
       <span>{text}</span>
