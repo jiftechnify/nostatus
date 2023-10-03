@@ -156,7 +156,7 @@ const MenuItemSwitchLangage: React.FC = () => {
         <DropdownMenuSubContent>
           <DropdownMenuRadioGroup value={i18n.language} onValueChange={(v) => onLangChange(v)}>
             {supportedLangCodes.map((lang) => (
-              <DropdownMenuRadioItem className={radioItemClassNames} value={lang}>
+              <DropdownMenuRadioItem key={lang} className={radioItemClassNames} value={lang}>
                 <span>{langNameTable[lang]}</span>
               </DropdownMenuRadioItem>
             ))}

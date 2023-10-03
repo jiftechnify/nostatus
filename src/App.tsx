@@ -60,9 +60,7 @@ export const App = () => {
 };
 
 const isTouchDevice = () => {
-  const matches = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-  console.log(matches);
-  return matches;
+  return window.matchMedia("(hover: none) and (pointer: coarse)").matches;
 };
 
 const UpdateStatusFab = () => (
