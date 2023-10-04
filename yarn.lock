@@ -2443,9 +2443,6 @@
   resolved "https://registry.yarnpkg.com/@shadow-panda/style-context/-/style-context-0.6.0.tgz#f3c2a7972b56ff609317d318f2528149a4f62739"
   integrity sha512-FByYV28vyfgpRP47Xng+yFywG3xzGv9SbfOwZrIsVAinOd8jBy8E7nnTP8aNYwnor5BfD3FI2Z0+zG8PgAxaUg==
 
-"@shadow-panda/styled-system@./node_modules/@shadow-panda/styled-system":
-  version "0.0.0-1050.3611019998789"
-
 "@surma/rollup-plugin-off-main-thread@^2.2.3":
   version "2.2.3"
   resolved "https://registry.yarnpkg.com/@surma/rollup-plugin-off-main-thread/-/rollup-plugin-off-main-thread-2.2.3.tgz#ee34985952ca21558ab0d952f00298ad2190c053"
