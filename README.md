@@ -1,11 +1,11 @@
-<div style="text-align: center">
+<p align="center">
 <img src="./docs/logo.svg" width="64" height="64" >
 <h1>nostatus</h1>
 
 A Nostr web client specialized in browsing user status ([NIP-38](https://github.com/nostr-protocol/nips/blob/master/38.md)).
 
 **Try it out at: https://nostatus.vercel.app**
-</div>
+</p>
 
 ## Features
 
