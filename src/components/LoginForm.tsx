@@ -50,7 +50,7 @@ export const LoginForm: React.FC = () => {
   return (
     <div className={vstack({ w: "300px", mt: "4", mx: "auto", gap: "10" })}>
       <button className={button({ expand: true })} onClick={onClickNostrExtLogin} disabled={!isNostrExtAvailable}>
-        {t("Login with NIP-07 Extension")}
+        {t("Login with Nostr Extension")}
       </button>
 
       <div className={vstack({ w: "100%", gap: "1.5" })}>
