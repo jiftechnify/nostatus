@@ -49,7 +49,7 @@ type StatusDetailsViewProps = {
 export const StatusDetailsView: React.FC<StatusDetailsViewProps> = ({ status }) => {
   const availableCategories = userStatusCategories.filter((cat) => status[cat] !== undefined);
 
-  const {t} = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <div className={css({ w: "95vw", maxW: "800px" })}>

@@ -9,6 +9,6 @@ declare global {
 
     nostrZap: {
       initTarget: (targetEl: HTMLElement) => void;
-    }
+    };
   }
 }

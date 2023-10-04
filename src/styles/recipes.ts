@@ -34,7 +34,7 @@ export const button = cva({
       primary: {
         color: {
           base: "primary.foreground",
-          _disabled: "primary.muted.fg"
+          _disabled: "primary.muted.fg",
         },
         bg: {
           base: "primary",
@@ -46,7 +46,7 @@ export const button = cva({
       destructive: {
         color: {
           base: "destructive.foreground",
-          _disabled: "destructive.muted.fg"
+          _disabled: "destructive.muted.fg",
         },
         bg: {
           base: "destructive",
@@ -76,23 +76,23 @@ export const menuItem = cva({
   variants: {
     color: {
       default: {
-        color: "foreground"
+        color: "foreground",
       },
       primary: {
         color: {
           base: "primary",
-          _dark: "purple.400"
-        }
+          _dark: "purple.400",
+        },
       },
       destructive: {
         color: {
           base: "destructive",
-          _dark: "red.400"
-        }
+          _dark: "red.400",
+        },
       },
-    }
+    },
   },
   defaultVariants: {
-    color: "default"
-  }
-})
+    color: "default",
+  },
+});
