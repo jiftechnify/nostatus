@@ -207,9 +207,9 @@ nostrExtensionAtom.onMount = (set) => {
   };
 };
 
-export const isNostrExtAvailableAtom = atom(get => {
-  return get(nostrExtensionAtom) !== undefined
-})
+export const isNostrExtAvailableAtom = atom((get) => {
+  return get(nostrExtensionAtom) !== undefined;
+});
 
 export const usePubkeyInNostrExt = () => {
   const nostrExt = useAtomValue(nostrExtensionAtom);
