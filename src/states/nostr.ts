@@ -44,13 +44,13 @@ const myPubkeyAtom = atom((get) => {
 });
 
 // temporarily mask my pubkey. used to cause hard reload
-const isMyPubkeyMaskedAtom = atom(false)
+const isMyPubkeyMaskedAtom = atom(false);
 const maskedMyPubkeyAtom = atom((get) => {
   if (get(isMyPubkeyMaskedAtom)) {
-    return undefined
+    return undefined;
   }
-  return get(myPubkeyAtom)
-})
+  return get(myPubkeyAtom);
+});
 
 export const useMyPubkey = () => {
   return useAtomValue(myPubkeyAtom);
@@ -94,7 +94,7 @@ export const useHardReload = () => {
   }, [setIsPubkeyMasked]);
 
   return hardReload;
-}
+};
 
 const ACCT_DATA_CACHE_KEY = "nostr_my_data";
 const ACCT_DATA_CACHE_TTL = 12 * 60 * 60; // 12 hour
@@ -612,7 +612,10 @@ const getStatusesCache = (myPubkey: string, followings: string[]): [StatusesCach
         cacheMissPubkeys.push(pubkey);
       }
     }
-    return [{ statuses: cachedStatuses, latestUpdateTime: cache.latestUpdateTime, myPubkey: cache.myPubkey }, cacheMissPubkeys];
+    return [
+      { statuses: cachedStatuses, latestUpdateTime: cache.latestUpdateTime, myPubkey: cache.myPubkey },
+      cacheMissPubkeys,
+    ];
   } catch (err) {
     console.error(err);
     return [undefined, followings];

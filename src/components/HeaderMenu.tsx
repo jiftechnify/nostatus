@@ -66,7 +66,7 @@ const HeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
                 textOverflow: "ellipsis",
               })}
             >
-              { myName }
+              {myName}
             </div>
           </Trans>
         </DropdownMenuLabel>

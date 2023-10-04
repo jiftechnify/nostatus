@@ -6,9 +6,9 @@ export type ColorTheme = "light" | "dark";
 
 const getSystemTheme = () => (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 const getInitialTheme = (): ColorTheme => {
-  const theme = localStorage.getItem("color-theme")
-  return theme !== null ? JSON.parse(theme) as ColorTheme : getSystemTheme()
-}
+  const theme = localStorage.getItem("color-theme");
+  return theme !== null ? (JSON.parse(theme) as ColorTheme) : getSystemTheme();
+};
 
 // "manually" get value from localStorage on initializing atom value
 // to prevent the app view from flickering if system theme and theme stored in the storage differ.

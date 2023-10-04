@@ -11,7 +11,7 @@ type AppAvatarProps = {
 export const AppAvatar: React.FC<AppAvatarProps> = ({ imgSrc, alt = "avatar", size = "sm" }) => (
   <Avatar className={avatar({ size })}>
     <AvatarImage src={imgSrc} alt={alt} />
-    <AvatarFallback className={css({color: "avatar-fallback"})}>
+    <AvatarFallback className={css({ color: "avatar-fallback" })}>
       <UserCircle2 />
     </AvatarFallback>
   </Avatar>
