@@ -1,9 +1,10 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { vstack } from "@shadow-panda/styled-system/patterns";
+import { useAtomValue } from "jotai";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { parsePrivkey, parsePubkey } from "../nostr";
-import { useLoginWithPrivkey, useLoginWithPubkey, useNip07Availability } from "../states/nostr";
+import { isNostrExtAvailableAtom, useLoginWithPrivkey, useLoginWithPubkey } from "../states/nostr";
 import { button } from "../styles/recipes";
 import { Input } from "./ui/input";
 
@@ -11,13 +12,13 @@ export const LoginForm: React.FC = () => {
   const loginWithPubkey = useLoginWithPubkey();
   const loginWithPrivkey = useLoginWithPrivkey();
 
-  const isNip07Available = useNip07Availability();
+  const isNostrExtAvailable = useAtomValue(isNostrExtAvailableAtom);
   const [pubkeyInput, setPubkeyInput] = useState("");
   const [nsecInput, setNsecInput] = useState("");
 
   const { t } = useTranslation();
 
-  const onClickNip07Login = async () => {
+  const onClickNostrExtLogin = async () => {
     const pubkey = await window.nostr.getPublicKey();
     if (pubkey) {
       loginWithPubkey(pubkey);
@@ -38,7 +39,7 @@ export const LoginForm: React.FC = () => {
   const onClickNsecLogin = () => {
     const hexPrivkey = parsePrivkey(nsecInput);
     if (hexPrivkey === undefined) {
-      console.error("invalkid nsec");
+      console.error("invalid nsec");
       window.alert("invalid nsec");
       return;
     }
@@ -48,7 +49,7 @@ export const LoginForm: React.FC = () => {
 
   return (
     <div className={vstack({ w: "300px", mt: "4", mx: "auto", gap: "10" })}>
-      <button className={button({ expand: true })} onClick={onClickNip07Login} disabled={!isNip07Available}>
+      <button className={button({ expand: true })} onClick={onClickNostrExtLogin} disabled={!isNostrExtAvailable}>
         {t("Login with NIP-07 Extension")}
       </button>
 

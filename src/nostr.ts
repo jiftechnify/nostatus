@@ -115,3 +115,9 @@ export const parsePrivkey = (nsec: string): string | undefined => {
     return undefined;
   }
 };
+
+/* NIP-07 extensions */
+export type NostrExtension = {
+  getPublicKey: () => Promise<string>;
+  getRelays?: () => Promise<RelayList>;
+};
