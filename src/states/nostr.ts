@@ -1,4 +1,5 @@
 import {
+  NostrExtension,
   RelayList,
   getFirstTagValueByName,
   getTagValuesByName,
@@ -16,11 +17,12 @@ import {
   userStatusCategories,
 } from "./nostrModels";
 
-import { atom, getDefaultStore, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { atom, getDefaultStore, useAtomValue, useSetAtom } from "jotai";
 import { RESET, atomFamily, atomWithReset, atomWithStorage, loadable, selectAtom } from "jotai/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
+import "nip07-awaiter";
 import { NostrEvent, NostrFetcher } from "nostr-fetch";
 import { getPublicKey } from "nostr-tools";
 import { createRxForwardReq, createRxNostr, getSignedEvent, uniq, verify } from "rx-nostr";
@@ -190,40 +192,34 @@ export const pubkeysOrderByLastStatusUpdateTimeAtom = atom((get) => {
     .map((s) => s.pubkey);
 });
 
-const isNip07AvailableAtom = atom(false);
+const nostrExtensionAtom = atom<NostrExtension | undefined>(window.nostr);
+nostrExtensionAtom.onMount = (set) => {
+  const updateNostrExt = (ev: CustomEvent<{ nostr: NostrExtension }>) => {
+    set(ev.detail.nostr);
+  };
 
-const MAX_NIP07_CHECKS = 5;
-export const useNip07Availability = () => {
-  const [available, setAvailable] = useAtom(isNip07AvailableAtom);
-  const checkCnt = useRef(0);
+  window.addEventListener("nostrloaded", updateNostrExt);
+  window.addEventListener("nostrupdated", updateNostrExt);
 
-  useEffect(() => {
-    const nip07CheckInterval = setInterval(() => {
-      if (window.nostr) {
-        clearInterval(nip07CheckInterval);
-        setAvailable(true);
-      } else if (checkCnt.current > MAX_NIP07_CHECKS) {
-        clearInterval(nip07CheckInterval);
-        setAvailable(false);
-      } else {
-        checkCnt.current++;
-      }
-    }, 300);
-    return () => clearInterval(nip07CheckInterval);
-  }, [setAvailable]);
-
-  return available;
+  return () => {
+    window.removeEventListener("nostrloaded", updateNostrExt);
+    window.removeEventListener("nostrupdated", updateNostrExt);
+  };
 };
 
-export const usePubkeyInNip07 = () => {
-  const nip07Available = useNip07Availability();
+export const isNostrExtAvailableAtom = atom((get) => {
+  return get(nostrExtensionAtom) !== undefined;
+});
+
+export const usePubkeyInNostrExt = () => {
+  const nostrExt = useAtomValue(nostrExtensionAtom);
   const [pubkey, setPubkey] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const pollPubkey = async () => {
       try {
-        if (window.nostr) {
-          const pubkey = await window.nostr.getPublicKey();
+        if (nostrExt) {
+          const pubkey = await nostrExt.getPublicKey();
           setPubkey(pubkey);
         } else {
           setPubkey(undefined);
@@ -232,12 +228,8 @@ export const usePubkeyInNip07 = () => {
         console.error(e);
       }
     };
-    if (nip07Available) {
-      pollPubkey().catch((e) => console.error(e));
-    } else {
-      setPubkey(undefined);
-    }
-  }, [nip07Available]);
+    pollPubkey().catch((e) => console.error(e));
+  }, [nostrExt]);
 
   return pubkey;
 };
@@ -250,9 +242,9 @@ export const useWriteOpsEnabled = () => {
   const inputPrivkey = useAtomValue(inputPrivkeyAtom);
 
   const inputPubkey = useAtomValue(inputPubkeyAtom);
-  const pubkeyInNip07 = usePubkeyInNip07();
+  const pubkeyInNostrExt = usePubkeyInNostrExt();
 
-  return inputPrivkey !== undefined || (inputPubkey !== undefined && inputPubkey === pubkeyInNip07);
+  return inputPrivkey !== undefined || (inputPubkey !== undefined && inputPubkey === pubkeyInNostrExt);
 };
 
 const bootstrapFetcher = NostrFetcher.init();
@@ -275,9 +267,9 @@ const getBootstrapRelays = async (): Promise<[string[], boolean]> => {
   if (window.nostr === undefined || typeof window.nostr.getRelays !== "function") {
     return [defaultBootstrapRelays, true];
   }
-  const nip07Relays = await window.nostr.getRelays();
-  const nip07ReadRelays = nip07Relays !== undefined ? selectRelaysByUsage(nip07Relays, "read") : [];
-  return nip07ReadRelays.length > 0 ? [nip07ReadRelays, false] : [defaultBootstrapRelays, true];
+  const nostrExtRelays = await window.nostr.getRelays();
+  const nostrExtReadRelays = nostrExtRelays !== undefined ? selectRelaysByUsage(nostrExtRelays, "read") : [];
+  return nostrExtReadRelays.length > 0 ? [nostrExtReadRelays, false] : [defaultBootstrapRelays, true];
 };
 
 const extractRelayListOrDefault = (evs: (NostrEvent | undefined)[]): RelayList => {

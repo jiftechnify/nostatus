@@ -1,11 +1,8 @@
-import { RelayList } from "./nostr";
+import { NostrExtension } from "./nostr";
 
 declare global {
   interface Window {
-    nostr: {
-      getPublicKey: () => Promise<string>;
-      getRelays: () => Promise<RelayList>;
-    };
+    nostr: NostrExtension;
 
     nostrZap: {
       initTarget: (targetEl: HTMLElement) => void;

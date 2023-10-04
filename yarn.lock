@@ -6560,6 +6560,13 @@ network-information-types@^0.1.1:
   resolved "https://registry.yarnpkg.com/network-information-types/-/network-information-types-0.1.1.tgz#07e98d8050dd1e8ac787f0cc5ebaae4935393861"
   integrity sha512-mLXNafJYOkiJB6IlF727YWssTRpXitR+tKSLyA5VAdBi3SOvLf5gtizHgxf241YHPWocnAO/fAhVrB/68tPHDw==
 
+nip07-awaiter@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/nip07-awaiter/-/nip07-awaiter-0.2.1.tgz#de86f71fd2313c234704f05b00f05fe966c46659"
+  integrity sha512-JPaCwKhNLcc6YgI9MeEHSYfv9+MvEDmK1Sd3mJW5qb3KYxKLSBTZgWAqpw5306UMel1joBf6u+gbJn4diB0qSA==
+  dependencies:
+    nostr-typedef "^0.4.0"
+
 nlcst-to-string@^3.0.0:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/nlcst-to-string/-/nlcst-to-string-3.1.1.tgz#83b90f2e1ee2081e14701317efc26d3bbadc806e"
@@ -6629,6 +6636,11 @@ nostr-tools@^1.15.0:
     "@scure/base" "1.1.1"
     "@scure/bip32" "1.3.1"
     "@scure/bip39" "1.2.1"
+
+nostr-typedef@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/nostr-typedef/-/nostr-typedef-0.4.0.tgz#0b5cc334a223cc8138b7bb83cd7f7a176622f516"
+  integrity sha512-0hixsTzPHQ0EWGR592mEQFunAk3+0DkgLTXFi5emViMbSpu2f8g5mjjgEgDwjiky047dTfiVw7qMKibZrI5DfQ==
 
 now-and-later@^2.0.0:
   version "2.0.1"
