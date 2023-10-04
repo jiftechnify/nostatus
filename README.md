@@ -1,11 +1,11 @@
 <p align="center">
-<img src="./docs/logo.svg" width="64" height="64" >
-<h1>nostatus</h1>
-
-A Nostr web client specialized in browsing user status ([NIP-38](https://github.com/nostr-protocol/nips/blob/master/38.md)).
-
-**Try it out at: https://nostatus.vercel.app**
+<img src="./docs/logo.svg" align="center" width="64" height="64">
 </p>
+<h1 align="center">nostatus</h1>
+
+<p align="center"> A Nostr web client specialized in browsing user status (<a href="https://github.com/nostr-protocol/nips/blob/master/38.md">NIP-38</a>).</p>
+
+<p align="center"><strong>Try it out at: <a href="https://nostatus.vercel.app">https://nostatus.vercel.app</a></strong></p>
 
 ## Features
 
@@ -15,14 +15,16 @@ A Nostr web client specialized in browsing user status ([NIP-38](https://github.
 - 📲 PWA ready
 - 🌓 Light & dark color themes
 
-
 ## Screenshots
 
 ### User Status Timeline - Light
+
 ![timeline light](./docs/timeline_light.png)
 
 ### User Status Timeline - Dark
+
 ![timeline dark](./docs/timeline_dark.png)
 
 ### Status Update Dialog
+
 ![update dialog](./docs/update_dialog.png)
