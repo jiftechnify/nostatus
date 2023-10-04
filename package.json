@@ -16,7 +16,7 @@
     "dev": "vite dev",
     "build": "run-s type-check vite-build",
     "preview": "vite preview",
-    "lint": "run-p lint:*",
+    "lint": "run-p type-check lint:*",
     "lint:eslint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:prettier": "prettier --check --loglevel warn src/**/*.{ts,tsx}",
     "fix": "run-s fix:*",
