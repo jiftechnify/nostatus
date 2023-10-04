@@ -22,7 +22,7 @@ import { RESET, atomFamily, atomWithReset, atomWithStorage, loadable, selectAtom
 import { useCallback, useEffect, useState } from "react";
 
 import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
-import "nip07-awaiter";
+import { waitNostr } from "nip07-awaiter";
 import { NostrEvent, NostrFetcher } from "nostr-fetch";
 import { getPublicKey } from "nostr-tools";
 import { createRxForwardReq, createRxNostr, getSignedEvent, uniq, verify } from "rx-nostr";
@@ -194,17 +194,10 @@ export const pubkeysOrderByLastStatusUpdateTimeAtom = atom((get) => {
 
 const nostrExtensionAtom = atom<NostrExtension | undefined>(window.nostr);
 nostrExtensionAtom.onMount = (set) => {
-  const updateNostrExt = (ev: CustomEvent<{ nostr: NostrExtension }>) => {
-    set(ev.detail.nostr);
+  const setNostrExt = async () => {
+    set(await waitNostr(1500));
   };
-
-  window.addEventListener("nostrloaded", updateNostrExt);
-  window.addEventListener("nostrupdated", updateNostrExt);
-
-  return () => {
-    window.removeEventListener("nostrloaded", updateNostrExt);
-    window.removeEventListener("nostrupdated", updateNostrExt);
-  };
+  setNostrExt().catch((e) => console.error("failed to detect Nostr extension:", e));
 };
 
 export const isNostrExtAvailableAtom = atom((get) => {
