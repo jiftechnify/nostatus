@@ -19,7 +19,7 @@ import {
 
 import { atom, getDefaultStore, useAtomValue, useSetAtom } from "jotai";
 import { RESET, atomFamily, atomWithReset, atomWithStorage, loadable, selectAtom } from "jotai/utils";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 
 import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
 import { waitNostr } from "nip07-awaiter";
@@ -43,6 +43,10 @@ const myPubkeyAtom = atom((get) => {
     return getPublicKey(privkey);
   }
   return undefined;
+});
+
+const isLoggedInAtom = atom((get) => {
+  return get(myPubkeyAtom) !== undefined;
 });
 
 // temporarily mask my pubkey. used to cause hard reload
@@ -204,28 +208,22 @@ export const isNostrExtAvailableAtom = atom((get) => {
   return get(nostrExtensionAtom) !== undefined;
 });
 
-export const usePubkeyInNostrExt = () => {
-  const nostrExt = useAtomValue(nostrExtensionAtom);
-  const [pubkey, setPubkey] = useState<string | undefined>(undefined);
+// get user's pubkey from nostr extension on login
+const pubkeyInNostrExtAtomBase = loadable(
+  atom((get) => {
+    const isLoggedIn = get(isLoggedInAtom);
+    const nostrExt = get(nostrExtensionAtom);
+    if (isLoggedIn && nostrExt) {
+      return nostrExt.getPublicKey();
+    }
+    return Promise.resolve(undefined);
+  })
+);
 
-  useEffect(() => {
-    const pollPubkey = async () => {
-      try {
-        if (nostrExt) {
-          const pubkey = await nostrExt.getPublicKey();
-          setPubkey(pubkey);
-        } else {
-          setPubkey(undefined);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    pollPubkey().catch((e) => console.error(e));
-  }, [nostrExt]);
-
-  return pubkey;
-};
+const pubkeyInNostrExtAtom = atom((get) => {
+  const pkLoadable = get(pubkeyInNostrExtAtomBase);
+  return pkLoadable.state === "hasData" ? pkLoadable.data : undefined;
+});
 
 // write ops are enabled if:
 // - logged in via privkey
@@ -235,7 +233,7 @@ export const useWriteOpsEnabled = () => {
   const inputPrivkey = useAtomValue(inputPrivkeyAtom);
 
   const inputPubkey = useAtomValue(inputPubkeyAtom);
-  const pubkeyInNostrExt = usePubkeyInNostrExt();
+  const pubkeyInNostrExt = useAtomValue(pubkeyInNostrExtAtom);
 
   return inputPrivkey !== undefined || (inputPubkey !== undefined && inputPubkey === pubkeyInNostrExt);
 };
