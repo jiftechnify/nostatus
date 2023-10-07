@@ -1,5 +1,4 @@
 import {
-  NostrExtension,
   RelayList,
   getFirstTagValueByName,
   getTagValuesByName,
@@ -196,25 +195,26 @@ export const pubkeysOrderByLastStatusUpdateTimeAtom = atom((get) => {
     .map((s) => s.pubkey);
 });
 
-const nostrExtensionAtom = atom<NostrExtension | undefined>(window.nostr);
-nostrExtensionAtom.onMount = (set) => {
+export const isNostrExtAvailableAtom = atom<boolean>(window.nostr !== undefined);
+isNostrExtAvailableAtom.onMount = (set) => {
+  if (window.nostr !== undefined) {
+    return;
+  }
+
   const setNostrExt = async () => {
-    set(await waitNostr(1500));
+    set((await waitNostr(1500)) !== undefined);
   };
   setNostrExt().catch((e) => console.error("failed to detect Nostr extension:", e));
 };
 
-export const isNostrExtAvailableAtom = atom((get) => {
-  return get(nostrExtensionAtom) !== undefined;
-});
-
 // get user's pubkey from nostr extension on login
 const pubkeyInNostrExtAtomBase = loadable(
-  atom((get) => {
+  atom(async (get) => {
     const isLoggedIn = get(isLoggedInAtom);
-    const nostrExt = get(nostrExtensionAtom);
-    if (isLoggedIn && nostrExt) {
-      return nostrExt.getPublicKey();
+    const isNostrExtAvailable = get(isNostrExtAvailableAtom);
+    if (isLoggedIn && isNostrExtAvailable) {
+      await wait(500); // HACK: wait for nos2x overrides alby extension if both extensions coexist
+      return window.nostr.getPublicKey();
     }
     return Promise.resolve(undefined);
   })
@@ -222,6 +222,7 @@ const pubkeyInNostrExtAtomBase = loadable(
 
 const pubkeyInNostrExtAtom = atom((get) => {
   const pkLoadable = get(pubkeyInNostrExtAtomBase);
+  console.log(pkLoadable);
   return pkLoadable.state === "hasData" ? pkLoadable.data : undefined;
 });
 
