@@ -196,16 +196,14 @@ export const pubkeysOrderByLastStatusUpdateTimeAtom = atom((get) => {
 });
 
 export const isNostrExtAvailableAtom = atom<boolean>(window.nostr !== undefined);
-isNostrExtAvailableAtom.onMount = (set) => {
-  if (window.nostr !== undefined) {
-    return;
-  }
-
-  const setNostrExt = async () => {
-    set((await waitNostr(1500)) !== undefined);
+if (window.nostr === undefined) {
+  isNostrExtAvailableAtom.onMount = (set) => {
+    const setNostrExt = async () => {
+      set((await waitNostr(1500)) !== undefined);
+    };
+    setNostrExt().catch((e) => console.error("failed to detect Nostr extension:", e));
   };
-  setNostrExt().catch((e) => console.error("failed to detect Nostr extension:", e));
-};
+}
 
 // get user's pubkey from nostr extension on login
 const pubkeyInNostrExtAtomBase = loadable(
