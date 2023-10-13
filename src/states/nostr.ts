@@ -211,7 +211,7 @@ const pubkeyInNostrExtAtomBase = loadable(
     const isLoggedIn = get(isLoggedInAtom);
     const isNostrExtAvailable = get(isNostrExtAvailableAtom);
     if (isLoggedIn && isNostrExtAvailable) {
-      await wait(500); // HACK: wait for nos2x overrides alby extension if both extensions coexist
+      await wait(1000); // HACK: wait for nos2x overrides alby extension if both extensions coexist
       return window.nostr.getPublicKey();
     }
     return Promise.resolve(undefined);
