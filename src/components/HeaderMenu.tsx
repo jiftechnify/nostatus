@@ -1,7 +1,7 @@
-import { css } from "@shadow-panda/styled-system/css";
+import { css, cx } from "@shadow-panda/styled-system/css";
 import { icon } from "@shadow-panda/styled-system/recipes";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { ArrowUpCircle, Github, Globe, LogOut, Moon, RotateCw, Sun, Zap } from "lucide-react";
+import { ArrowUpCircle, Github, Globe, LogOut, Moon, RotateCw, Settings, Sun, Zap } from "lucide-react";
 import React, { useEffect, useRef } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { langNameTable, supportedLangCodes } from "../locales/i18n";
@@ -37,14 +37,14 @@ export const useCloseHeaderMenu = () => {
 
 export const HeaderMenu: React.FC = () => {
   const myData = useAtomValue(myAccountDataAtom);
-  return myData !== undefined ? <HeaderMenuBody myData={myData} /> : null;
+  return myData !== undefined ? <LoggedInHeaderMenuBody myData={myData} /> : <LoggedOutHeaderMenuBody />;
 };
 
 type HeaderMenuBodyProps = {
   myData: AccountMetadata;
 };
 
-const HeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
+const LoggedInHeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
   const [open, setOpen] = useAtom(isHeaderMenuOpenAtom);
   const writeOpsEnabled = useWriteOpsEnabled();
   const myName = myData.profile.displayName || myData.profile.name || "???";
@@ -80,6 +80,22 @@ const HeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
         <DropdownMenuSeparator />
         <MenuItemHardReload />
         <MenuItemLogout />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+const LoggedOutHeaderMenuBody: React.FC = () => {
+  const [open, setOpen] = useAtom(isHeaderMenuOpenAtom);
+
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger className={css({ cursor: "pointer" })}>
+        <Settings className={cx(icon({ size: "xl" }), css({ mx: "1" }))} />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className={css({ w: "12rem" })} align="start" collisionPadding={8}>
+        <MenuItemToggleColorTheme />
+        <MenuItemSwitchLangage />
       </DropdownMenuContent>
     </DropdownMenu>
   );
