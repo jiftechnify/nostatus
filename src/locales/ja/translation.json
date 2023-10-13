@@ -33,6 +33,7 @@
   "Clear status after": "指定時間後にステータスをクリア",
   "Clear": "クリア",
   "Update": "更新",
+  "Fetching": "取得中...",
   "ttl": {
     "never": "クリアしない",
     "10min": "10分",
