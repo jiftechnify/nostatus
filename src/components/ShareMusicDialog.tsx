@@ -82,7 +82,7 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
           <Input id="content" type="text" value={musicLinkInput} onChange={(e) => setMusicLinkInput(e.target.value)} />
           {musicData.state === "hasData" && (
             <button
-              className={css(button.raw({ color: "primary" }), { w: "10rem" })}
+              className={css(button.raw({ color: "primary" }), { w: "9rem" })}
               type="button"
               onClick={() => setMusicLink(musicLinkInput)}
             >
@@ -90,7 +90,7 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
             </button>
           )}
           {musicData.state === "loading" && (
-            <button className={css(button.raw({ color: "primary" }), { w: "10rem" })} disabled={true}>
+            <button className={css(button.raw({ color: "primary" }), { w: "9rem" })} disabled={true}>
               {t("musicDataLoading")}
             </button>
           )}

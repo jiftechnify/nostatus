@@ -710,7 +710,7 @@ jotaiStore.sub(bootstrapFinishedAtom, async () => {
 });
 
 type UpdateStatusInput = {
-  category: UserStatusCategory
+  category: UserStatusCategory;
   content: string;
   linkUrl: string;
   ttl: number | undefined;
