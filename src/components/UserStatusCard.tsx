@@ -1,7 +1,6 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { circle, hstack, vstack } from "@shadow-panda/styled-system/patterns";
 import { icon } from "@shadow-panda/styled-system/recipes";
-import { token } from "@shadow-panda/styled-system/tokens";
 import { useAtomValue } from "jotai";
 import { MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -10,6 +9,7 @@ import { UserStatus } from "../states/nostrModels";
 import { currUnixtime } from "../utils";
 import { AppAvatar } from "./AppAvatar";
 import { ExternalLink } from "./ExternalLink";
+import { MusicStatusView } from "./MusicStatusView";
 import { StatusDetailsView } from "./StatusDetailsView";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 
@@ -68,7 +68,7 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
 
         {/* now playing  */}
         {status.music && status.music.content && (
-          <NowPlaying content={status.music.content} linkUrl={status.music.linkUrl} />
+          <MusicStatusView content={status.music.content} linkUrl={status.music.linkUrl} />
         )}
       </div>
 
@@ -147,29 +147,6 @@ const GeneralStatus = ({ content, linkUrl }: GeneralStatusProps) => {
       })}
     >
       No status
-    </p>
-  );
-};
-
-type NowPlayingProps = {
-  content: string;
-  linkUrl?: string;
-};
-
-const NowPlaying = ({ content, linkUrl }: NowPlayingProps) => {
-  return (
-    <p
-      className={css({
-        textStyle: "now-playing",
-        color: "text.now-playing",
-        _before: {
-          content: "'♫'",
-          mr: "1",
-        },
-      })}
-    >
-      <span>{content}</span>
-      {linkUrl && <ExternalLink href={linkUrl} size={token("fontSizes.sm")} />}
     </p>
   );
 };

@@ -159,7 +159,7 @@ export const semanticTokens = defineSemanticTokens({
           _dark: "{colors.slate.700}",
         },
       },
-      "now-playing": {
+      "music-status": {
         value: {
           base: "{colors.slate.600}",
           _dark: "{colors.slate.400}",
