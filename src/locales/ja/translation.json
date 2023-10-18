@@ -23,6 +23,7 @@
   "musicDataLoading": "取得中...",
   "fetchingMusicDataFailed": "楽曲データの取得に失敗しました。",
   "shareMusicButton": "共有",
+  "stopSharingMusicButton": "共有をやめる",
   "Details": "詳細",
   "Lifetime": "期間",
   "Event Identifiers": "イベント識別子",

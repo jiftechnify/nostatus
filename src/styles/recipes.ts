@@ -55,6 +55,15 @@ export const button = cva({
           _disabled: "destructive.muted.bg",
         },
       },
+      destructiveSubtle: {
+        color: {
+          base: "destructive.text",
+        },
+        bg: {
+          base: "transparent",
+        },
+        shadow: "none",
+      },
     },
     expand: {
       false: {},
