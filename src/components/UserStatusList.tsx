@@ -3,9 +3,12 @@ import { useAtomValue } from "jotai";
 import { VList } from "virtua";
 import { pubkeysOrderByLastStatusUpdateTimeAtom } from "../states/nostr";
 import { UserStatusCard } from "./UserStatusCard";
+import { useTranslation } from "react-i18next";
 
 export const UserStatusList: React.FC = () => {
   const orderedPubkeys = useAtomValue(pubkeysOrderByLastStatusUpdateTimeAtom);
+
+  const { t } = useTranslation();
 
   return (
     <VList>
@@ -32,7 +35,7 @@ export const UserStatusList: React.FC = () => {
           );
         })
       ) : (
-        <p className={css({ textAlign: "center" })}>Fetching...</p>
+        <p className={css({ textAlign: "center" })}>{t("Fetching")}</p>
       )}
 
       {/* spacer below the bottom item */}
