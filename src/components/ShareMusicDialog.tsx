@@ -3,7 +3,7 @@ import { hstack } from "@shadow-panda/styled-system/patterns";
 import { t } from "i18next";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { loadable } from "jotai/utils";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { updateMyStatus } from "../states/nostr";
 import { button } from "../styles/recipes";
 import { useCloseHeaderMenu } from "./HeaderMenu";
@@ -44,6 +44,8 @@ type ShareMusicDialogProps = {
   trigger: React.ReactNode;
 };
 
+const stepsStyle = css({ ml: "4", fontSize: "sm", display: "list-item", listStyleType: "decimal" });
+
 export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) => {
   const [open, setOpen] = useState(false);
   const closeHeaderMenu = useCloseHeaderMenu();
@@ -51,6 +53,26 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
   const [musicLinkInput, setMusicLinkInput] = useState("");
   const setMusicLink = useSetAtom(musicLinkAtom);
   const musicData = useAtomValue(musicDataLoadableAtom);
+
+  console.log(musicData);
+
+  const musicStatus = useMemo(() => {
+    if (musicData.state !== "hasData" || musicData.data === undefined) {
+      return undefined;
+    }
+    return {
+      content: `${musicData.data.title || "???"} - ${(musicData.data.artists ?? []).join(", ")}`,
+      linkUrl: musicData.data.url,
+    };
+  }, [musicData]);
+
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      setMusicLinkInput("");
+      setMusicLink(undefined);
+    }
+    setOpen(open);
+  };
 
   const closeDialog = () => {
     setOpen(false);
@@ -60,66 +82,69 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
   };
 
   const handleClickUpdate = async () => {
-    if (musicData.state !== "hasData" || musicData.data === undefined) {
+    if (musicStatus === undefined) {
       return;
     }
 
-    const content = `${musicData.data.title || "???"} - ${(musicData.data.artists ?? []).join(", ")}`;
-    await updateMyStatus({ category: "music", content, linkUrl: musicData.data.url, ttl: undefined });
+    const { content, linkUrl } = musicStatus;
+    await updateMyStatus({ category: "music", content, linkUrl, ttl: undefined });
 
     closeDialog();
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger className={css({ w: "100%" })}>{trigger}</DialogTrigger>
       <DialogContent className={css({ bg: "card" })}>
         <DialogHeader>
           <DialogTitle>{t("Share Music")}</DialogTitle>
         </DialogHeader>
-        <Label htmlFor="content">{t("Paste music share link")}</Label>
+
+        <ol>
+          <li className={stepsStyle}>{t("shareMusicStep1")}</li>
+          <li className={stepsStyle}>{t("shareMusicStep2")}</li>
+          <li className={stepsStyle}>{t("shareMusicStep3")}</li>
+        </ol>
+
+        <Label htmlFor="content">{t("musicShareLink")}</Label>
         <div className={hstack({})}>
-          <Input id="content" type="text" value={musicLinkInput} onChange={(e) => setMusicLinkInput(e.target.value)} />
-          {musicData.state === "hasData" && (
-            <button
-              className={css(button.raw({ color: "primary" }), { w: "9rem" })}
-              type="button"
-              onClick={() => setMusicLink(musicLinkInput)}
-            >
-              {t("getMusicData")}
-            </button>
-          )}
-          {musicData.state === "loading" && (
-            <button className={css(button.raw({ color: "primary" }), { w: "9rem" })} disabled={true}>
-              {t("musicDataLoading")}
-            </button>
-          )}
+          <Input
+            id="content"
+            type="text"
+            autoComplete="off"
+            value={musicLinkInput}
+            onChange={(e) => setMusicLinkInput(e.target.value)}
+          />
+
+          <button
+            className={css(button.raw({ color: "primary" }), { flexShrink: "0" })}
+            type="button"
+            disabled={musicData.state === "loading"}
+            onClick={() => setMusicLink(musicLinkInput)}
+          >
+            {t("getMusicDataButton")}
+          </button>
         </div>
 
-        {musicData.state === "hasData" && musicData.data !== undefined && (
-          <>
-            <p className={css({ fontSize: "0.875rem", lineHeight: "none", fontWeight: "medium" })}>
-              {t("musicStatusPreview")}
-            </p>
+        {(musicData.state === "loading" || musicStatus !== undefined) && (
+          <p className={css({ fontSize: "0.875rem", lineHeight: "none", fontWeight: "medium" })}>
+            {t("musicStatusPreview")}
+          </p>
+        )}
+        {musicData.state === "loading" && <p>Loading...</p>}
+        {musicStatus !== undefined && <MusicStatusView {...musicStatus} />}
 
-            <MusicStatusView
-              content={`${musicData.data.title || "???"} - ${(musicData.data.artists ?? []).join(", ")}`}
-              linkUrl={musicData.data.url}
-            />
-          </>
+        {musicData.state === "hasError" && (
+          <p className={css({ fontSize: "sm", color: "destructive.text" })}>{t("fetchingMusicDataFailed")}</p>
         )}
 
-        {musicData.state === "hasData" && musicData.data !== undefined && (
-          <DialogFooter>
-            <button
-              className={button()}
-              disabled={musicData.state !== "hasData" || musicData.data === undefined}
-              onClick={handleClickUpdate}
-            >
-              {t("Update")}
+        <DialogFooter>
+          {musicStatus !== undefined && (
+            <button className={button()} onClick={handleClickUpdate}>
+              {t("shareMusicButton")}
             </button>
-          </DialogFooter>
-        )}
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

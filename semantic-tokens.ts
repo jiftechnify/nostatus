@@ -111,6 +111,12 @@ export const semanticTokens = defineSemanticTokens({
           },
         },
       },
+      text: {
+        value: {
+          base: "{colors.purple.600}",
+          _dark: "{colors.purple.400}",
+        },
+      },
     },
     destructive: {
       DEFAULT: {
@@ -143,6 +149,12 @@ export const semanticTokens = defineSemanticTokens({
             base: "{colors.slate.50}",
             _dark: "{colors.slate.600}",
           },
+        },
+      },
+      text: {
+        value: {
+          base: "{colors.red.600}",
+          _dark: "{colors.red.400}",
         },
       },
     },
