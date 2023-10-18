@@ -22,16 +22,6 @@ const ttlTable = {
 
 type TtlKey = keyof typeof ttlTable;
 
-// const ttlLabelKeys = {
-//   never: "Never",
-//   "10min": "10 Minutes",
-//   "30min": "30 Minutes",
-//   "1hr": "1 Hour",
-//   "4hr": "4 Hours",
-//   "8hr": "8 Hours",
-//   "1day": "1 Day",
-// } satisfies Record<TtlKey, string>;
-
 type UpdateStatusDialogProps = {
   trigger: React.ReactNode;
 };
@@ -68,13 +58,13 @@ export const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({ trigger 
 
   const handleClickUpdate = async () => {
     const ttl = ttlTable[ttlKey as TtlKey];
-    await updateMyStatus({ content: content.trim(), linkUrl: linkUrl.trim(), ttl });
+    await updateMyStatus({ category: "general", content: content.trim(), linkUrl: linkUrl.trim(), ttl });
 
     closeDialog();
   };
 
   const handleClickClear = async () => {
-    await updateMyStatus({ content: "", linkUrl: "", ttl: undefined });
+    await updateMyStatus({ category: "general", content: "", linkUrl: "", ttl: undefined });
 
     closeDialog();
   };

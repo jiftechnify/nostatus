@@ -111,6 +111,12 @@ export const semanticTokens = defineSemanticTokens({
           },
         },
       },
+      text: {
+        value: {
+          base: "{colors.purple.600}",
+          _dark: "{colors.purple.400}",
+        },
+      },
     },
     destructive: {
       DEFAULT: {
@@ -145,6 +151,12 @@ export const semanticTokens = defineSemanticTokens({
           },
         },
       },
+      text: {
+        value: {
+          base: "{colors.red.600}",
+          _dark: "{colors.red.400}",
+        },
+      },
     },
     text: {
       sub: {
@@ -159,7 +171,7 @@ export const semanticTokens = defineSemanticTokens({
           _dark: "{colors.slate.700}",
         },
       },
-      "now-playing": {
+      "music-status": {
         value: {
           base: "{colors.slate.600}",
           _dark: "{colors.slate.400}",

@@ -710,6 +710,7 @@ jotaiStore.sub(bootstrapFinishedAtom, async () => {
 });
 
 type UpdateStatusInput = {
+  category: UserStatusCategory;
   content: string;
   linkUrl: string;
   ttl: number | undefined;
@@ -717,7 +718,7 @@ type UpdateStatusInput = {
 
 // update my general status
 // update local statuses map, then send a user status event (kind:30315) to write relays
-export const updateMyStatus = async ({ content, linkUrl, ttl }: UpdateStatusInput) => {
+export const updateMyStatus = async ({ category, content, linkUrl, ttl }: UpdateStatusInput) => {
   const created_at = currUnixtime();
   const exp = ttl !== undefined ? created_at + ttl : undefined;
 
@@ -726,7 +727,7 @@ export const updateMyStatus = async ({ content, linkUrl, ttl }: UpdateStatusInpu
     content,
     created_at,
     tags: [
-      ["d", "general"],
+      ["d", category],
       ...(linkUrl !== "" ? [["r", linkUrl]] : []),
       ...(exp !== undefined ? [["expiration", String(exp)]] : []),
     ],

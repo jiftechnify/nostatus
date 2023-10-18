@@ -21,7 +21,7 @@ export const textStyles = defineTextStyles({
       fontWeight: "bold",
     },
   },
-  "now-playing": {
+  "music-status": {
     description: "now playing",
     value: {
       fontSize: "xs",

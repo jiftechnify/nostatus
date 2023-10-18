@@ -79,16 +79,10 @@ export const menuItem = cva({
         color: "foreground",
       },
       primary: {
-        color: {
-          base: "primary",
-          _dark: "purple.400",
-        },
+        color: "primary.text",
       },
       destructive: {
-        color: {
-          base: "destructive",
-          _dark: "red.400",
-        },
+        color: "destructive.text",
       },
     },
   },

@@ -1,7 +1,7 @@
 import { css, cx } from "@shadow-panda/styled-system/css";
 import { icon } from "@shadow-panda/styled-system/recipes";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { ArrowUpCircle, Github, Globe, LogOut, Moon, RotateCw, Settings, Sun, Zap } from "lucide-react";
+import { ArrowUpCircle, Github, Globe, LogOut, Moon, Music, RotateCw, Settings, Sun, Zap } from "lucide-react";
 import React, { useEffect, useRef } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { langNameTable, supportedLangCodes } from "../locales/i18n";
@@ -10,6 +10,7 @@ import { AccountMetadata } from "../states/nostrModels";
 import { ColorTheme, colorThemeAtom } from "../states/theme";
 import { menuItem } from "../styles/recipes";
 import { AppAvatar } from "./AppAvatar";
+import { ShareMusicDialog } from "./ShareMusicDialog";
 import { UpdateStatusDialog } from "./UpdateStatusDialog";
 import {
   DropdownMenu,
@@ -72,6 +73,8 @@ const LoggedInHeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <MenuItemUpdateStatus disabled={!writeOpsEnabled} />
+        <MenuItemShareMusic disabled={!writeOpsEnabled} />
+        <DropdownMenuSeparator />
         <MenuItemToggleColorTheme />
         <MenuItemSwitchLangage />
         <DropdownMenuSeparator />
@@ -101,13 +104,13 @@ const LoggedOutHeaderMenuBody: React.FC = () => {
   );
 };
 
-type UpdateStatusMenuItemProps = {
+type MenuItemUpdateStatusProps = {
   disabled: boolean;
 };
 
 // If `disabled === true`, completely omit the dialog.
 // Just setting DropdownMenuItem's `disabled` prop to `true` doesn't prevent the dialog from being opened.
-const MenuItemUpdateStatus: React.FC<UpdateStatusMenuItemProps> = ({ disabled }) => {
+const MenuItemUpdateStatus: React.FC<MenuItemUpdateStatusProps> = ({ disabled }) => {
   const { t } = useTranslation();
 
   const menuItemBody = (
@@ -122,6 +125,29 @@ const MenuItemUpdateStatus: React.FC<UpdateStatusMenuItemProps> = ({ disabled })
   );
 
   return disabled ? menuItemBody : <UpdateStatusDialog trigger={menuItemBody} />;
+};
+
+type MenuItemShareMusicProps = {
+  disabled: boolean;
+};
+
+// If `disabled === true`, completely omit the dialog.
+// Just setting DropdownMenuItem's `disabled` prop to `true` doesn't prevent the dialog from being opened.
+const MenuItemShareMusic: React.FC<MenuItemShareMusicProps> = ({ disabled }) => {
+  const { t } = useTranslation();
+
+  const menuItemBody = (
+    <DropdownMenuItem
+      className={menuItem({ color: "primary" })}
+      disabled={disabled}
+      onSelect={(e) => e.preventDefault()}
+    >
+      <Music className={icon()} />
+      <span>{t("Share Music")}</span>
+    </DropdownMenuItem>
+  );
+
+  return disabled ? menuItemBody : <ShareMusicDialog trigger={menuItemBody} />;
 };
 
 const radioItemClassNames = css({ display: "flex", gap: "1.5", cursor: "pointer" });
