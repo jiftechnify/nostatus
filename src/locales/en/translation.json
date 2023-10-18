@@ -23,6 +23,7 @@
   "musicDataLoading": "Loading...",
   "fetchingMusicDataFailed": "Failed to get music data.",
   "shareMusicButton": "Share",
+  "stopSharingMusicButton": "Stop Sharing",
   "Details": "Details",
   "Lifetime": "Lifetime",
   "Event Identifiers": "Event Identifiers",

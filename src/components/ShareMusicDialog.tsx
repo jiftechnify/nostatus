@@ -1,10 +1,10 @@
 import { css } from "@shadow-panda/styled-system/css";
-import { hstack } from "@shadow-panda/styled-system/patterns";
+import { divider, hstack } from "@shadow-panda/styled-system/patterns";
 import { t } from "i18next";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { loadable } from "jotai/utils";
 import { useMemo, useState } from "react";
-import { updateMyStatus } from "../states/nostr";
+import { myMusicStatusAtom, updateMyStatus } from "../states/nostr";
 import { button } from "../styles/recipes";
 import { useCloseHeaderMenu } from "./HeaderMenu";
 import { MusicStatusView } from "./MusicStatusView";
@@ -53,10 +53,7 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
   const [musicLinkInput, setMusicLinkInput] = useState("");
   const setMusicLink = useSetAtom(musicLinkAtom);
   const musicData = useAtomValue(musicDataLoadableAtom);
-
-  console.log(musicData);
-
-  const musicStatus = useMemo(() => {
+  const newMusicStatus = useMemo(() => {
     if (musicData.state !== "hasData" || musicData.data === undefined) {
       return undefined;
     }
@@ -65,6 +62,8 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
       linkUrl: musicData.data.url,
     };
   }, [musicData]);
+
+  const currMusicStatus = useAtomValue(myMusicStatusAtom);
 
   const handleOpenChange = (open: boolean) => {
     if (open) {
@@ -81,13 +80,19 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
     closeHeaderMenu();
   };
 
-  const handleClickUpdate = async () => {
-    if (musicStatus === undefined) {
+  const handleClickShare = async () => {
+    if (newMusicStatus === undefined) {
       return;
     }
 
-    const { content, linkUrl } = musicStatus;
+    const { content, linkUrl } = newMusicStatus;
     await updateMyStatus({ category: "music", content, linkUrl, ttl: undefined });
+
+    closeDialog();
+  };
+
+  const handleClickStopSharing = async () => {
+    await updateMyStatus({ category: "music", content: "", linkUrl: "", ttl: undefined });
 
     closeDialog();
   };
@@ -126,25 +131,39 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
           </button>
         </div>
 
-        {(musicData.state === "loading" || musicStatus !== undefined) && (
+        {(musicData.state !== "hasData" || newMusicStatus !== undefined) && (
           <p className={css({ fontSize: "0.875rem", lineHeight: "none", fontWeight: "medium" })}>
             {t("musicStatusPreview")}
           </p>
         )}
         {musicData.state === "loading" && <p>{t("musicDataLoading")}</p>}
-        {musicStatus !== undefined && <MusicStatusView {...musicStatus} />}
+        {newMusicStatus !== undefined && <MusicStatusView {...newMusicStatus} />}
 
         {musicData.state === "hasError" && (
           <p className={css({ fontSize: "sm", color: "destructive.text" })}>{t("fetchingMusicDataFailed")}</p>
         )}
 
         <DialogFooter>
-          {musicStatus !== undefined && (
-            <button className={button()} onClick={handleClickUpdate}>
+          {newMusicStatus !== undefined && (
+            <button className={button({ expand: true })} onClick={handleClickShare}>
               {t("shareMusicButton")}
             </button>
           )}
         </DialogFooter>
+
+        {currMusicStatus !== undefined && (
+          <>
+            <div className={divider({ orientation: "horizontal" })} />
+            <DialogFooter>
+              <button
+                className={css(button.raw({ color: "destructiveSubtle" }), { w: "fit-content", mx: "auto" })}
+                onClick={handleClickStopSharing}
+              >
+                {t("stopSharingMusicButton")}
+              </button>
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -182,6 +182,14 @@ export const myGeneralStatusAtom = atom((get) => {
   return get(userStatusAtomFamily(myPubkey))?.general;
 });
 
+export const myMusicStatusAtom = atom((get) => {
+  const myPubkey = get(maskedMyPubkeyAtom);
+  if (myPubkey === undefined) {
+    return undefined;
+  }
+  return get(userStatusAtomFamily(myPubkey))?.music;
+});
+
 export const pubkeysOrderByLastStatusUpdateTimeAtom = atom((get) => {
   const statusesMap = get(followingsStatusesAtom);
   return [...statusesMap.values()]
