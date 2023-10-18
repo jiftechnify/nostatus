@@ -131,7 +131,7 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
             {t("musicStatusPreview")}
           </p>
         )}
-        {musicData.state === "loading" && <p>Loading...</p>}
+        {musicData.state === "loading" && <p>{t("musicDataLoading")}</p>}
         {musicStatus !== undefined && <MusicStatusView {...musicStatus} />}
 
         {musicData.state === "hasError" && (

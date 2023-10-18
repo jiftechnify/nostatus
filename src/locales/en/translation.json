@@ -20,6 +20,7 @@
   "musicShareLink": "Music share link",
   "getMusicDataButton": "Get Data",
   "musicStatusPreview": "Preview",
+  "musicDataLoading": "Loading...",
   "fetchingMusicDataFailed": "Failed to get music data.",
   "shareMusicButton": "Share",
   "Details": "Details",
