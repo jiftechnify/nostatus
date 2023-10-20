@@ -111,10 +111,10 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
           <li className={stepsStyle}>{t("shareMusicStep3")}</li>
         </ol>
 
-        <Label htmlFor="content">{t("musicShareLink")}</Label>
+        <Label htmlFor="music-share-link">{t("musicShareLink")}</Label>
         <div className={hstack({})}>
           <Input
-            id="content"
+            id="music-share-link"
             type="text"
             autoComplete="off"
             value={musicLinkInput}
@@ -154,12 +154,15 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
         {currMusicStatus !== undefined && (
           <>
             <div className={divider({ orientation: "horizontal" })} />
+
+            <p className={css({ mt: "2", fontSize: "0.875rem", lineHeight: "none", fontWeight: "medium" })}>
+              {t("currSharingMusic")}
+            </p>
+            <MusicStatusView {...currMusicStatus} />
+
             <DialogFooter>
-              <button
-                className={css(button.raw({ color: "destructiveSubtle" }), { w: "fit-content", mx: "auto" })}
-                onClick={handleClickStopSharing}
-              >
-                {t("stopSharingMusicButton")}
+              <button className={button({ color: "destructiveSubtle" })} onClick={handleClickStopSharing}>
+                {t("cancelSharingMusicButton")}
               </button>
             </DialogFooter>
           </>
