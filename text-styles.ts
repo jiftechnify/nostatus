@@ -60,4 +60,12 @@ export const textStyles = defineTextStyles({
       fontFamily: "monospace",
     },
   },
+  "dialog-label-like": {
+    description: "label-like text in dialog",
+    value: {
+      fontSize: "sm",
+      fontWeight: "medium",
+      lineHeight: "none",
+    },
+  },
 });
