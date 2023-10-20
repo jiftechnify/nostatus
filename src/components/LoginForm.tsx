@@ -1,5 +1,6 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { vstack } from "@shadow-panda/styled-system/patterns";
+import { SystemStyleObject } from "@shadow-panda/styled-system/types";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -8,7 +9,11 @@ import { isNostrExtAvailableAtom, useLoginWithPrivkey, useLoginWithPubkey } from
 import { button } from "../styles/recipes";
 import { Input } from "./ui/input";
 
-export const LoginForm: React.FC = () => {
+type LoginFormProps = {
+  css?: SystemStyleObject;
+};
+
+export const LoginForm: React.FC<LoginFormProps> = ({ css: cssProp = {} }) => {
   const loginWithPubkey = useLoginWithPubkey();
   const loginWithPrivkey = useLoginWithPrivkey();
 
@@ -48,35 +53,37 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className={vstack({ w: "300px", mt: "4", mx: "auto", gap: "10" })}>
-      <button className={button({ expand: true })} onClick={onClickNostrExtLogin} disabled={!isNostrExtAvailable}>
-        {t("Login with Nostr Extension")}
-      </button>
-
-      <div className={vstack({ w: "100%", gap: "1.5" })}>
-        <Input
-          className={css({ h: "8", px: "1", py: "0.5" })}
-          type="text"
-          placeholder={t("npub or hex pubkey")}
-          value={pubkeyInput}
-          onChange={(e) => setPubkeyInput(e.target.value)}
-        />
-        <button className={button({ expand: true })} onClick={onClickPubkeyLogin}>
-          {t("Login with Pubkey")}
+    <div className={css(cssProp)}>
+      <div className={vstack({ w: "300px", mx: "auto", gap: "14" })}>
+        <button className={button({ expand: true })} onClick={onClickNostrExtLogin} disabled={!isNostrExtAvailable}>
+          {t("Login with Nostr Extension")}
         </button>
-      </div>
 
-      <div className={vstack({ w: "100%", gap: "1.5" })}>
-        <Input
-          className={css({ h: "8", px: "1", py: "0.5" })}
-          type="password"
-          placeholder="nsec1..."
-          value={nsecInput}
-          onChange={(e) => setNsecInput(e.target.value)}
-        />
-        <button className={button({ expand: true })} onClick={onClickNsecLogin}>
-          {t("Login with nsec")}
-        </button>
+        <div className={vstack({ w: "100%", gap: "1.5" })}>
+          <Input
+            className={css({ h: "8", px: "1", py: "0.5" })}
+            type="text"
+            placeholder={t("npub or hex pubkey")}
+            value={pubkeyInput}
+            onChange={(e) => setPubkeyInput(e.target.value)}
+          />
+          <button className={button({ expand: true })} onClick={onClickPubkeyLogin}>
+            {t("Login with Pubkey")}
+          </button>
+        </div>
+
+        <div className={vstack({ w: "100%", gap: "1.5" })}>
+          <Input
+            className={css({ h: "8", px: "1", py: "0.5" })}
+            type="password"
+            placeholder="nsec1..."
+            value={nsecInput}
+            onChange={(e) => setNsecInput(e.target.value)}
+          />
+          <button className={button({ expand: true })} onClick={onClickNsecLogin}>
+            {t("Login with nsec")}
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -16,6 +16,8 @@ export const App = () => {
   const pubkey = useMyPubkey();
   const writeOpsEnabled = useWriteOpsEnabled();
 
+  const isTouch = isTouchDevice();
+
   return (
     <div
       className={vstack({
@@ -50,11 +52,17 @@ export const App = () => {
       </header>
 
       <main className={css({ h: "100%", w: "100vw" })}>
-        <Suspense>{pubkey !== undefined ? <UserStatusList /> : <LoginForm />}</Suspense>
+        <Suspense>
+          {pubkey !== undefined ? (
+            <UserStatusList />
+          ) : (
+            <LoginForm css={{ position: "relative", top: isTouch ? "max(calc(50% - 14rem), 16px)" : "16px" }} />
+          )}
+        </Suspense>
       </main>
 
       {/* floating action button that triggers UpdateStatusDialog */}
-      {writeOpsEnabled && isTouchDevice() && <UpdateStatusDialog trigger={<UpdateStatusFab />} />}
+      {writeOpsEnabled && isTouch && <UpdateStatusDialog trigger={<UpdateStatusFab />} />}
     </div>
   );
 };

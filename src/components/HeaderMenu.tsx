@@ -55,7 +55,7 @@ const LoggedInHeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
       <DropdownMenuTrigger className={css({ cursor: "pointer" })}>
         <AppAvatar imgSrc={myData.profile.picture} size="md" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className={css({ w: "16rem" })} align="start" collisionPadding={8}>
+      <DropdownMenuContent className={css({ w: "14rem" })} align="start" collisionPadding={8}>
         <DropdownMenuLabel>
           <Trans i18nKey="loggedInAs" values={{ myName }}>
             <div className={css({ fontWeight: "normal", fontSize: "xs" })}>Logged in as</div>
