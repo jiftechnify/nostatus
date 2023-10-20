@@ -132,9 +132,7 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
         </div>
 
         {(musicData.state !== "hasData" || newMusicStatus !== undefined) && (
-          <p className={css({ fontSize: "0.875rem", lineHeight: "none", fontWeight: "medium" })}>
-            {t("musicStatusPreview")}
-          </p>
+          <p className={css({ textStyle: "dialog-label-like" })}>{t("musicStatusPreview")}</p>
         )}
         {musicData.state === "loading" && <p>{t("musicDataLoading")}</p>}
         {newMusicStatus !== undefined && <MusicStatusView {...newMusicStatus} />}
@@ -155,9 +153,7 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
           <>
             <div className={divider({ orientation: "horizontal" })} />
 
-            <p className={css({ mt: "2", fontSize: "0.875rem", lineHeight: "none", fontWeight: "medium" })}>
-              {t("currSharingMusic")}
-            </p>
+            <p className={css({ mt: "2", textStyle: "dialog-label-like" })}>{t("currSharingMusic")}</p>
             <MusicStatusView {...currMusicStatus} />
 
             <DialogFooter>
