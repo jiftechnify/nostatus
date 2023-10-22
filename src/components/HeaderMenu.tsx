@@ -83,6 +83,8 @@ const LoggedInHeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
         <DropdownMenuSeparator />
         <MenuItemHardReload />
         <MenuItemLogout />
+        <DropdownMenuSeparator />
+        <MenuLabelBuildId />
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -99,6 +101,8 @@ const LoggedOutHeaderMenuBody: React.FC = () => {
       <DropdownMenuContent className={css({ w: "12rem" })} align="start" collisionPadding={8}>
         <MenuItemToggleColorTheme />
         <MenuItemSwitchLangage />
+        <DropdownMenuSeparator />
+        <MenuLabelBuildId />
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -281,5 +285,17 @@ const MenuItemLogout = () => {
       <LogOut className={icon()} />
       <span>{t("Logout")}</span>
     </DropdownMenuItem>
+  );
+};
+
+const buildIdStyle = { fontWeight: "light", color: "muted.foreground" };
+const MenuLabelBuildId = () => {
+  const { t } = useTranslation();
+
+  return (
+    <DropdownMenuLabel>
+      <p className={css(buildIdStyle)}>{t("Build ID")}:</p>
+      <p className={css(buildIdStyle)}>{import.meta.env.VITE_BUILD_ID}</p>
+    </DropdownMenuLabel>
   );
 };
