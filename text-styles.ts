@@ -34,8 +34,8 @@ export const textStyles = defineTextStyles({
       fontSize: "md",
     },
   },
-  name: {
-    description: "name in profile",
+  "sub-name": {
+    description: "sub-name in profile",
     value: {
       fontSize: "xs",
     },

@@ -5,13 +5,34 @@ import { useAtomValue } from "jotai";
 import { MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 import { userProfileAtomFamily, userStatusAtomFamily } from "../states/nostr";
-import { UserStatus } from "../states/nostrModels";
+import { UserProfile, UserStatus } from "../states/nostrModels";
 import { currUnixtime } from "../utils";
 import { AppAvatar } from "./AppAvatar";
 import { ExternalLink } from "./ExternalLink";
 import { MusicStatusView } from "./MusicStatusView";
 import { StatusDetailsView } from "./StatusDetailsView";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+
+const extractNames = (profile: UserProfile): { displayName: string; subName: string | undefined } => {
+  if (!profile.displayName) {
+    return {
+      displayName: profile.name || "???",
+      subName: undefined,
+    };
+  }
+
+  // profile.displayName is non-empty string
+  if (profile.name === undefined || profile.displayName.includes(profile.name.trim())) {
+    return {
+      displayName: profile.displayName,
+      subName: undefined,
+    };
+  }
+  return {
+    displayName: profile.displayName,
+    subName: profile.name,
+  };
+};
 
 type UserStatusCardProps = {
   pubkey: string;
@@ -47,6 +68,8 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
     return null;
   }
 
+  const { displayName, subName } = extractNames(profile);
+
   return (
     <div
       className={vstack({
@@ -81,8 +104,8 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
             alignItems: "baseline",
           })}
         >
-          {profile.displayName && <p className={css({ textStyle: "display-name" })}>{profile.displayName}</p>}
-          <p className={css({ textStyle: "name", color: "text.sub" })}>{profile.name ?? "???"}</p>
+          <p className={css({ textStyle: "display-name" })}>{displayName}</p>
+          {subName !== undefined && <p className={css({ textStyle: "sub-name", color: "text.sub" })}>{subName}</p>}
         </div>
       </div>
 
