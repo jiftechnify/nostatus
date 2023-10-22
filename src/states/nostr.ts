@@ -371,7 +371,8 @@ type UserProfileCache = {
   lastFetchedAt: number;
 };
 const PROFILE_CACHE_KEY = "nostr_profiles";
-const PROFILE_CACHE_TTL = 12 * 60 * 60; // 12 hour
+const PROFILE_CACHE_TIME_TO_STALE = 10 * 60; // 10 mins
+const PROFILE_CACHE_TIME_TO_EXPIRE = 3 * 24 * 60 * 60; // 3 days
 
 const getProfilesFromCache = (pubkeys: string[]): [UserProfile[], string[]] => {
   const json = localStorage.getItem(PROFILE_CACHE_KEY);
@@ -385,12 +386,26 @@ const getProfilesFromCache = (pubkeys: string[]): [UserProfile[], string[]] => {
     const cachedProfiles: UserProfile[] = [];
     const cacheMissPubkeys: string[] = [];
 
+    const now = currUnixtime();
+
     for (const pubkey of pubkeys) {
       const c = cacheMap.get(pubkey);
-      if (c !== undefined && currUnixtime() - c.lastFetchedAt <= PROFILE_CACHE_TTL) {
-        cachedProfiles.push(c.profile);
-      } else {
+      if (c === undefined) {
         cacheMissPubkeys.push(pubkey);
+      } else {
+        const age = now - c.lastFetchedAt;
+        if (age > PROFILE_CACHE_TIME_TO_EXPIRE) {
+          // cache has been completely expired
+          cacheMissPubkeys.push(pubkey);
+        } else if (age > PROFILE_CACHE_TIME_TO_STALE) {
+          // cache is stale
+          // -> use "stale-while-revalidate" strategy: use stale cache while fetching new data
+          cachedProfiles.push(c.profile);
+          cacheMissPubkeys.push(pubkey);
+        } else {
+          // cache is fresh
+          cachedProfiles.push(c.profile);
+        }
       }
     }
     return [cachedProfiles, cacheMissPubkeys];
@@ -404,8 +419,9 @@ const saveProfilesCache = (newProfiles: UserProfile[]) => {
   const cache = json !== null ? (JSON.parse(json) as UserProfileCache[]) : [];
   const cacheMap = new Map(cache.map((c: UserProfileCache) => [c.profile.pubkey, c]));
 
+  const now = currUnixtime();
   for (const profile of newProfiles) {
-    cacheMap.set(profile.pubkey, { profile, lastFetchedAt: currUnixtime() });
+    cacheMap.set(profile.pubkey, { profile, lastFetchedAt: now });
   }
   localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify([...cacheMap.values()]));
 };
