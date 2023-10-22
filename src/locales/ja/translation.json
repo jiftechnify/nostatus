@@ -10,6 +10,7 @@
   "View Code on GitHub": "GitHub でコードを見る",
   "Hard Reload": "ハードリロード",
   "Logout": "ログアウト",
+  "Build ID": "ビルドID",
   "Login with Nostr Extension": "Nostr 拡張機能でログイン",
   "npub or hex pubkey": "npub または hex 形式の公開鍵",
   "Login with Pubkey": "公開鍵でログイン",
