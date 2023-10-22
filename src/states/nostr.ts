@@ -371,7 +371,7 @@ type UserProfileCache = {
   lastFetchedAt: number;
 };
 const PROFILE_CACHE_KEY = "nostr_profiles";
-const PROFILE_CACHE_TIME_TO_STALE = 1 * 60; // 10 mins
+const PROFILE_CACHE_TIME_TO_STALE = 10 * 60; // 10 mins
 const PROFILE_CACHE_TIME_TO_EXPIRE = 3 * 24 * 60 * 60; // 3 days
 
 const getProfilesFromCache = (pubkeys: string[]): [UserProfile[], string[]] => {
