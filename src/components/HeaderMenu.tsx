@@ -98,7 +98,7 @@ const LoggedOutHeaderMenuBody: React.FC = () => {
       <DropdownMenuTrigger className={css({ cursor: "pointer" })}>
         <Settings className={cx(icon({ size: "xl" }), css({ mx: "1" }))} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className={css({ w: "12rem" })} align="start" collisionPadding={8}>
+      <DropdownMenuContent className={css({ w: "14rem" })} align="start" collisionPadding={8}>
         <MenuItemToggleColorTheme />
         <MenuItemSwitchLangage />
         <DropdownMenuSeparator />
