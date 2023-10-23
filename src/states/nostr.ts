@@ -102,7 +102,7 @@ export const useHardReload = () => {
 };
 
 const ACCT_DATA_CACHE_KEY = "nostr_my_data";
-const ACCT_DATA_CACHE_TTL = 12 * 60 * 60; // 12 hour
+const ACCT_DATA_CACHE_TTL = 10 * 60; // 10 mins
 
 const saveMyAccountDataCache = (metadata: AccountMetadata) => {
   localStorage.setItem(ACCT_DATA_CACHE_KEY, JSON.stringify(metadata));
