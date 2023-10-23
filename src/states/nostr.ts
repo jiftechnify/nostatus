@@ -102,7 +102,7 @@ export const useHardReload = () => {
 };
 
 const ACCT_DATA_CACHE_KEY = "nostr_my_data";
-const ACCT_DATA_CACHE_TTL = 12 * 60 * 60; // 12 hour
+const ACCT_DATA_CACHE_TTL = 10 * 60; // 10 mins
 
 const saveMyAccountDataCache = (metadata: AccountMetadata) => {
   localStorage.setItem(ACCT_DATA_CACHE_KEY, JSON.stringify(metadata));
@@ -651,6 +651,52 @@ const cancelFetchStatuses = () => {
   }
 };
 
+/**
+ * fetch past user status events for given pubkeys.
+ * if `since` is specified, fetch only events after the timestamp.
+ *
+ * returns whether fetch was aborted or not.
+ */
+const fetchPastStatuses = async (
+  pubkeys: string[],
+  readRelays: string[],
+  since: number | undefined,
+  myPubkey: string
+): Promise<boolean> => {
+  fetchPastStatusesAbortCtrl = new AbortController();
+  const pastStatusEvIter = fetcherOnRxNostr.allEventsIterator(
+    readRelays,
+    { kinds: [30315], authors: pubkeys, "#d": ["general", "music"] },
+    { since },
+    { abortSignal: fetchPastStatusesAbortCtrl.signal, connectTimeoutMs: 3000 }
+  );
+
+  // save statuses cache periodically
+  let isMapDirty = false;
+  const saveCacheInterval = setInterval(() => {
+    if (isMapDirty) {
+      saveStatusesCache(myPubkey, [...statusesMap.values()]);
+      isMapDirty = false;
+    }
+  }, 1000);
+
+  try {
+    for await (const ev of pastStatusEvIter) {
+      applyStatusUpdate(ev);
+      isMapDirty = true;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
+  // post process
+  clearInterval(saveCacheInterval);
+
+  const { aborted } = fetchPastStatusesAbortCtrl.signal;
+  fetchPastStatusesAbortCtrl = undefined;
+  return aborted;
+};
+
 jotaiStore.sub(bootstrapFinishedAtom, async () => {
   cancelFetchStatuses();
 
@@ -695,42 +741,17 @@ jotaiStore.sub(bootstrapFinishedAtom, async () => {
 
     // fetch status updates for status-cached pubkeys
     const statusCachedPubkeys = statuses.map((s) => s.pubkey);
-
-    fetchPastStatusesAbortCtrl = new AbortController();
-    const pastStatusEvIter = fetcherOnRxNostr.allEventsIterator(
-      readRelays,
-      { kinds: [30315], authors: statusCachedPubkeys, "#d": ["general", "music"] },
-      { since: latestUpdateTime },
-      { abortSignal: fetchPastStatusesAbortCtrl.signal, connectTimeoutMs: 3000 }
-    );
-    for await (const ev of pastStatusEvIter) {
-      applyStatusUpdate(ev);
-    }
-    const { aborted } = fetchPastStatusesAbortCtrl.signal;
-    fetchPastStatusesAbortCtrl = undefined;
+    const aborted = await fetchPastStatuses(statusCachedPubkeys, readRelays, latestUpdateTime, myPubkey);
     if (aborted) {
       return;
     }
-    saveStatusesCache(myPubkey, [...statusesMap.values()]);
   }
 
   // fetch all the past status events for cache-missed pubkeys
-  fetchPastStatusesAbortCtrl = new AbortController();
-  const pastStatusEvIter = fetcherOnRxNostr.allEventsIterator(
-    readRelays,
-    { kinds: [30315], authors: cacheMissPubkeys, "#d": ["general", "music"] },
-    {},
-    { abortSignal: fetchPastStatusesAbortCtrl.signal, connectTimeoutMs: 3000 }
-  );
-  for await (const ev of pastStatusEvIter) {
-    applyStatusUpdate(ev);
-  }
-  const { aborted } = fetchPastStatusesAbortCtrl.signal;
-  fetchPastStatusesAbortCtrl = undefined;
+  const aborted = await fetchPastStatuses(cacheMissPubkeys, readRelays, undefined, myPubkey);
   if (aborted) {
     return;
   }
-  saveStatusesCache(myPubkey, [...statusesMap.values()]);
 });
 
 type UpdateStatusInput = {
