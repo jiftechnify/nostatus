@@ -34,7 +34,7 @@ export const UserStatusList = forwardRef<UserStatusListHandle>(function UserStat
   const { t } = useTranslation();
 
   return (
-    <VList ref={refVList}>
+    <VList ref={refVList} overscan={10}>
       {/* spacer above the top item */}
       <div className={css({ h: "2" })}></div>
 
