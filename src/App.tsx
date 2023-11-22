@@ -2,11 +2,11 @@ import { css, cx } from "@shadow-panda/styled-system/css";
 import { circle, vstack } from "@shadow-panda/styled-system/patterns";
 import { icon } from "@shadow-panda/styled-system/recipes";
 import { ArrowUpCircle } from "lucide-react";
-import { Suspense } from "react";
+import { Suspense, useRef } from "react";
 import { HeaderMenu } from "./components/HeaderMenu";
 import { LoginForm } from "./components/LoginForm";
 import { UpdateStatusDialog } from "./components/UpdateStatusDialog";
-import { UserStatusList } from "./components/UserStatusList";
+import { UserStatusList, UserStatusListHandle } from "./components/UserStatusList";
 import { useMyPubkey, useWriteOpsEnabled } from "./states/nostr";
 import { useColorTheme } from "./states/theme";
 import { button } from "./styles/recipes";
@@ -17,6 +17,11 @@ export const App = () => {
   const writeOpsEnabled = useWriteOpsEnabled();
 
   const isTouch = isTouchDevice();
+
+  const refStatusList = useRef<UserStatusListHandle>(null);
+  const handleClickHeader = () => {
+    refStatusList.current?.scrollToTop();
+  };
 
   return (
     <div
@@ -40,7 +45,11 @@ export const App = () => {
         })}
       >
         <div className={css({ mr: "auto" })}></div>
-        <div className={css({ lineHeight: "tight", textAlign: "center" })}>
+        <div
+          className={css({ lineHeight: "tight", textAlign: "center", cursor: "pointer" })}
+          role="button"
+          onClick={handleClickHeader}
+        >
           <h1 className={css({ textStyle: "title" })}>nostatus</h1>
           <p className={css({ textStyle: "tagline", color: "text.sub" })}>Have an eye on your friends' status.</p>
         </div>
@@ -54,7 +63,7 @@ export const App = () => {
       <main className={css({ h: "100%", w: "100vw" })}>
         <Suspense>
           {pubkey !== undefined ? (
-            <UserStatusList />
+            <UserStatusList ref={refStatusList} />
           ) : (
             <LoginForm css={{ position: "relative", top: isTouch ? "max(calc(50% - 14rem), 16px)" : "16px" }} />
           )}
