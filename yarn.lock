@@ -6877,10 +6877,21 @@ virtua@^0.8.2:
   resolved "https://registry.yarnpkg.com/virtua/-/virtua-0.8.2.tgz#cd3ece5939b6eb477c9552aeada22dd4d5b752cb"
   integrity sha512-p9o1A+440Jtv1R4jqRKaQyygAlk/Ss0ZavK6RIP7w+MtZnVKYfStK0BCwPGcozOEVjbgZ2PetnpG58CIgqNj5A==
 
-vite@4.4.9, vite@^4.4.5, vite@^4.4.6:
+vite@4.4.9:
   version "4.4.9"
   resolved "https://registry.yarnpkg.com/vite/-/vite-4.4.9.tgz#1402423f1a2f8d66fd8d15e351127c7236d29d3d"
   integrity sha512-2mbUn2LlUmNASWwSCNSJ/EG2HuSRTnVNaydp6vMCm5VIqJsjMfbIWtbH2kDuwUVW5mMUKKZvGPX/rqeqVvv1XA==
+  dependencies:
+    esbuild "^0.18.10"
+    postcss "^8.4.27"
+    rollup "^3.27.1"
+  optionalDependencies:
+    fsevents "~2.3.2"
+
+vite@^4.4.12, vite@^4.4.6:
+  version "4.4.12"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-4.4.12.tgz#e9c355d5a0d8a47afa46cb4bad10820da333da5c"
+  integrity sha512-KtPlUbWfxzGVul8Nut8Gw2Qe8sBzWY+8QVc5SL8iRFnpnrcoCaNlzO40c1R6hPmcdTwIPEDkq0Y9+27a5tVbdQ==
   dependencies:
     esbuild "^0.18.10"
     postcss "^8.4.27"
