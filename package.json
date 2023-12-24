@@ -14,7 +14,7 @@
     "type-check": "tsc",
     "vite-dev": "vite dev",
     "vite-build": "vite build",
-    "gen-build-id": "node --loader esbuild-register/loader -r esbuild-register scripts/genBuildId.ts",
+    "gen-build-id": "tsx scripts/genBuildId.ts",
     "dev": "run-s gen-build-id vite-dev",
     "build": "run-s type-check gen-build-id vite-build",
     "preview": "vite preview",
@@ -51,22 +51,22 @@
     "virtua": "^0.8.2"
   },
   "devDependencies": {
-    "@pandacss/dev": "^0.14.0",
-    "@shadow-panda/preset": "^0.6.0",
+    "@pandacss/dev": "^0.23.0",
+    "@shadow-panda/preset": "^0.7.1",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "@vitejs/plugin-react": "^4.0.3",
+    "@vitejs/plugin-react": "^4.2.1",
     "date-fns": "^2.30.0",
-    "esbuild-register": "^3.5.0",
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
-    "i18next-parser": "^8.7.0",
+    "i18next-parser": "^8.9.0",
     "npm-run-all2": "^6.1.0",
+    "tsx": "^4.7.0",
     "typescript": "^5.0.2",
-    "vite": "^4.4.12"
+    "vite": "^5.0.10"
   },
   "prettier": {
     "printWidth": 120
