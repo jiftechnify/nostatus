@@ -4308,10 +4308,10 @@ vinyl@^3.0.0, vinyl@~3.0.0:
     replace-ext "^2.0.0"
     teex "^1.0.1"
 
-virtua@^0.8.2:
-  version "0.8.2"
-  resolved "https://registry.yarnpkg.com/virtua/-/virtua-0.8.2.tgz#cd3ece5939b6eb477c9552aeada22dd4d5b752cb"
-  integrity sha512-p9o1A+440Jtv1R4jqRKaQyygAlk/Ss0ZavK6RIP7w+MtZnVKYfStK0BCwPGcozOEVjbgZ2PetnpG58CIgqNj5A==
+virtua@^0.18.0:
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/virtua/-/virtua-0.18.0.tgz#43e07e8a42ddbd0d1cc1b70116d5b79fdf48bfd0"
+  integrity sha512-ztDBzTbzSluK//xvcXhCfjDbwkuBFSPD43ZO2SR5tNI46/BEb1oNBI/lu6CAE8MmlXr10ZdaFOdbm6LtC0hvlQ==
 
 vite@^5.0.10:
   version "5.0.10"
