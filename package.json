@@ -29,7 +29,7 @@
   "dependencies": {
     "@nostr-fetch/adapter-rx-nostr": "^0.13.0",
     "@radix-ui/react-avatar": "^1.0.4",
-    "@radix-ui/react-dialog": "^1.0.4",
+    "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.5",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-select": "^1.2.2",
@@ -37,7 +37,7 @@
     "@shadow-panda/style-context": "^0.6.0",
     "i18next": "^23.5.1",
     "i18next-browser-languagedetector": "^7.1.0",
-    "jotai": "^2.4.2",
+    "jotai": "^2.6.0",
     "js-easing-functions": "^1.0.3",
     "lucide-react": "^0.277.0",
     "nip07-awaiter": "^0.2.1",
@@ -46,9 +46,9 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^13.2.2",
-    "rx-nostr": "^1.8.0",
+    "rx-nostr": "^1.8.1",
     "rxjs": "^7.8.1",
-    "virtua": "^0.8.2"
+    "virtua": "^0.18.0"
   },
   "devDependencies": {
     "@pandacss/dev": "^0.23.0",
