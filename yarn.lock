@@ -780,17 +780,17 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@nostr-fetch/adapter-rx-nostr@^0.13.0":
-  version "0.13.0"
-  resolved "https://registry.yarnpkg.com/@nostr-fetch/adapter-rx-nostr/-/adapter-rx-nostr-0.13.0.tgz#a2be6e5940540d7f03a4f48b555594ca32f6120e"
-  integrity sha512-HojQeLdA7t+ONzPyVaF7lM6bAY8y42YFVyiXM6dp7VSSSlHPOIbPFanRzIA3fIuP/Gp3wtu0LcJMUauzoFCA7g==
+"@nostr-fetch/adapter-rx-nostr@^0.14.1":
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/@nostr-fetch/adapter-rx-nostr/-/adapter-rx-nostr-0.14.1.tgz#8680412ab8b8aa8208289b0e6bd5c6163748e52b"
+  integrity sha512-YnWUaGyYxERWrY0Aru9rXsrOA5xugtgnGJAO6ddBznFTkEhUnYfcR6Emc5V+DogSPx/gMjUk3YZKhZX66MMQwg==
   dependencies:
-    "@nostr-fetch/kernel" "^0.13.0"
+    "@nostr-fetch/kernel" "^0.14.0"
 
-"@nostr-fetch/kernel@^0.13.0":
-  version "0.13.0"
-  resolved "https://registry.yarnpkg.com/@nostr-fetch/kernel/-/kernel-0.13.0.tgz#ff5b4c3e138056eadcaaf10f957073528508260e"
-  integrity sha512-KoF6pCezZvGP9ZQo23Ib4UDwJRd08xqVeVTQ44Z/b+gxBBrZCR0lnwOPS6KYBvdOfduynQEryNt5if5ZLxpRlg==
+"@nostr-fetch/kernel@^0.14.0":
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/@nostr-fetch/kernel/-/kernel-0.14.0.tgz#82e2baf76715e5ef80b058fd3f9af79d23ab28c5"
+  integrity sha512-gJWlOXYBkb3SqTP8WTm7E8dwGA7g+TaYtZntjMf3L2wzivS2OjVLSURyuidSyzdpK8kPpyiL2O3RuotssncO1g==
   dependencies:
     "@noble/curves" "^1.1.0"
     "@noble/hashes" "^1.2.0"
@@ -1065,20 +1065,20 @@
   dependencies:
     "@babel/runtime" "^7.13.10"
 
-"@radix-ui/react-dialog@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@radix-ui/react-dialog/-/react-dialog-1.0.5.tgz#71657b1b116de6c7a0b03242d7d43e01062c7300"
-  integrity sha512-GjWJX/AUpB703eEBanuBnIWdIXg6NvJFCXcNlSZk4xdszCdhrJgBoUd1cGk67vFO+WdA2pfI/plOpqz/5GUP6Q==
+"@radix-ui/react-dialog@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@radix-ui/react-dialog/-/react-dialog-1.0.4.tgz#06bce6c16bb93eb36d7a8589e665a20f4c1c52c1"
+  integrity sha512-hJtRy/jPULGQZceSAP2Re6/4NpKo8im6V8P2hUqZsdFiSL8l35kYsw3qbRI6Ay5mQd2+wlLqje770eq+RJ3yZg==
   dependencies:
     "@babel/runtime" "^7.13.10"
     "@radix-ui/primitive" "1.0.1"
     "@radix-ui/react-compose-refs" "1.0.1"
     "@radix-ui/react-context" "1.0.1"
-    "@radix-ui/react-dismissable-layer" "1.0.5"
+    "@radix-ui/react-dismissable-layer" "1.0.4"
     "@radix-ui/react-focus-guards" "1.0.1"
-    "@radix-ui/react-focus-scope" "1.0.4"
+    "@radix-ui/react-focus-scope" "1.0.3"
     "@radix-ui/react-id" "1.0.1"
-    "@radix-ui/react-portal" "1.0.4"
+    "@radix-ui/react-portal" "1.0.3"
     "@radix-ui/react-presence" "1.0.1"
     "@radix-ui/react-primitive" "1.0.3"
     "@radix-ui/react-slot" "1.0.2"
@@ -1097,18 +1097,6 @@
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-dismissable-layer/-/react-dismissable-layer-1.0.4.tgz#883a48f5f938fa679427aa17fcba70c5494c6978"
   integrity sha512-7UpBa/RKMoHJYjie1gkF1DlK8l1fdU/VKDpoS3rCCo8YBJR294GwcEHyxHw72yvphJ7ld0AXEcSLAzY2F/WyCg==
-  dependencies:
-    "@babel/runtime" "^7.13.10"
-    "@radix-ui/primitive" "1.0.1"
-    "@radix-ui/react-compose-refs" "1.0.1"
-    "@radix-ui/react-primitive" "1.0.3"
-    "@radix-ui/react-use-callback-ref" "1.0.1"
-    "@radix-ui/react-use-escape-keydown" "1.0.3"
-
-"@radix-ui/react-dismissable-layer@1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@radix-ui/react-dismissable-layer/-/react-dismissable-layer-1.0.5.tgz#3f98425b82b9068dfbab5db5fff3df6ebf48b9d4"
-  integrity sha512-aJeDjQhywg9LBu2t/At58hCvr7pEm0o2Ke1x33B+MhjNmmZ17sy4KImo0KPLgsnc/zN7GPdce8Cnn0SWvwZO7g==
   dependencies:
     "@babel/runtime" "^7.13.10"
     "@radix-ui/primitive" "1.0.1"
@@ -1142,16 +1130,6 @@
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-focus-scope/-/react-focus-scope-1.0.3.tgz#9c2e8d4ed1189a1d419ee61edd5c1828726472f9"
   integrity sha512-upXdPfqI4islj2CslyfUBNlaJCPybbqRHAi1KER7Isel9Q2AtSJ0zRBZv8mWQiFXD2nyAJ4BhC3yXgZ6kMBSrQ==
-  dependencies:
-    "@babel/runtime" "^7.13.10"
-    "@radix-ui/react-compose-refs" "1.0.1"
-    "@radix-ui/react-primitive" "1.0.3"
-    "@radix-ui/react-use-callback-ref" "1.0.1"
-
-"@radix-ui/react-focus-scope@1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@radix-ui/react-focus-scope/-/react-focus-scope-1.0.4.tgz#2ac45fce8c5bb33eb18419cdc1905ef4f1906525"
-  integrity sha512-sL04Mgvf+FmyvZeYfNu1EPAaaxD+aw7cYeIB9L9Fvq8+urhltTRaEo5ysKOpHuKPclsZcSUMKlN05x4u+CINpA==
   dependencies:
     "@babel/runtime" "^7.13.10"
     "@radix-ui/react-compose-refs" "1.0.1"
@@ -1220,14 +1198,6 @@
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@radix-ui/react-portal/-/react-portal-1.0.3.tgz#ffb961244c8ed1b46f039e6c215a6c4d9989bda1"
   integrity sha512-xLYZeHrWoPmA5mEKEfZZevoVRK/Q43GfzRXkWV6qawIWWK8t6ifIiLQdd7rmQ4Vk1bmI21XhqF9BN3jWf+phpA==
-  dependencies:
-    "@babel/runtime" "^7.13.10"
-    "@radix-ui/react-primitive" "1.0.3"
-
-"@radix-ui/react-portal@1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@radix-ui/react-portal/-/react-portal-1.0.4.tgz#df4bfd353db3b1e84e639e9c63a5f2565fb00e15"
-  integrity sha512-Qki+C/EuGUVCQTOTD5vzJzJuMUlewbzuKyUy+/iHM2uwGiru9gZeBJtHAPKAEkB5KWGi9mP/CHKcY0wt1aW45Q==
   dependencies:
     "@babel/runtime" "^7.13.10"
     "@radix-ui/react-primitive" "1.0.3"
@@ -3335,12 +3305,12 @@ normalize-url@^8.0.0:
   resolved "https://registry.yarnpkg.com/normalize-url/-/normalize-url-8.0.0.tgz#593dbd284f743e8dcf6a5ddf8fadff149c82701a"
   integrity sha512-uVFpKhj5MheNBJRTiMZ9pE/7hD1QTeEvugSJW/OmLzAp78PB5O6adfMNTvmfKhXBkvCzC+rqifWcVYpGFwTjnw==
 
-nostr-fetch@^0.13.0:
-  version "0.13.0"
-  resolved "https://registry.yarnpkg.com/nostr-fetch/-/nostr-fetch-0.13.0.tgz#9d3a377822c76cc6139b0f0a9dc5b6c946741e31"
-  integrity sha512-0lIBkDjF5W0OBtkoMPax6ArKlzMGQDfc6cSyZ+XFvAoY2TJEiUXkI7Piwf0TQBEvJtahHaZnaTaFD13T69mgmQ==
+nostr-fetch@^0.14.1:
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/nostr-fetch/-/nostr-fetch-0.14.1.tgz#00fa46ba3c10eaa7c21874ece25a9327a73ce460"
+  integrity sha512-0r9loOVutJalz8OFK4vMWWcxGlpGdhcR+/xCro/k6V75uRrYchMYNrgJWP3fT7Sn89JtUkUqRYi4P9hh5qdruA==
   dependencies:
-    "@nostr-fetch/kernel" "^0.13.0"
+    "@nostr-fetch/kernel" "^0.14.0"
 
 nostr-tools@^1.15.0:
   version "1.15.0"
