@@ -1453,10 +1453,10 @@
   dependencies:
     "@pandacss/preset-panda" "0.15.5"
 
-"@shadow-panda/style-context@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@shadow-panda/style-context/-/style-context-0.6.0.tgz#f3c2a7972b56ff609317d318f2528149a4f62739"
-  integrity sha512-FByYV28vyfgpRP47Xng+yFywG3xzGv9SbfOwZrIsVAinOd8jBy8E7nnTP8aNYwnor5BfD3FI2Z0+zG8PgAxaUg==
+"@shadow-panda/style-context@^0.7.1":
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/@shadow-panda/style-context/-/style-context-0.7.1.tgz#79c8449c4701a370a8990546c1513b4bce7a8984"
+  integrity sha512-1vNZewZvqUWyiSX0+BxIYrqPP/7QUgjqKITMw6RALdz6AqnlPIB+EBIvbnScsa++7NrnUbxe/XKem2wzeZy3RA==
 
 "@ts-morph/common@~0.20.0":
   version "0.20.0"
