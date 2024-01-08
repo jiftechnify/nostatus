@@ -567,7 +567,7 @@ const applyStatusUpdate = (ev: NostrEvent) => {
     }
     jotaiStore.set(followingsStatusesAtom, new Map(statusesMap));
   } else {
-    // status update with emtpy content -> invalidate
+    // status update with empty content -> invalidate
     invalidationScheduler.cancel(pubkey, category);
     invalidateStatus(pubkey, category);
   }
