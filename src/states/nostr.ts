@@ -154,7 +154,7 @@ export const userProfileAtomFamily = atomFamily((pubkey: string) => {
     },
     (a, b) => {
       return a.srcEventId === b.srcEventId;
-    }
+    },
   );
 });
 
@@ -170,7 +170,7 @@ export const userStatusAtomFamily = atomFamily((pubkey: string) => {
         return a === b;
       }
       return UserStatus.contentId(a) === UserStatus.contentId(b);
-    }
+    },
   );
 });
 
@@ -223,7 +223,7 @@ const pubkeyInNostrExtAtomBase = loadable(
       return window.nostr.getPublicKey();
     }
     return Promise.resolve(undefined);
-  })
+  }),
 );
 
 const pubkeyInNostrExtAtom = atom((get) => {
@@ -303,9 +303,9 @@ export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata>
             authors: [pubkey],
             kinds: [kind],
           },
-          { connectTimeoutMs: 3000 }
-        )
-      )
+          { connectTimeoutMs: 3000 },
+        ),
+      ),
     );
     if (!isDefault && (k0 === undefined || [k3, k10002].every((ev) => ev === undefined))) {
       // if some of event are not found in relays from NIP-07 ext, fallback to default relays
@@ -453,7 +453,7 @@ jotaiStore.sub(bootstrapFinishedAtom, async () => {
   const iter = fetcherOnRxNostr.fetchLastEventPerAuthor(
     { authors: cacheMissPubkeys, relayUrls: readRelays },
     { kinds: [0] },
-    { abortSignal: fetchProfilesAbortCtrl.signal, connectTimeoutMs: 3000 }
+    { abortSignal: fetchProfilesAbortCtrl.signal, connectTimeoutMs: 3000 },
   );
 
   const newProfiles: UserProfile[] = [];
@@ -661,14 +661,14 @@ const fetchPastStatuses = async (
   pubkeys: string[],
   readRelays: string[],
   since: number | undefined,
-  myPubkey: string
+  myPubkey: string,
 ): Promise<boolean> => {
   fetchPastStatusesAbortCtrl = new AbortController();
   const pastStatusEvIter = fetcherOnRxNostr.allEventsIterator(
     readRelays,
     { kinds: [30315], authors: pubkeys, "#d": ["general", "music"] },
     { since },
-    { abortSignal: fetchPastStatusesAbortCtrl.signal, connectTimeoutMs: 3000 }
+    { abortSignal: fetchPastStatusesAbortCtrl.signal, connectTimeoutMs: 3000 },
   );
 
   // save statuses cache periodically
