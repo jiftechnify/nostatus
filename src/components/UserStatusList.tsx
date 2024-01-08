@@ -28,7 +28,7 @@ export const UserStatusList = forwardRef<UserStatusListHandle>(function UserStat
         },
       };
     },
-    []
+    [],
   );
 
   const { t } = useTranslation();

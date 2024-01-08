@@ -20,10 +20,10 @@
     "preview": "vite preview",
     "lint": "run-p type-check lint:*",
     "lint:eslint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "lint:prettier": "prettier --check --loglevel warn src/**/*.{ts,tsx}",
+    "lint:prettier": "prettier --check --log-level warn src/**/*.{ts,tsx}",
     "fix": "run-s fix:*",
     "fix:eslint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
-    "fix:prettier": "prettier --check --loglevel warn src/**/*.{ts,tsx} --write",
+    "fix:prettier": "prettier --check --log-level warn src/**/*.{ts,tsx} --write",
     "i18n-extract": "i18next src/**/*.tsx --config i18next-parser.config.js"
   },
   "dependencies": {
@@ -64,6 +64,7 @@
     "eslint-plugin-react-refresh": "^0.4.3",
     "i18next-parser": "^8.9.0",
     "npm-run-all2": "^6.1.0",
+    "prettier": "^3.1.1",
     "tsx": "^4.7.0",
     "typescript": "^5.0.2",
     "vite": "^5.0.10"

@@ -37,7 +37,7 @@ const musicDataLoadableAtom = loadable(
       return Promise.resolve(undefined);
     }
     return fetchMusicData(musicLink);
-  })
+  }),
 );
 
 type ShareMusicDialogProps = {
