@@ -250,7 +250,7 @@ const bootstrapFetcher = NostrFetcher.init();
 const rxNostr = createRxNostr();
 const fetcherOnRxNostr = NostrFetcher.withCustomPool(rxNostrAdapter(rxNostr));
 
-const defaultBootstrapRelays = ["wss://relay.nostr.band", "wss://relayable.org", "wss://directory.yabu.me"];
+const defaultBootstrapRelays = ["wss://relay.nostr.band", "wss://directory.yabu.me", "wss://purplepag.es"];
 
 const fallbackRelayList: RelayList = {
   "wss://relay.nostr.band": { read: true, write: true },
