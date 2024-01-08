@@ -39,7 +39,7 @@
     "i18next-browser-languagedetector": "^7.1.0",
     "jotai": "^2.6.0",
     "js-easing-functions": "^1.0.3",
-    "lucide-react": "^0.277.0",
+    "lucide-react": "^0.307.0",
     "nip07-awaiter": "^0.2.1",
     "nostr-fetch": "^0.14.1",
     "nostr-tools": "^1.15.0",
