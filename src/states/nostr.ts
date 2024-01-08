@@ -228,7 +228,6 @@ const pubkeyInNostrExtAtomBase = loadable(
 
 const pubkeyInNostrExtAtom = atom((get) => {
   const pkLoadable = get(pubkeyInNostrExtAtomBase);
-  console.log(pkLoadable);
   return pkLoadable.state === "hasData" ? pkLoadable.data : undefined;
 });
 
