@@ -76,7 +76,7 @@ const LoggedInHeaderMenuBody: React.FC<HeaderMenuBodyProps> = ({ myData }) => {
         <MenuItemShareMusic disabled={!writeOpsEnabled} />
         <DropdownMenuSeparator />
         <MenuItemToggleColorTheme />
-        <MenuItemSwitchLangage />
+        <MenuItemSwitchLanguage />
         <DropdownMenuSeparator />
         <MenuItemZap />
         <MenuItemGitHubRepo />
@@ -100,7 +100,7 @@ const LoggedOutHeaderMenuBody: React.FC = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent className={css({ w: "14rem" })} align="start" collisionPadding={8}>
         <MenuItemToggleColorTheme />
-        <MenuItemSwitchLangage />
+        <MenuItemSwitchLanguage />
         <DropdownMenuSeparator />
         <MenuLabelBuildId />
       </DropdownMenuContent>
@@ -185,7 +185,7 @@ const MenuItemToggleColorTheme: React.FC = () => {
   );
 };
 
-const MenuItemSwitchLangage: React.FC = () => {
+const MenuItemSwitchLanguage: React.FC = () => {
   const { t, i18n } = useTranslation();
 
   const onLangChange = (v: string) => {
