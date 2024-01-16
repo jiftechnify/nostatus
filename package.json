@@ -35,9 +35,9 @@
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-tabs": "^1.0.4",
     "@shadow-panda/style-context": "^0.7.1",
-    "i18next": "^23.7.14",
+    "i18next": "^23.7.16",
     "i18next-browser-languagedetector": "^7.1.0",
-    "jotai": "^2.6.0",
+    "jotai": "^2.6.1",
     "js-easing-functions": "^1.0.3",
     "lucide-react": "^0.307.0",
     "nip07-awaiter": "^0.2.1",
@@ -48,7 +48,7 @@
     "react-i18next": "^13.2.2",
     "rx-nostr": "^1.8.1",
     "rxjs": "^7.8.1",
-    "virtua": "^0.20.0"
+    "virtua": "^0.20.5"
   },
   "devDependencies": {
     "@pandacss/dev": "^0.23.0",
@@ -62,7 +62,7 @@
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
-    "i18next-parser": "^8.9.0",
+    "i18next-parser": "^8.12.0",
     "npm-run-all2": "^6.1.0",
     "prettier": "^3.1.1",
     "tsx": "^4.7.0",
