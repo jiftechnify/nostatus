@@ -36,7 +36,7 @@
     "@radix-ui/react-tabs": "^1.0.4",
     "@shadow-panda/style-context": "^0.7.1",
     "i18next": "^23.7.16",
-    "i18next-browser-languagedetector": "^7.1.0",
+    "i18next-browser-languagedetector": "^7.2.0",
     "jotai": "^2.6.1",
     "js-easing-functions": "^1.0.3",
     "lucide-react": "^0.307.0",
