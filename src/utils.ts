@@ -7,3 +7,13 @@ export const wait = (timeoutMs: number): Promise<void> => {
     }, timeoutMs);
   });
 };
+
+const hexTable = Array.from({ length: 256 }, (_, i) => i.toString(16).padStart(2, "0"));
+
+export const bytesToHex = (bytes: Uint8Array): string => {
+  const res: string[] = [];
+  for (let i = 0; i < bytes.length; i++) {
+    res.push(hexTable[bytes[i]!]!);
+  }
+  return res.join("");
+};

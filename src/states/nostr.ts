@@ -5,7 +5,7 @@ import {
   parseRelayListInEvent,
   selectRelaysByUsage,
 } from "../nostr";
-import { currUnixtime, wait } from "../utils";
+import { bytesToHex, currUnixtime, wait } from "../utils";
 import {
   AccountMetadata,
   StatusData,
@@ -30,16 +30,21 @@ import { Subscription } from "rxjs";
 const jotaiStore = getDefaultStore();
 
 const inputPubkeyAtom = atomWithStorage<string | undefined>("nostr_pubkey", undefined);
-const inputPrivkeyAtom = atomWithReset<string | undefined>(undefined);
+const inputSeckeyAtom = atomWithReset<Uint8Array | undefined>(undefined);
+
+const hexSeckeyAtom = atom((get) => {
+  const bytes = get(inputSeckeyAtom);
+  return bytes !== undefined ? bytesToHex(bytes) : undefined;
+});
 
 const myPubkeyAtom = atom((get) => {
   const pubkey = get(inputPubkeyAtom);
   if (pubkey !== undefined) {
     return pubkey;
   }
-  const privkey = get(inputPrivkeyAtom);
-  if (privkey !== undefined) {
-    return getPublicKey(privkey);
+  const seckey = get(inputSeckeyAtom);
+  if (seckey !== undefined) {
+    return getPublicKey(seckey);
   }
   return undefined;
 });
@@ -65,18 +70,18 @@ export const useLoginWithPubkey = () => {
   return useSetAtom(inputPubkeyAtom);
 };
 
-export const useLoginWithPrivkey = () => {
-  return useSetAtom(inputPrivkeyAtom);
+export const useLoginWithSeckey = () => {
+  return useSetAtom(inputSeckeyAtom);
 };
 
 export const useLogout = () => {
   const setPubkey = useSetAtom(inputPubkeyAtom);
-  const setPrivkey = useSetAtom(inputPrivkeyAtom);
+  const setSeckey = useSetAtom(inputSeckeyAtom);
 
   const logout = useCallback(() => {
     setPubkey(RESET);
-    setPrivkey(RESET);
-  }, [setPubkey, setPrivkey]);
+    setSeckey(RESET);
+  }, [setPubkey, setSeckey]);
 
   return logout;
 };
@@ -232,16 +237,16 @@ const pubkeyInNostrExtAtom = atom((get) => {
 });
 
 // write ops are enabled if:
-// - logged in via privkey
+// - logged in via secret key
 // - logged in via NIP-07 extension
 // - logged in via pubkey and it matches with pubkey in NIP-07 extension
 export const useWriteOpsEnabled = () => {
-  const inputPrivkey = useAtomValue(inputPrivkeyAtom);
+  const inputSeckey = useAtomValue(inputSeckeyAtom);
 
   const inputPubkey = useAtomValue(inputPubkeyAtom);
   const pubkeyInNostrExt = useAtomValue(pubkeyInNostrExtAtom);
 
-  return inputPrivkey !== undefined || (inputPubkey !== undefined && inputPubkey === pubkeyInNostrExt);
+  return inputSeckey !== undefined || (inputPubkey !== undefined && inputPubkey === pubkeyInNostrExt);
 };
 
 const bootstrapFetcher = NostrFetcher.init();
@@ -777,10 +782,10 @@ export const updateMyStatus = async ({ category, content, linkUrl, ttl }: Update
     ],
   };
 
-  // precondition: logged in via privkey or NIP-07 extension is available
-  // in latter case, privkey will be undefined and getSignedEvent() will use NIP-07 extension to sign
-  const privkey = jotaiStore.get(inputPrivkeyAtom);
-  const signedEv = await getSignedEvent(ev, privkey);
+  // precondition: logged in via secret key or NIP-07 extension is available
+  // in latter case, secret key will be undefined and getSignedEvent() will use NIP-07 extension to sign
+  const seckey = jotaiStore.get(hexSeckeyAtom);
+  const signedEv = await getSignedEvent(ev, seckey);
 
   applyStatusUpdate(signedEv);
   rxNostr.send(signedEv);
