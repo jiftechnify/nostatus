@@ -4,8 +4,8 @@ import { SystemStyleObject } from "@shadow-panda/styled-system/types";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { parsePrivkey, parsePubkey } from "../nostr";
-import { isNostrExtAvailableAtom, useLoginWithPrivkey, useLoginWithPubkey } from "../states/nostr";
+import { parsePubkey, parseSeckey } from "../nostr";
+import { isNostrExtAvailableAtom, useLoginWithPubkey, useLoginWithSeckey } from "../states/nostr";
 import { button } from "../styles/recipes";
 import { Input } from "./ui/input";
 
@@ -15,7 +15,7 @@ type LoginFormProps = {
 
 export const LoginForm: React.FC<LoginFormProps> = ({ css: cssProp = {} }) => {
   const loginWithPubkey = useLoginWithPubkey();
-  const loginWithPrivkey = useLoginWithPrivkey();
+  const loginWithSeckey = useLoginWithSeckey();
 
   const isNostrExtAvailable = useAtomValue(isNostrExtAvailableAtom);
   const [pubkeyInput, setPubkeyInput] = useState("");
@@ -42,14 +42,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ css: cssProp = {} }) => {
   };
 
   const onClickNsecLogin = () => {
-    const hexPrivkey = parsePrivkey(nsecInput);
-    if (hexPrivkey === undefined) {
+    const binSeckey = parseSeckey(nsecInput);
+    if (binSeckey === undefined) {
       console.error("invalid nsec");
       window.alert("invalid nsec");
       return;
     }
 
-    loginWithPrivkey(hexPrivkey);
+    loginWithSeckey(binSeckey);
   };
 
   return (

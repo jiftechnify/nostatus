@@ -99,7 +99,7 @@ export const parsePubkey = (pubkey: string): string | undefined => {
   return regexp32BytesHexStr.test(pubkey) ? pubkey : undefined;
 };
 
-export const parsePrivkey = (nsec: string): string | undefined => {
+export const parseSeckey = (nsec: string): Uint8Array | undefined => {
   if (!nsec.startsWith("nsec1")) {
     return undefined;
   }
@@ -108,7 +108,7 @@ export const parsePrivkey = (nsec: string): string | undefined => {
     if (res.type === "nsec") {
       return res.data;
     }
-    console.error("parsePrivkey: unexpected decode result");
+    console.error("parseSeckey: unexpected decode result");
     return undefined;
   } catch (err) {
     console.error(err);
