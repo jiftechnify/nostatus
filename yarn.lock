@@ -4249,10 +4249,10 @@ vinyl@^3.0.0, vinyl@~3.0.0:
     replace-ext "^2.0.0"
     teex "^1.0.1"
 
-virtua@^0.20.5:
-  version "0.20.5"
-  resolved "https://registry.yarnpkg.com/virtua/-/virtua-0.20.5.tgz#12dcebce87b6a5d7ac704a0af870da18d4e91ba1"
-  integrity sha512-GHL+kSTotf5L1x3/Wcir0KkNKxmQIdWiDrcrBNz+DMiLUdNtskKs+E76Z0SSeeL0+I/PFutBrI8fXw/j7N+6sQ==
+virtua@^0.27.2:
+  version "0.27.2"
+  resolved "https://registry.yarnpkg.com/virtua/-/virtua-0.27.2.tgz#ebfb2d7bd41547467f801ee3803dc681f7b6a971"
+  integrity sha512-w4mBduS/Ah+Orte8Wl4nbREXfbHlkGb4pxoRqyS/61F8OplZ3o1x/UiEL0yMESfbe1tn6rBBwPyFUfF4inG+Ew==
 
 vite@^5.0.12:
   version "5.0.12"
