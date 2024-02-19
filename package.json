@@ -42,7 +42,7 @@
     "lucide-react": "^0.325.0",
     "nip07-awaiter": "^0.2.1",
     "nostr-fetch": "^0.14.1",
-    "nostr-tools": "^2.1.5",
+    "nostr-tools": "^2.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^13.2.2",
