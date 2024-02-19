@@ -42,16 +42,16 @@
     "lucide-react": "^0.325.0",
     "nip07-awaiter": "^0.2.1",
     "nostr-fetch": "^0.14.1",
-    "nostr-tools": "^2.1.5",
+    "nostr-tools": "^2.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^13.2.2",
     "rx-nostr": "^1.8.1",
     "rxjs": "^7.8.1",
-    "virtua": "^0.20.5"
+    "virtua": "^0.27.2"
   },
   "devDependencies": {
-    "@pandacss/dev": "^0.30.1",
+    "@pandacss/dev": "^0.31.0",
     "@shadow-panda/preset": "^0.7.1",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.19",
@@ -63,9 +63,9 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "i18next-parser": "^8.12.0",
-    "npm-run-all2": "^6.1.0",
+    "npm-run-all2": "^6.1.2",
     "prettier": "^3.2.5",
-    "tsx": "^4.7.0",
+    "tsx": "^4.7.1",
     "typescript": "^5.3.3",
     "vite": "^5.0.12"
   },
