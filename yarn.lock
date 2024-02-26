@@ -3194,10 +3194,10 @@ nostr-fetch@^0.14.1:
   dependencies:
     "@nostr-fetch/kernel" "^0.14.0"
 
-nostr-tools@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/nostr-tools/-/nostr-tools-2.3.0.tgz#687d1af486a21e3e4805f0d4167c01221d871e65"
-  integrity sha512-jWD71y9JJ7DJ5/Si/DhREkjwyCWgMmY7x8qXfA9xC1HeosoGnaXuyYtspfYuiy8B8B2969C1iR6rWt6Fyf3IaA==
+nostr-tools@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/nostr-tools/-/nostr-tools-2.3.1.tgz#348d3c4aab0ab00716f93d6e2a72333d8c7da982"
+  integrity sha512-qjKx2C3EzwiQOe2LPSPyCnp07pGz1pWaWjDXcm+L2y2c8iTECbvlzujDANm3nJUjWL5+LVRUVDovTZ1a/DC4Bg==
   dependencies:
     "@noble/ciphers" "^0.5.1"
     "@noble/curves" "1.2.0"
