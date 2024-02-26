@@ -48,7 +48,7 @@
     "react-i18next": "^13.2.2",
     "rx-nostr": "^1.8.1",
     "rxjs": "^7.8.1",
-    "virtua": "^0.27.2"
+    "virtua": "^0.27.5"
   },
   "devDependencies": {
     "@pandacss/dev": "^0.31.0",
