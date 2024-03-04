@@ -51,7 +51,7 @@
     "virtua": "^0.27.2"
   },
   "devDependencies": {
-    "@pandacss/dev": "^0.31.0",
+    "@pandacss/dev": "^0.33.0",
     "@shadow-panda/preset": "^0.7.1",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.19",
