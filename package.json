@@ -54,7 +54,7 @@
     "@pandacss/dev": "^0.34.3",
     "@shadow-panda/preset": "^0.7.1",
     "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.19",
+    "@types/react-dom": "^18.2.22",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.21.0",
     "@vitejs/plugin-react": "^4.2.1",
