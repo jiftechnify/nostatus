@@ -37,7 +37,7 @@
     "@shadow-panda/style-context": "^0.7.1",
     "i18next": "^23.8.2",
     "i18next-browser-languagedetector": "^7.2.0",
-    "jotai": "^2.7.0",
+    "jotai": "^2.7.1",
     "js-easing-functions": "^1.0.3",
     "lucide-react": "^0.325.0",
     "nip07-awaiter": "^0.2.1",
