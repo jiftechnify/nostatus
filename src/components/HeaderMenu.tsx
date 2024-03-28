@@ -2,12 +2,13 @@ import { css, cx } from "@shadow-panda/styled-system/css";
 import { icon } from "@shadow-panda/styled-system/recipes";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ArrowUpCircle, Github, Globe, LogOut, Moon, Music, RotateCw, Settings, Sun, Zap } from "lucide-react";
-import React, { useEffect, useRef } from "react";
+import type React from "react";
+import { useEffect, useRef } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { langNameTable, supportedLangCodes } from "../locales/i18n";
 import { myAccountDataAtom, useHardReload, useLogout, useWriteOpsEnabled } from "../states/nostr";
-import { AccountMetadata } from "../states/nostrModels";
-import { ColorTheme, colorThemeAtom } from "../states/theme";
+import type { AccountMetadata } from "../states/nostrModels";
+import { type ColorTheme, colorThemeAtom } from "../states/theme";
 import { menuItem } from "../styles/recipes";
 import { AppAvatar } from "./AppAvatar";
 import { ShareMusicDialog } from "./ShareMusicDialog";
@@ -223,7 +224,9 @@ const MenuItemZap = () => {
     }
 
     // remove zap dialogs created by previous render
-    document.querySelectorAll("dialog.nostr-zap-dialog").forEach((e) => e.remove());
+    for (const e of document.querySelectorAll("dialog.nostr-zap-dialog")) {
+      e.remove;
+    }
 
     window.nostrZap.initTarget(menuItemRef.current);
     handlerInitialized.current = true;

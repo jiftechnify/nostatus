@@ -1,4 +1,4 @@
-import { NostrExtension } from "./nostr";
+import type { NostrExtension } from "./nostr";
 
 declare global {
   interface Window {

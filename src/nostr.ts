@@ -1,4 +1,4 @@
-import { NostrEvent } from "nostr-fetch";
+import type { NostrEvent } from "nostr-fetch";
 import { nip19 } from "nostr-tools";
 
 /* primitives */
@@ -43,7 +43,7 @@ const parseRelayListInKind3 = (ev: NostrEvent): RelayList | undefined => {
 const parseRelayListInKind10002 = (ev: NostrEvent): RelayList | undefined => {
   const res: RelayList = Object.create(null);
 
-  getTagsByName(ev, "r").forEach((t) => {
+  for (const t of getTagsByName(ev, "r")) {
     const [, url, usage] = t;
     if (url === undefined) {
       return;
@@ -66,7 +66,7 @@ const parseRelayListInKind10002 = (ev: NostrEvent): RelayList | undefined => {
         console.warn("invalid relay type in kind 10002 event:", usage);
         return;
     }
-  });
+  }
 
   if (Object.keys(res).length === 0) {
     return undefined;

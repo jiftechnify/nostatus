@@ -3,7 +3,7 @@ import { useAtomValue } from "jotai";
 import { easeInOutQuart } from "js-easing-functions";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { VList, VListHandle } from "virtua";
+import { VList, type VListHandle } from "virtua";
 import { pubkeysOrderByLastStatusUpdateTimeAtom } from "../states/nostr";
 import { UserStatusCard } from "./UserStatusCard";
 
@@ -36,7 +36,7 @@ export const UserStatusList = forwardRef<UserStatusListHandle>(function UserStat
   return (
     <VList ref={refVList} overscan={10}>
       {/* spacer above the top item */}
-      <div className={css({ h: "2" })}></div>
+      <div className={css({ h: "2" })} />
 
       {/* main */}
       {orderedPubkeys.length !== 0 ? (
@@ -62,7 +62,7 @@ export const UserStatusList = forwardRef<UserStatusListHandle>(function UserStat
       )}
 
       {/* spacer below the bottom item */}
-      <div className={css({ h: "4" })}></div>
+      <div className={css({ h: "4" })} />
     </VList>
   );
 });

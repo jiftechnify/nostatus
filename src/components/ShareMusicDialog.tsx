@@ -143,7 +143,7 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
 
         <DialogFooter>
           {newMusicStatus !== undefined && (
-            <button className={button({ expand: true })} onClick={handleClickShare}>
+            <button className={button({ expand: true })} type="button" onClick={handleClickShare}>
               {t("shareMusicButton")}
             </button>
           )}
@@ -157,7 +157,7 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
             <MusicStatusView {...currMusicStatus} />
 
             <DialogFooter>
-              <button className={button({ color: "destructiveSubtle" })} onClick={handleClickStopSharing}>
+              <button className={button({ color: "destructiveSubtle" })} type="button" onClick={handleClickStopSharing}>
                 {t("cancelSharingMusicButton")}
               </button>
             </DialogFooter>

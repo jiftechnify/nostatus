@@ -1,5 +1,5 @@
-import { NostrEvent } from "nostr-fetch";
-import { RelayList, getFirstTagValueByName } from "../nostr";
+import type { NostrEvent } from "nostr-fetch";
+import { type RelayList, getFirstTagValueByName } from "../nostr";
 
 export type UserProfile = {
   srcEventId: string;
@@ -20,10 +20,10 @@ export const UserProfile = {
       const profile = JSON.parse(ev.content) as Record<string, string>; // TODO validate schema
 
       const res: UserProfile = { srcEventId: ev.id, pubkey: ev.pubkey };
-      res.displayName = profile["display_name"] ?? profile["displayName"];
-      res.name = profile["name"];
-      res.nip05 = profile["nip05"];
-      res.picture = profile["picture"];
+      res.displayName = profile.display_name ?? profile.displayName;
+      res.name = profile.name;
+      res.nip05 = profile.nip05;
+      res.picture = profile.picture;
 
       return res;
     } catch (err) {
@@ -52,7 +52,7 @@ export const StatusData = {
         return undefined;
       }
       const exp = Number(expStr);
-      return !isNaN(exp) ? exp : undefined;
+      return !Number.isNaN(exp) ? exp : undefined;
     })();
 
     return { srcEvent: ev, content, linkUrl, createdAt, expiration };

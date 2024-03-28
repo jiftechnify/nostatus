@@ -106,11 +106,11 @@ export const UpdateStatusDialog: React.FC<UpdateStatusDialogProps> = ({ trigger 
         </Select>
         <DialogFooter>
           {isClearStatus ? (
-            <button className={button({ color: "destructive" })} onClick={handleClickClear}>
+            <button className={button({ color: "destructive" })} type="button" onClick={handleClickClear}>
               {t("Clear")}
             </button>
           ) : (
-            <button className={button()} disabled={!isDirty} onClick={handleClickUpdate}>
+            <button className={button()} type="button" disabled={!isDirty} onClick={handleClickUpdate}>
               {t("Update")}
             </button>
           )}

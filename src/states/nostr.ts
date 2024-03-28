@@ -1,5 +1,5 @@
 import {
-  RelayList,
+  type RelayList,
   getFirstTagValueByName,
   getTagValuesByName,
   parseRelayListInEvent,
@@ -7,11 +7,11 @@ import {
 } from "../nostr";
 import { bytesToHex, currUnixtime, wait } from "../utils";
 import {
-  AccountMetadata,
+  type AccountMetadata,
   StatusData,
   UserProfile,
   UserStatus,
-  UserStatusCategory,
+  type UserStatusCategory,
   isSupportedUserStatusCategory,
   userStatusCategories,
 } from "./nostrModels";
@@ -22,10 +22,10 @@ import { useCallback } from "react";
 
 import { rxNostrAdapter } from "@nostr-fetch/adapter-rx-nostr";
 import { waitNostr } from "nip07-awaiter";
-import { NostrEvent, NostrFetcher } from "nostr-fetch";
+import { type NostrEvent, NostrFetcher } from "nostr-fetch";
 import { getPublicKey } from "nostr-tools";
 import { createRxForwardReq, createRxNostr, getSignedEvent, uniq, verify } from "rx-nostr";
-import { Subscription } from "rxjs";
+import type { Subscription } from "rxjs";
 
 const jotaiStore = getDefaultStore();
 
