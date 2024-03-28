@@ -1,4 +1,4 @@
-import { RecipeVariantProps, css } from "@shadow-panda/styled-system/css";
+import { type RecipeVariantProps, css } from "@shadow-panda/styled-system/css";
 import { UserCircle2 } from "lucide-react";
 import { avatar } from "../styles/recipes";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";

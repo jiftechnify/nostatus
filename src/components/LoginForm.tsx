@@ -1,6 +1,6 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { vstack } from "@shadow-panda/styled-system/patterns";
-import { SystemStyleObject } from "@shadow-panda/styled-system/types";
+import type { SystemStyleObject } from "@shadow-panda/styled-system/types";
 import { useAtomValue } from "jotai";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -55,7 +55,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ css: cssProp = {} }) => {
   return (
     <div className={css(cssProp)}>
       <div className={vstack({ w: "300px", mx: "auto", gap: "14" })}>
-        <button className={button({ expand: true })} onClick={onClickNostrExtLogin} disabled={!isNostrExtAvailable}>
+        <button
+          className={button({ expand: true })}
+          type="button"
+          onClick={onClickNostrExtLogin}
+          disabled={!isNostrExtAvailable}
+        >
           {t("Login with Nostr Extension")}
         </button>
 
@@ -67,7 +72,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ css: cssProp = {} }) => {
             value={pubkeyInput}
             onChange={(e) => setPubkeyInput(e.target.value)}
           />
-          <button className={button({ expand: true })} onClick={onClickPubkeyLogin}>
+          <button className={button({ expand: true })} type="button" onClick={onClickPubkeyLogin}>
             {t("Login with Pubkey")}
           </button>
         </div>
@@ -80,7 +85,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ css: cssProp = {} }) => {
             value={nsecInput}
             onChange={(e) => setNsecInput(e.target.value)}
           />
-          <button className={button({ expand: true })} onClick={onClickNsecLogin}>
+          <button className={button({ expand: true })} type="button" onClick={onClickNsecLogin}>
             {t("Login with nsec")}
           </button>
         </div>

@@ -5,7 +5,7 @@ import { useAtomValue } from "jotai";
 import { MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 import { userProfileAtomFamily, userStatusAtomFamily } from "../states/nostr";
-import { UserProfile, UserStatus } from "../states/nostrModels";
+import { type UserProfile, UserStatus } from "../states/nostrModels";
 import { currUnixtime } from "../utils";
 import { AppAvatar } from "./AppAvatar";
 import { ExternalLink } from "./ExternalLink";
@@ -90,9 +90,7 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
         <GeneralStatus content={status.general?.content} linkUrl={status.general?.linkUrl} />
 
         {/* now playing  */}
-        {status.music && status.music.content && (
-          <MusicStatusView content={status.music.content} linkUrl={status.music.linkUrl} />
-        )}
+        {status.music?.content && <MusicStatusView content={status.music.content} linkUrl={status.music.linkUrl} />}
       </div>
 
       {/* profile */}
@@ -120,7 +118,7 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
             bg: "teal.400",
             shadow: "0 0 8px rgba(45, 212, 191, 0.6)",
           })}
-        ></div>
+        />
       )}
 
       {/* open details dialog */}

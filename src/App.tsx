@@ -6,7 +6,7 @@ import { Suspense, useRef } from "react";
 import { HeaderMenu } from "./components/HeaderMenu";
 import { LoginForm } from "./components/LoginForm";
 import { UpdateStatusDialog } from "./components/UpdateStatusDialog";
-import { UserStatusList, UserStatusListHandle } from "./components/UserStatusList";
+import { UserStatusList, type UserStatusListHandle } from "./components/UserStatusList";
 import { useMyPubkey, useWriteOpsEnabled } from "./states/nostr";
 import { useColorTheme } from "./states/theme";
 import { button } from "./styles/recipes";
@@ -44,7 +44,8 @@ export const App = () => {
           alignItems: "center",
         })}
       >
-        <div className={css({ mr: "auto" })}></div>
+        <div className={css({ mr: "auto" })} />
+        {/* biome-ignore lint/a11y/useKeyWithClickEvents: TODO */}
         <div
           className={css({ lineHeight: "tight", textAlign: "center", cursor: "pointer" })}
           role="button"
