@@ -56,7 +56,7 @@
     "@shadow-panda/preset": "^0.7.1",
     "@types/node": "^20.11.30",
     "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.22",
+    "@types/react-dom": "^18.2.23",
     "@vitejs/plugin-react": "^4.2.1",
     "date-fns": "^3.2.0",
     "i18next-parser": "^8.12.0",
