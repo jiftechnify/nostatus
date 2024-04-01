@@ -33,8 +33,8 @@ dependencies:
     specifier: ^23.8.2
     version: 23.10.1
   i18next-browser-languagedetector:
-    specifier: ^7.2.0
-    version: 7.2.0
+    specifier: ^7.2.1
+    version: 7.2.1
   jotai:
     specifier: ^2.7.1
     version: 2.7.1(@types/react@18.2.73)(react@18.2.0)
@@ -2915,8 +2915,8 @@ packages:
       entities: 4.5.0
     dev: true
 
-  /i18next-browser-languagedetector@7.2.0:
-    resolution: {integrity: sha512-U00DbDtFIYD3wkWsr2aVGfXGAj2TgnELzOX9qv8bT0aJtvPV9CRO77h+vgmHFBMe7LAxdwvT/7VkCWGya6L3tA==}
+  /i18next-browser-languagedetector@7.2.1:
+    resolution: {integrity: sha512-h/pM34bcH6tbz8WgGXcmWauNpQupCGr25XPp9cZwZInR9XHSjIFDYp1SIok7zSPsTOMxdvuLyu86V+g2Kycnfw==}
     dependencies:
       '@babel/runtime': 7.24.1
     dev: false
