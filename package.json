@@ -52,7 +52,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.6.3",
-    "@pandacss/dev": "^0.35.0",
+    "@pandacss/dev": "^0.36.1",
     "@shadow-panda/preset": "^0.7.1",
     "@types/node": "^20.11.30",
     "@types/react": "^18.2.15",
