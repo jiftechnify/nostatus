@@ -55,7 +55,7 @@
     "@pandacss/dev": "^0.36.1",
     "@shadow-panda/preset": "^0.7.1",
     "@types/node": "^20.12.2",
-    "@types/react": "^18.2.15",
+    "@types/react": "^18.2.74",
     "@types/react-dom": "^18.2.23",
     "@vitejs/plugin-react": "^4.2.1",
     "date-fns": "^3.2.0",
