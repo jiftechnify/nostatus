@@ -45,7 +45,7 @@
     "nostr-tools": "^2.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-i18next": "^13.2.2",
+    "react-i18next": "^14.1.0",
     "rx-nostr": "^1.8.1",
     "rxjs": "^7.8.1",
     "virtua": "^0.29.1"
