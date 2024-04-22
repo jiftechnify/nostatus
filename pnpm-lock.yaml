@@ -69,8 +69,8 @@ dependencies:
     specifier: ^7.8.1
     version: 7.8.1
   virtua:
-    specifier: ^0.29.1
-    version: 0.29.1(react-dom@18.2.0)(react@18.2.0)
+    specifier: ^0.30.1
+    version: 0.30.1(react-dom@18.2.0)(react@18.2.0)
 
 devDependencies:
   '@biomejs/biome':
@@ -4298,8 +4298,8 @@ packages:
       teex: 1.0.1
     dev: true
 
-  /virtua@0.29.1(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-6H2du5FjAfvhJE8dTUP57rSm93dRT45EqK4M/PBW9yU8lsdDB76mAXlF10pz73YgMmVyiMdbO0sFgwRJtCJp0g==}
+  /virtua@0.30.1(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-Kp6D3WdT91xOHhHOSZ7bAzByxz7F/y/QZQdb0mjKTHtm9sYkeq2Bnv+J1FumC9vdw0yxatELfsN0a2IqQPtZFg==}
     peerDependencies:
       react: '>=16.14.0'
       react-dom: '>=16.14.0'
