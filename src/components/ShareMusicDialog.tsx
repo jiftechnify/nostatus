@@ -1,9 +1,11 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { divider, hstack } from "@shadow-panda/styled-system/patterns";
 import { t } from "i18next";
-import { atom, useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtomValue } from "jotai";
 import { loadable } from "jotai/utils";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { LangCode } from "../locales/i18n";
 import { myMusicStatusAtom, updateMyStatus } from "../states/nostr";
 import { button } from "../styles/recipes";
 import { useCloseHeaderMenu } from "./HeaderMenu";
@@ -12,33 +14,54 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
-type MusicData = {
+type SongData = {
   url: string;
   title?: string;
-  artists?: string[];
+  artist?: string;
 };
 
-const songwhipProxyUrl = "https://songwhip-proxy.c-stellar.net/";
+const songDataApiUrl = "https://nostatus-songdata-api.c-stellar.net/";
 
-const fetchMusicData = async (musicLink: string): Promise<MusicData> => {
-  const resp = await fetch(`${songwhipProxyUrl}?url=${encodeURIComponent(musicLink)}`);
-  if (!resp.ok) {
-    throw Error("failed to fetch music data");
+const langCodeToCountry = (lang: LangCode) => {
+  switch (lang) {
+    case "ja":
+      return "JP";
+    case "en":
+      return "US";
+    default:
+      return "US";
   }
-  return resp.json() as Promise<MusicData>;
 };
 
-const musicLinkAtom = atom<string | undefined>(undefined);
+const fetchSongData = async (musicLink: string, lang: LangCode): Promise<SongData> => {
+  const apiUrl = new URL(songDataApiUrl);
 
-const musicDataLoadableAtom = loadable(
-  atom(async (get) => {
-    const musicLink = get(musicLinkAtom);
-    if (musicLink === undefined) {
-      return Promise.resolve(undefined);
-    }
-    return fetchMusicData(musicLink);
-  }),
-);
+  const params = new URLSearchParams();
+  params.set("url", musicLink);
+  params.set("country", langCodeToCountry(lang));
+  apiUrl.search = params.toString();
+
+  const resp = await fetch(apiUrl);
+  if (!resp.ok) {
+    throw Error("failed to fetch song data");
+  }
+  return resp.json() as Promise<SongData>;
+};
+
+const makeMusicDataLoadableAtom = (musicLink: string | undefined, lang: LangCode) =>
+  loadable(
+    atom(async () => {
+      if (musicLink === undefined) {
+        return Promise.resolve(undefined);
+      }
+      return fetchSongData(musicLink, lang);
+    }),
+  );
+
+const useSongDataLoadable = (musicLink: string | undefined, lang: LangCode) => {
+  const songDataLoadableAtom = useMemo(() => makeMusicDataLoadableAtom(musicLink, lang), [musicLink, lang]);
+  return useAtomValue(songDataLoadableAtom);
+};
 
 type ShareMusicDialogProps = {
   trigger: React.ReactNode;
@@ -50,18 +73,20 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
   const [open, setOpen] = useState(false);
   const closeHeaderMenu = useCloseHeaderMenu();
 
+  const { i18n } = useTranslation();
   const [musicLinkInput, setMusicLinkInput] = useState("");
-  const setMusicLink = useSetAtom(musicLinkAtom);
-  const musicData = useAtomValue(musicDataLoadableAtom);
+  const [musicLink, setMusicLink] = useState<string | undefined>(undefined);
+
+  const songData = useSongDataLoadable(musicLink, i18n.language as LangCode);
   const newMusicStatus = useMemo(() => {
-    if (musicData.state !== "hasData" || musicData.data === undefined) {
+    if (songData.state !== "hasData" || songData.data === undefined) {
       return undefined;
     }
     return {
-      content: `${musicData.data.title || "???"} - ${(musicData.data.artists ?? []).join(", ")}`,
-      linkUrl: musicData.data.url,
+      content: `${songData.data.title || "???"} - ${songData.data.artist || "???"}`,
+      linkUrl: songData.data.url,
     };
-  }, [musicData]);
+  }, [songData]);
 
   const currMusicStatus = useAtomValue(myMusicStatusAtom);
 
@@ -124,20 +149,20 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
           <button
             className={css(button.raw({ color: "primary" }), { flexShrink: "0" })}
             type="button"
-            disabled={musicData.state === "loading"}
+            disabled={songData.state === "loading"}
             onClick={() => setMusicLink(musicLinkInput)}
           >
             {t("getMusicDataButton")}
           </button>
         </div>
 
-        {(musicData.state !== "hasData" || newMusicStatus !== undefined) && (
+        {(songData.state !== "hasData" || newMusicStatus !== undefined) && (
           <p className={css({ textStyle: "dialog-label-like" })}>{t("musicStatusPreview")}</p>
         )}
-        {musicData.state === "loading" && <p>{t("musicDataLoading")}</p>}
+        {songData.state === "loading" && <p>{t("musicDataLoading")}</p>}
         {newMusicStatus !== undefined && <MusicStatusView {...newMusicStatus} />}
 
-        {musicData.state === "hasError" && (
+        {songData.state === "hasError" && (
           <p className={css({ fontSize: "sm", color: "destructive.text" })}>{t("fetchingMusicDataFailed")}</p>
         )}
 
