@@ -45,15 +45,14 @@ export const App = () => {
         })}
       >
         <div className={css({ mr: "auto" })} />
-        {/* biome-ignore lint/a11y/useKeyWithClickEvents: TODO */}
-        <div
+        <button
           className={css({ lineHeight: "tight", textAlign: "center", cursor: "pointer" })}
-          role="button"
+          type="button"
           onClick={handleClickHeader}
         >
           <h1 className={css({ textStyle: "title" })}>nostatus</h1>
           <p className={css({ textStyle: "tagline", color: "text.sub" })}>Have an eye on your friends' status.</p>
-        </div>
+        </button>
         <div className={css({ ml: "auto" })}>
           <Suspense>
             <HeaderMenu />
