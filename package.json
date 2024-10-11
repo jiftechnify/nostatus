@@ -39,16 +39,16 @@
     "i18next-browser-languagedetector": "^7.2.1",
     "jotai": "^2.7.2",
     "js-easing-functions": "^1.0.3",
-    "lucide-react": "^0.363.0",
+    "lucide-react": "^0.451.0",
     "nip07-awaiter": "^0.2.1",
     "nostr-fetch": "^0.14.1",
     "nostr-tools": "^2.3.2",
     "react": "^18.3.1",
     "react-dom": "^18.2.0",
-    "react-i18next": "^13.2.2",
+    "react-i18next": "^15.0.2",
     "rx-nostr": "^1.8.1",
     "rxjs": "^7.8.1",
-    "virtua": "^0.29.1"
+    "virtua": "^0.35.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.6.3",
@@ -63,7 +63,7 @@
     "npm-run-all2": "^6.1.2",
     "prettier": "^3.2.5",
     "tsx": "^4.7.1",
-    "typescript": "^5.3.3",
+    "typescript": "^5.6.3",
     "vite": "^5.2.14"
   },
   "prettier": {
