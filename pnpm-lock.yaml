@@ -63,8 +63,8 @@ importers:
         specifier: ^18.2.0
         version: 18.2.0(react@18.3.1)
       react-i18next:
-        specifier: ^13.2.2
-        version: 13.5.0(i18next@23.10.1)(react-dom@18.2.0(react@18.3.1))(react@18.3.1)
+        specifier: ^15.0.2
+        version: 15.0.2(i18next@23.10.1)(react-dom@18.2.0(react@18.3.1))(react@18.3.1)
       rx-nostr:
         specifier: ^1.8.1
         version: 1.8.1
@@ -217,6 +217,10 @@ packages:
 
   '@babel/runtime@7.24.1':
     resolution: {integrity: sha512-+BIznRzyqBf+2wCTxcKE3wDjfGeCoVE61KSHGpkzqrLi8qxqFwBeUFyId2cxkTmm55fzDGnm0+yCxaxygrLUnQ==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime@7.25.7':
+    resolution: {integrity: sha512-FjoyLe754PMiYsFaN5C94ttGiOmBNYTf6pLr4xXHAT5uctHb092PBszndLDR5XA/jghQvn4n7JMHl7dmTgbm9w==}
     engines: {node: '>=6.9.0'}
 
   '@babel/template@7.24.0':
@@ -2106,8 +2110,8 @@ packages:
     peerDependencies:
       react: ^18.2.0
 
-  react-i18next@13.5.0:
-    resolution: {integrity: sha512-CFJ5NDGJ2MUyBohEHxljOq/39NQ972rh1ajnadG9BjTk+UXbHLq4z5DKEbEQBDoIhUmmbuS/fIMJKo6VOax1HA==}
+  react-i18next@15.0.2:
+    resolution: {integrity: sha512-z0W3/RES9Idv3MmJUcf0mDNeeMOUXe+xoL0kPfQPbDoZHmni/XsIoq5zgT2MCFUiau283GuBUK578uD/mkAbLQ==}
     peerDependencies:
       i18next: '>= 23.2.3'
       react: '>= 16.8.0'
@@ -2617,6 +2621,10 @@ snapshots:
       '@babel/helper-plugin-utils': 7.24.0
 
   '@babel/runtime@7.24.1':
+    dependencies:
+      regenerator-runtime: 0.14.1
+
+  '@babel/runtime@7.25.7':
     dependencies:
       regenerator-runtime: 0.14.1
 
@@ -4522,9 +4530,9 @@ snapshots:
       react: 18.3.1
       scheduler: 0.23.0
 
-  react-i18next@13.5.0(i18next@23.10.1)(react-dom@18.2.0(react@18.3.1))(react@18.3.1):
+  react-i18next@15.0.2(i18next@23.10.1)(react-dom@18.2.0(react@18.3.1))(react@18.3.1):
     dependencies:
-      '@babel/runtime': 7.24.1
+      '@babel/runtime': 7.25.7
       html-parse-stringify: 3.0.1
       i18next: 23.10.1
       react: 18.3.1
