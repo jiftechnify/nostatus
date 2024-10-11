@@ -20,8 +20,6 @@ type SongData = {
   artist?: string;
 };
 
-const songDataApiUrl = "https://nostatus-songdata-api.c-stellar.net/";
-
 const langCodeToCountry = (lang: LangCode) => {
   switch (lang) {
     case "ja":
@@ -34,7 +32,7 @@ const langCodeToCountry = (lang: LangCode) => {
 };
 
 const fetchSongData = async (musicLink: string, lang: LangCode): Promise<SongData> => {
-  const apiUrl = new URL(songDataApiUrl);
+  const apiUrl = new URL(import.meta.env.VITE_SONGDATA_API_URL);
 
   const params = new URLSearchParams();
   params.set("url", musicLink);
