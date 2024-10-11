@@ -1,10 +1,10 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { divider, hstack } from "@shadow-panda/styled-system/patterns";
 import { t } from "i18next";
-import { atom, useAtomValue } from "jotai";
+import { atom, useAtomValue, useSetAtom } from "jotai";
 import { loadable } from "jotai/utils";
 import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { getI18n } from "react-i18next";
 import type { LangCode } from "../locales/i18n";
 import { myMusicStatusAtom, updateMyStatus } from "../states/nostr";
 import { button } from "../styles/recipes";
@@ -46,20 +46,17 @@ const fetchSongData = async (musicLink: string, lang: LangCode): Promise<SongDat
   return resp.json() as Promise<SongData>;
 };
 
-const makeMusicDataLoadableAtom = (musicLink: string | undefined, lang: LangCode) =>
-  loadable(
-    atom(async () => {
-      if (musicLink === undefined) {
-        return Promise.resolve(undefined);
-      }
-      return fetchSongData(musicLink, lang);
-    }),
-  );
+const musicLinkAtom = atom<string | undefined>(undefined);
 
-const useSongDataLoadable = (musicLink: string | undefined, lang: LangCode) => {
-  const songDataLoadableAtom = useMemo(() => makeMusicDataLoadableAtom(musicLink, lang), [musicLink, lang]);
-  return useAtomValue(songDataLoadableAtom);
-};
+const musicDataLoadableAtom = loadable(
+  atom(async (get) => {
+    const musicLink = get(musicLinkAtom);
+    if (musicLink === undefined) {
+      return Promise.resolve(undefined);
+    }
+    return fetchSongData(musicLink, getI18n().language as LangCode);
+  }),
+);
 
 type ShareMusicDialogProps = {
   trigger: React.ReactNode;
@@ -71,11 +68,10 @@ export const ShareMusicDialog: React.FC<ShareMusicDialogProps> = ({ trigger }) =
   const [open, setOpen] = useState(false);
   const closeHeaderMenu = useCloseHeaderMenu();
 
-  const { i18n } = useTranslation();
   const [musicLinkInput, setMusicLinkInput] = useState("");
-  const [musicLink, setMusicLink] = useState<string | undefined>(undefined);
+  const setMusicLink = useSetAtom(musicLinkAtom);
+  const songData = useAtomValue(musicDataLoadableAtom);
 
-  const songData = useSongDataLoadable(musicLink, i18n.language as LangCode);
   const newMusicStatus = useMemo(() => {
     if (songData.state !== "hasData" || songData.data === undefined) {
       return undefined;
