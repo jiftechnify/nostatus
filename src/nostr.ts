@@ -46,25 +46,25 @@ const parseRelayListInKind10002 = (ev: NostrEvent): RelayList | undefined => {
   for (const t of getTagsByName(ev, "r")) {
     const [, url, usage] = t;
     if (url === undefined) {
-      return;
+      continue;
     }
     switch (usage) {
       case undefined:
       case "":
         res[url] = { read: true, write: true };
-        return;
+        break;
 
       case "read":
         res[url] = { read: true, write: false };
-        return;
+        break;
 
       case "write":
         res[url] = { read: false, write: true };
-        return;
+        break;
 
       default:
         console.warn("invalid relay type in kind 10002 event:", usage);
-        return;
+        break;
     }
   }
 
