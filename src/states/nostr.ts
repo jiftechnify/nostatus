@@ -258,9 +258,8 @@ const defaultBootstrapRelays = ["wss://relay.nostr.band", "wss://directory.yabu.
 
 const fallbackRelayList: RelayList = {
   "wss://relay.nostr.band": { read: true, write: true },
-  "wss://relayable.org": { read: true, write: true },
-  "wss://relay.damus.io": { read: false, write: true },
-  "wss://yabu.me": { read: true, write: false },
+  "wss://nos.lol": { read: true, write: true },
+  "wss://yabu.me": { read: true, write: true },
 };
 
 // first, get read relays from NIP-07 extension if available. if no relays found, use default relays.
