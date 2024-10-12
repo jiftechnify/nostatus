@@ -273,18 +273,19 @@ const getBootstrapRelays = async (): Promise<[string[], boolean]> => {
   return nostrExtReadRelays.length > 0 ? [nostrExtReadRelays, false] : [defaultBootstrapRelays, true];
 };
 
-const extractRelayListOrDefault = (evs: (NostrEvent | undefined)[]): RelayList => {
-  const relayListEvs = evs.filter((ev): ev is NostrEvent => ev !== undefined && [3, 10002].includes(ev.kind));
+const extractRelayListOrDefault = ({
+  k10002,
+  k3,
+}: { k10002: NostrEvent | undefined; k3: NostrEvent | undefined }): RelayList => {
+  // kind 10002 take precedence over kind 3
+  const relayListEvs = [k10002, k3].filter((ev): ev is NostrEvent => ev !== undefined && [3, 10002].includes(ev.kind));
+
   if (relayListEvs.length === 0) {
     console.warn("failed to fetch events that have relay list; using fallback relays");
     return fallbackRelayList;
   }
 
-  // 1. try newer one out of kind:3 and kind:10002
-  // 2. if fails, try older one
-  // 3. if both fail, return default
-  const evsLatestOrder = relayListEvs.sort((a, b) => b.created_at - a.created_at);
-  for (const ev of evsLatestOrder) {
+  for (const ev of relayListEvs) {
     const res = parseRelayListInEvent(ev);
     if (res !== undefined) {
       console.log("extracted relay list from kind %d: %O", ev.kind, res);
@@ -318,7 +319,7 @@ export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata>
 
     const profile = k0 !== undefined ? UserProfile.fromEvent(k0) : { srcEventId: "undefined", pubkey };
     const followings = k3 !== undefined ? getTagValuesByName(k3, "p") : [];
-    const relayList = extractRelayListOrDefault([k3, k10002]);
+    const relayList = extractRelayListOrDefault({ k10002, k3 });
     return { profile, followings, relayList, lastFetchedAt: currUnixtime() };
   };
 
