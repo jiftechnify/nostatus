@@ -1,13 +1,17 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { token } from "@shadow-panda/styled-system/tokens";
+import { type NostrEvent, eventContentPartKey, parseEventContent } from "../nostr";
+import { CustomEmoji } from "./CustomEmoji";
 import { ExternalLink } from "./ExternalLink";
 
 type MusicStatusViewProps = {
-  content: string;
+  srcEvent: NostrEvent;
   linkUrl?: string;
 };
 
-export const MusicStatusView = ({ content, linkUrl }: MusicStatusViewProps) => {
+export const MusicStatusView = ({ srcEvent, linkUrl }: MusicStatusViewProps) => {
+  const parts = parseEventContent(srcEvent);
+
   return (
     <p
       className={css({
@@ -19,7 +23,19 @@ export const MusicStatusView = ({ content, linkUrl }: MusicStatusViewProps) => {
         },
       })}
     >
-      <span>{content}</span>
+      {parts.map((part) => {
+        const key = eventContentPartKey(part);
+        switch (part.type) {
+          case "text":
+            return (
+              <span key={key} className={css({ verticalAlign: "middle" })}>
+                {part.text}
+              </span>
+            );
+          case "custom-emoji":
+            return <CustomEmoji key={key} imgUrl={part.imgUrl} shortcode={part.shortcode} />;
+        }
+      })}
       {linkUrl && <ExternalLink href={linkUrl} size={token("fontSizes.sm")} />}
     </p>
   );

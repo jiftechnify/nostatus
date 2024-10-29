@@ -1,4 +1,5 @@
 import type { NostrEvent } from "nostr-fetch";
+export type { NostrEvent };
 import { nip19 } from "nostr-tools";
 
 /* primitives */
@@ -11,6 +12,68 @@ export const getTagsByName = (ev: NostrEvent, name: string): string[][] => ev.ta
 
 export const getTagValuesByName = (ev: NostrEvent, name: string): string[] =>
   ev.tags.filter((t) => t[0] === name).map((t) => t[1] ?? "");
+
+/* parsing content */
+const contentRefPattern = /(:[_a-zA-Z0-9]+:)/;
+
+export type EventContentPart =
+  | {
+      type: "text";
+      text: string;
+    }
+  | {
+      type: "custom-emoji";
+      imgUrl: string;
+      shortcode: string;
+    };
+
+export const eventContentPartKey = (part: EventContentPart): string => {
+  switch (part.type) {
+    case "text":
+      return `text-${part.text}`;
+    case "custom-emoji":
+      return `emoji-${part.imgUrl}`;
+  }
+};
+
+export const parseEventContent = (ev?: NostrEvent): EventContentPart[] => {
+  if (ev === undefined) {
+    return [];
+  }
+
+  return ev.content
+    .split(contentRefPattern)
+    .filter((s) => s !== undefined && s.length > 0)
+    .map((part) => {
+      // custom emoji
+      if (part.startsWith(":") && part.endsWith(":")) {
+        return parseCustomEmoji(part, ev);
+      }
+      return {
+        type: "text",
+        text: part,
+      };
+    });
+};
+
+const getEmojiImgUrlByShortcode = (ev: NostrEvent, shortcode: string): string | undefined =>
+  ev.tags.find((t) => t[0] === "emoji" && t[1] === shortcode)?.[2];
+
+const parseCustomEmoji = (part: string, ev: NostrEvent): EventContentPart => {
+  const shortcode = part.slice(1, -1);
+  const imgUrl = getEmojiImgUrlByShortcode(ev, shortcode);
+  if (imgUrl === undefined) {
+    return {
+      type: "text",
+      text: part,
+    };
+  }
+  return {
+    type: "custom-emoji",
+    imgUrl,
+    shortcode,
+  };
+};
 
 /* parsing relay list */
 export type RelayList = Record<string, { read: boolean; write: boolean }>;
