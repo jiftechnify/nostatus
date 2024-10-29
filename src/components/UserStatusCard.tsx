@@ -4,10 +4,13 @@ import { icon } from "@shadow-panda/styled-system/recipes";
 import { useAtomValue } from "jotai";
 import { MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { NostrEvent } from "../nostr";
+import { eventContentPartKey, parseEventContent } from "../nostr";
 import { userProfileAtomFamily, userStatusAtomFamily } from "../states/nostr";
 import { type UserProfile, UserStatus } from "../states/nostrModels";
 import { currUnixtime } from "../utils";
 import { AppAvatar } from "./AppAvatar";
+import { CustomEmoji } from "./CustomEmoji";
 import { ExternalLink } from "./ExternalLink";
 import { MusicStatusView } from "./MusicStatusView";
 import { StatusDetailsView } from "./StatusDetailsView";
@@ -87,10 +90,10 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
     >
       <div>
         {/* status */}
-        <GeneralStatus content={status.general?.content} linkUrl={status.general?.linkUrl} />
+        <GeneralStatus srcEvent={status.general?.srcEvent} linkUrl={status.general?.linkUrl} />
 
         {/* now playing  */}
-        {status.music?.content && <MusicStatusView content={status.music.content} linkUrl={status.music.linkUrl} />}
+        {status.music && <MusicStatusView content={status.music.content} linkUrl={status.music.linkUrl} />}
       </div>
 
       {/* profile */}
@@ -143,21 +146,33 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
 };
 
 type GeneralStatusProps = {
-  content?: string;
+  srcEvent?: NostrEvent;
   linkUrl?: string;
 };
 
-const GeneralStatus = ({ content, linkUrl }: GeneralStatusProps) => {
-  const text = content ?? "";
+const GeneralStatus = ({ srcEvent, linkUrl }: GeneralStatusProps) => {
+  const parts = parseEventContent(srcEvent);
 
-  return text !== "" ? (
+  return parts.length > 0 ? (
     <p
       className={css({
         textStyle: "main-status",
         wordBreak: "break-all",
       })}
     >
-      <span>{text}</span>
+      {parts.map((part) => {
+        const key = eventContentPartKey(part);
+        switch (part.type) {
+          case "text":
+            return (
+              <span key={key} className={css({ verticalAlign: "middle" })}>
+                {part.text}
+              </span>
+            );
+          case "custom-emoji":
+            return <CustomEmoji key={key} imgUrl={part.imgUrl} shortcode={part.shortcode} />;
+        }
+      })}
       {linkUrl && <ExternalLink href={linkUrl} />}
     </p>
   ) : (

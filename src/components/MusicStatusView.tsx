@@ -19,7 +19,7 @@ export const MusicStatusView = ({ content, linkUrl }: MusicStatusViewProps) => {
         },
       })}
     >
-      <span>{content}</span>
+      <span className={css({ verticalAlign: "middle" })}>{content}</span>
       {linkUrl && <ExternalLink href={linkUrl} size={token("fontSizes.sm")} />}
     </p>
   );
