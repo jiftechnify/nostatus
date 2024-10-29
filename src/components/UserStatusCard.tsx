@@ -93,7 +93,7 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
         <GeneralStatus srcEvent={status.general?.srcEvent} linkUrl={status.general?.linkUrl} />
 
         {/* now playing  */}
-        {status.music && <MusicStatusView srcEvent={status.music.srcEvent} linkUrl={status.music.linkUrl} />}
+        {status.music && <MusicStatusView content={status.music.content} linkUrl={status.music.linkUrl} />}
       </div>
 
       {/* profile */}
