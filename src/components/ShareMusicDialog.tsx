@@ -9,7 +9,7 @@ import type { LangCode } from "../locales/i18n";
 import { myMusicStatusAtom, updateMyStatus } from "../states/nostr";
 import { button } from "../styles/recipes";
 import { useCloseHeaderMenu } from "./HeaderMenu";
-import { MusicStatusView } from "./MusicStatusView";
+import { MusicStatusView } from "./status/MusicStatusView";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";

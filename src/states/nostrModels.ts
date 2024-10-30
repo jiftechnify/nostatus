@@ -2,7 +2,7 @@ import type { NostrEvent } from "nostr-fetch";
 import { type RelayList, getFirstTagValueByName } from "../nostr";
 
 export type UserProfile = {
-  srcEventId: string;
+  srcEvent?: NostrEvent;
   pubkey: string;
   displayName?: string;
   name?: string;
@@ -14,12 +14,12 @@ export const UserProfile = {
   fromEvent(ev: NostrEvent): UserProfile {
     if (ev.kind !== 0) {
       console.error("invalid event kind: %O", ev);
-      return { srcEventId: ev.id, pubkey: ev.pubkey };
+      return { srcEvent: ev, pubkey: ev.pubkey };
     }
     try {
       const profile = JSON.parse(ev.content) as Record<string, string>; // TODO validate schema
 
-      const res: UserProfile = { srcEventId: ev.id, pubkey: ev.pubkey };
+      const res: UserProfile = { srcEvent: ev, pubkey: ev.pubkey };
       res.displayName = profile.display_name ?? profile.displayName;
       res.name = profile.name;
       res.nip05 = profile.nip05;
@@ -28,7 +28,7 @@ export const UserProfile = {
       return res;
     } catch (err) {
       console.error("failed to parse content of kind 0:", err);
-      return { srcEventId: ev.id, pubkey: ev.pubkey };
+      return { srcEvent: ev, pubkey: ev.pubkey };
     }
   },
 } as const;

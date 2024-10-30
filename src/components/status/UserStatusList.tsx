@@ -4,7 +4,7 @@ import { easeInOutQuart } from "js-easing-functions";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { VList, type VListHandle } from "virtua";
-import { pubkeysOrderByLastStatusUpdateTimeAtom } from "../states/nostr";
+import { pubkeysOrderByLastStatusUpdateTimeAtom } from "../../states/nostr";
 import { UserStatusCard } from "./UserStatusCard";
 
 export type UserStatusListHandle = {

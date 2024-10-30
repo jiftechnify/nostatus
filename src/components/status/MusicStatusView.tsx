@@ -1,6 +1,6 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { token } from "@shadow-panda/styled-system/tokens";
-import { ExternalLink } from "./ExternalLink";
+import { ExternalLink } from "../ExternalLink";
 
 type MusicStatusViewProps = {
   content: string;

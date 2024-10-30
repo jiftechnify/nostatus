@@ -154,11 +154,11 @@ export const followingsProfilesAtom = atom(new Map<string, UserProfile>());
 export const userProfileAtomFamily = atomFamily((pubkey: string) => {
   return selectAtom(
     followingsProfilesAtom,
-    (profilesMap) => {
-      return profilesMap.get(pubkey) ?? { srcEventId: "undefined", pubkey };
+    (profilesMap): UserProfile => {
+      return profilesMap.get(pubkey) ?? { pubkey };
     },
     (a, b) => {
-      return a.srcEventId === b.srcEventId;
+      return a.srcEvent !== undefined && b.srcEvent !== undefined && a.srcEvent.id === b.srcEvent.id;
     },
   );
 });
@@ -317,7 +317,7 @@ export const fetchAccountData = async (pubkey: string): Promise<AccountMetadata>
       return fetchBody(defaultBootstrapRelays, true);
     }
 
-    const profile = k0 !== undefined ? UserProfile.fromEvent(k0) : { srcEventId: "undefined", pubkey };
+    const profile: UserProfile = k0 !== undefined ? UserProfile.fromEvent(k0) : { pubkey };
     const followings = k3 !== undefined ? getTagValuesByName(k3, "p") : [];
     const relayList = extractRelayListOrDefault({ k10002, k3 });
     return { profile, followings, relayList, lastFetchedAt: currUnixtime() };
