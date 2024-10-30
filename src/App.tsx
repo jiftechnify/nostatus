@@ -6,7 +6,7 @@ import { Suspense, useRef } from "react";
 import { HeaderMenu } from "./components/HeaderMenu";
 import { LoginForm } from "./components/LoginForm";
 import { UpdateStatusDialog } from "./components/UpdateStatusDialog";
-import { UserStatusList, type UserStatusListHandle } from "./components/UserStatusList";
+import { UserStatusList, type UserStatusListHandle } from "./components/status/UserStatusList";
 import { useMyPubkey, useWriteOpsEnabled } from "./states/nostr";
 import { useColorTheme } from "./states/theme";
 import { button } from "./styles/recipes";

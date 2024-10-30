@@ -1,41 +1,17 @@
 import { css } from "@shadow-panda/styled-system/css";
-import { circle, hstack, vstack } from "@shadow-panda/styled-system/patterns";
+import { circle, vstack } from "@shadow-panda/styled-system/patterns";
 import { icon } from "@shadow-panda/styled-system/recipes";
 import { useAtomValue } from "jotai";
 import { MoreHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { NostrEvent } from "../nostr";
-import { eventContentPartKey, parseEventContent } from "../nostr";
-import { userProfileAtomFamily, userStatusAtomFamily } from "../states/nostr";
-import { type UserProfile, UserStatus } from "../states/nostrModels";
-import { currUnixtime } from "../utils";
-import { AppAvatar } from "./AppAvatar";
-import { CustomEmoji } from "./CustomEmoji";
-import { ExternalLink } from "./ExternalLink";
+import { userProfileAtomFamily, userStatusAtomFamily } from "../../states/nostr";
+import { type UserProfile, UserStatus } from "../../states/nostrModels";
+import { currUnixtime } from "../../utils";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { GeneralStatusView } from "./GeneralStatusView";
 import { MusicStatusView } from "./MusicStatusView";
 import { StatusDetailsView } from "./StatusDetailsView";
-import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
-
-const extractNames = (profile: UserProfile): { displayName: string; subName: string | undefined } => {
-  if (!profile.displayName) {
-    return {
-      displayName: profile.name || "???",
-      subName: undefined,
-    };
-  }
-
-  // profile.displayName is non-empty string
-  if (profile.name === undefined || profile.displayName.includes(profile.name.trim())) {
-    return {
-      displayName: profile.displayName,
-      subName: undefined,
-    };
-  }
-  return {
-    displayName: profile.displayName,
-    subName: profile.name,
-  };
-};
+import { UserProfileView } from "./UserProfileView";
 
 type UserStatusCardProps = {
   pubkey: string;
@@ -90,14 +66,14 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
     >
       <div>
         {/* status */}
-        <GeneralStatus srcEvent={status.general?.srcEvent} linkUrl={status.general?.linkUrl} />
+        <GeneralStatusView srcEvent={status.general?.srcEvent} linkUrl={status.general?.linkUrl} />
 
         {/* now playing  */}
         {status.music && <MusicStatusView content={status.music.content} linkUrl={status.music.linkUrl} />}
       </div>
 
       {/* profile */}
-      <div className={hstack({ gap: "1" })}>
+      {/* <div className={hstack({ gap: "1" })}>
         <AppAvatar imgSrc={profile.picture} size="sm" />
         <div
           className={hstack({
@@ -108,7 +84,13 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
           <p className={css({ textStyle: "display-name" })}>{displayName}</p>
           {subName !== undefined && <p className={css({ textStyle: "sub-name", color: "text.sub" })}>{subName}</p>}
         </div>
-      </div>
+      </div> */}
+      <UserProfileView
+        srcEvent={profile.srcEvent}
+        picture={profile.picture}
+        displayName={displayName}
+        subName={subName}
+      />
 
       {/* recent update badge */}
       {recentlyUpdated && (
@@ -145,46 +127,25 @@ export const UserStatusCard: React.FC<UserStatusCardProps> = ({ pubkey }) => {
   );
 };
 
-type GeneralStatusProps = {
-  srcEvent?: NostrEvent;
-  linkUrl?: string;
-};
+const extractNames = (profile: UserProfile): { displayName: string; subName: string | undefined } => {
+  if (!profile.displayName) {
+    return {
+      displayName: profile.name || "???",
+      subName: undefined,
+    };
+  }
 
-const GeneralStatus = ({ srcEvent, linkUrl }: GeneralStatusProps) => {
-  const parts = parseEventContent(srcEvent);
-
-  return parts.length > 0 ? (
-    <p
-      className={css({
-        textStyle: "main-status",
-        wordBreak: "break-all",
-      })}
-    >
-      {parts.map((part) => {
-        const key = eventContentPartKey(part);
-        switch (part.type) {
-          case "text":
-            return (
-              <span key={key} className={css({ verticalAlign: "middle" })}>
-                {part.text}
-              </span>
-            );
-          case "custom-emoji":
-            return <CustomEmoji key={key} imgUrl={part.imgUrl} shortcode={part.shortcode} />;
-        }
-      })}
-      {linkUrl && <ExternalLink href={linkUrl} />}
-    </p>
-  ) : (
-    <p
-      className={css({
-        textStyle: "main-status",
-        color: "text.no-status",
-      })}
-    >
-      No status
-    </p>
-  );
+  // profile.displayName is non-empty string
+  if (profile.name === undefined || profile.displayName.includes(profile.name.trim())) {
+    return {
+      displayName: profile.displayName,
+      subName: undefined,
+    };
+  }
+  return {
+    displayName: profile.displayName,
+    subName: profile.name,
+  };
 };
 
 const RECENT_UPDATE_THRESHOLD_SEC = 60 * 60; // 1 hour

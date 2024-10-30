@@ -13,7 +13,7 @@ export const getTagsByName = (ev: NostrEvent, name: string): string[][] => ev.ta
 export const getTagValuesByName = (ev: NostrEvent, name: string): string[] =>
   ev.tags.filter((t) => t[0] === name).map((t) => t[1] ?? "");
 
-/* parsing content */
+/* parsing content into parts */
 const contentRefPattern = /(:[_a-zA-Z0-9]+:)/;
 
 export type EventContentPart =
@@ -36,12 +36,23 @@ export const eventContentPartKey = (part: EventContentPart): string => {
   }
 };
 
-export const parseEventContent = (ev?: NostrEvent): EventContentPart[] => {
-  if (ev === undefined) {
+export const parseEventContent = (ev: NostrEvent | undefined, textToParse?: string): EventContentPart[] => {
+  const input = textToParse ?? ev?.content ?? "";
+  if (input.length === 0) {
     return [];
   }
 
-  return ev.content
+  // parse input "as is" if event is not available
+  if (ev === undefined) {
+    return [
+      {
+        type: "text",
+        text: input,
+      },
+    ];
+  }
+
+  return input
     .split(contentRefPattern)
     .filter((s) => s !== undefined && s.length > 0)
     .map((part) => {

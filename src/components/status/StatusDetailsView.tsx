@@ -1,10 +1,15 @@
 import { css } from "@shadow-panda/styled-system/css";
 import { vstack } from "@shadow-panda/styled-system/patterns";
 import { nip19 } from "nostr-tools";
-import { getFirstTagValueByName } from "../nostr";
-import { type StatusData, type UserStatus, type UserStatusCategory, userStatusCategories } from "../states/nostrModels";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useTranslation } from "react-i18next";
+import { getFirstTagValueByName } from "../../nostr";
+import {
+  type StatusData,
+  type UserStatus,
+  type UserStatusCategory,
+  userStatusCategories,
+} from "../../states/nostrModels";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 const tabsListStyle = css({
   w: "full",
