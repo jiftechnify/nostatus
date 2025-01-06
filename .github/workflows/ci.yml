@@ -51,4 +51,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run typos
-        uses: crate-ci/typos@v1.26.8
+        uses: crate-ci/typos@v1.29.4
